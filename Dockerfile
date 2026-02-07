@@ -51,6 +51,9 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/node_modules ./node_modules
 
+# Ensure runtime user can write generated Prisma client
+RUN chown -R nextjs:nodejs /app/src/generated /app/node_modules
+
 USER nextjs
 
 EXPOSE 3000
