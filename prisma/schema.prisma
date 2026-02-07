@@ -1,0 +1,632 @@
+// ============================================================================
+// KOVO Apka - Complete Prisma Schema
+// Manufacturing Company Internal PWA
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum HrRequestType {
+  VACATION
+  SICK_DAY
+  DOCTOR
+  PERSONAL_DAY
+  HOME_OFFICE
+}
+
+enum HrRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ResourceType {
+  CAR
+  ROOM
+  TOOL
+  PARKING_SPOT
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum JobPostingStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  FILLED
+}
+
+enum DeviceType {
+  WEB
+  ANDROID
+  IOS
+}
+
+enum NotificationType {
+  HR_REQUEST_CREATED
+  HR_REQUEST_APPROVED
+  HR_REQUEST_REJECTED
+  RESERVATION_CONFIRMED
+  RESERVATION_CANCELLED
+  NEW_POST
+  NEW_POLL
+  POINTS_RECEIVED
+  POINTS_DEDUCTED
+  JOB_REFERRAL
+  SYSTEM
+}
+
+// ============================================================================
+// USER & AUTH
+// ============================================================================
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  password       String   // bcrypt hashed
+  role           Role     @default(EMPLOYEE)
+  position       String?
+  avatarUrl      String?
+  phone          String?
+  pointsBalance  Int      @default(0)
+  isActive       Boolean  @default(true)
+  hireDate       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Department relation
+  departmentId String?
+  department   Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
+
+  // Department managed (a user can manage one department)
+  managedDepartment Department? @relation("DepartmentManager")
+
+  // HR Requests
+  hrRequests         HrRequest[] @relation("HrRequestUser")
+  approvedHrRequests HrRequest[] @relation("HrRequestApprover")
+
+  // Reservations
+  reservations Reservation[]
+
+  // Posts (News)
+  posts    Post[]
+  comments Comment[]
+
+  // Polls
+  pollsCreated Poll[]
+  pollVotes    PollVote[]
+
+  // Points
+  pointsReceived PointTransaction[] @relation("PointsReceiver")
+  pointsGiven    PointTransaction[] @relation("PointsGiver")
+
+  // Job referrals
+  referrals Referral[]
+
+  // Marketplace
+  marketplaceListings MarketplaceListing[]
+
+  // FCM tokens
+  fcmTokens FcmToken[]
+
+  // Notifications
+  notifications Notification[]
+
+  // Reward claims
+  rewardClaims RewardClaim[]
+
+  // Sessions (for NextAuth)
+  sessions Session[]
+  accounts Account[]
+
+  @@index([email])
+  @@index([departmentId])
+  @@index([role])
+  @@map("users")
+}
+
+// ============================================================================
+// NEXTAUTH.JS v5 MODELS
+// ============================================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================================
+// DEPARTMENT
+// ============================================================================
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique // e.g., "VYR", "OBR", "LOG"
+  color     String?  // hex color for UI badges
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Manager relation (one-to-one with User)
+  managerId String? @unique
+  manager   User?   @relation("DepartmentManager", fields: [managerId], references: [id])
+
+  // Members
+  members User[] @relation("DepartmentMembers")
+
+  @@map("departments")
+}
+
+// ============================================================================
+// HR REQUESTS (Vacations, Sick Days, Doctor Visits, etc.)
+// ============================================================================
+
+model HrRequest {
+  id        String          @id @default(cuid())
+  type      HrRequestType
+  status    HrRequestStatus @default(PENDING)
+  startDate DateTime
+  endDate   DateTime
+  reason    String?         @db.Text
+  note      String?         @db.Text // Admin/manager note on approval/rejection
+
+  // Half-day support
+  isHalfDayStart Boolean @default(false)
+  isHalfDayEnd   Boolean @default(false)
+
+  // Total working days calculated
+  totalDays Float @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Requester
+  userId String
+  user   User   @relation("HrRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Approver (Manager or Admin)
+  approverId String?
+  approver   User?   @relation("HrRequestApprover", fields: [approverId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([startDate, endDate])
+  @@map("hr_requests")
+}
+
+// ============================================================================
+// RESOURCES & RESERVATIONS
+// ============================================================================
+
+model Resource {
+  id          String       @id @default(cuid())
+  name        String
+  type        ResourceType
+  description String?      @db.Text
+  location    String?
+  imageUrl    String?
+  isAvailable Boolean      @default(true)
+  metadata    Json?        // flexible: e.g., { seats: 6, licensePlate: "1A2 3456" }
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  reservations Reservation[]
+
+  @@index([type])
+  @@index([isAvailable])
+  @@map("resources")
+}
+
+model Reservation {
+  id        String            @id @default(cuid())
+  startTime DateTime
+  endTime   DateTime
+  status    ReservationStatus @default(PENDING)
+  purpose   String?           @db.Text
+  note      String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Resource booked
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  // User who booked
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@index([userId])
+  @@index([startTime, endTime])
+  @@index([status])
+  @@map("reservations")
+}
+
+// ============================================================================
+// NEWS / POSTS
+// ============================================================================
+
+model Post {
+  id            String   @id @default(cuid())
+  title         String
+  content       String   @db.Text
+  excerpt       String?  // Short preview text
+  imageUrl      String?
+  isPinned      Boolean  @default(false)
+  allowComments Boolean  @default(true)
+  publishedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Author
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Comments
+  comments Comment[]
+
+  // Tags
+  tags PostTag[]
+
+  @@index([authorId])
+  @@index([isPinned])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Author
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Post
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Self-referencing for nested replies
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name  String    @unique
+  color String?
+  posts PostTag[]
+
+  @@map("tags")
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+// ============================================================================
+// POLLS
+// ============================================================================
+
+model Poll {
+  id          String    @id @default(cuid())
+  question    String
+  description String?   @db.Text
+  options     Json      // Array of { index: number, text: string }
+  isAnonymous Boolean   @default(false)
+  isMultiple  Boolean   @default(false) // Allow multiple votes
+  activeUntil DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Creator
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  // Votes
+  votes PollVote[]
+
+  @@index([creatorId])
+  @@index([isActive])
+  @@index([activeUntil])
+  @@map("polls")
+}
+
+model PollVote {
+  id          String   @id @default(cuid())
+  optionIndex Int      // References the index in Poll.options JSON
+  createdAt   DateTime @default(now())
+
+  // Voter
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Poll
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  // Prevent double voting (one vote per user per poll, unless isMultiple)
+  @@unique([pollId, userId, optionIndex])
+  @@index([pollId])
+  @@index([userId])
+  @@map("poll_votes")
+}
+
+// ============================================================================
+// GAMIFICATION - POINTS & REWARDS
+// ============================================================================
+
+model PointTransaction {
+  id        String   @id @default(cuid())
+  amount    Int      // Positive = given, Negative = deducted/spent
+  reason    String   @db.Text
+  category  String?  // e.g., "performance", "teamwork", "innovation", "reward_claim"
+  createdAt DateTime @default(now())
+
+  // Receiver
+  userId String
+  user   User   @relation("PointsReceiver", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Giver (Admin/Manager who awarded or deducted)
+  adminId String?
+  admin   User?   @relation("PointsGiver", fields: [adminId], references: [id])
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([category])
+  @@map("point_transactions")
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  imageUrl    String?
+  pointsCost  Int
+  stock       Int      @default(-1) // -1 = unlimited
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  claims RewardClaim[]
+
+  @@index([isActive])
+  @@index([pointsCost])
+  @@map("rewards")
+}
+
+model RewardClaim {
+  id        String   @id @default(cuid())
+  status    String   @default("PENDING") // PENDING, FULFILLED, CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rewardId String
+  reward   Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([rewardId])
+  @@map("reward_claims")
+}
+
+// ============================================================================
+// JOB POSTINGS & REFERRALS
+// ============================================================================
+
+model JobPosting {
+  id             String           @id @default(cuid())
+  title          String
+  description    String           @db.Text
+  requirements   String?          @db.Text
+  location       String?
+  salaryRange    String?          // e.g., "35 000 - 45 000 CZK"
+  contractType   String?          // e.g., "HPP", "DPP", "DPČ"
+  referralBonus  Int              @default(0) // Points awarded for successful referral
+  status         JobPostingStatus @default(DRAFT)
+  publishedAt    DateTime?
+  closesAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  referrals Referral[]
+
+  @@index([status])
+  @@index([publishedAt])
+  @@map("job_postings")
+}
+
+model Referral {
+  id             String   @id @default(cuid())
+  candidateName  String
+  candidateEmail String?
+  candidatePhone String?
+  note           String?  @db.Text
+  status         String   @default("SUBMITTED") // SUBMITTED, INTERVIEWING, HIRED, REJECTED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Referrer (employee)
+  referrerId String
+  referrer   User   @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+
+  // Job
+  jobPostingId String
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+  @@index([jobPostingId])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ============================================================================
+// INTERNAL MARKETPLACE
+// ============================================================================
+
+enum MarketplaceCategory {
+  SELLING
+  BUYING
+  LOOKING_FOR
+  OFFERING
+}
+
+model MarketplaceListing {
+  id          String              @id @default(cuid())
+  title       String
+  description String              @db.Text
+  category    MarketplaceCategory
+  price       String?             // Free-text e.g. "500 Kč", "Zdarma", "Dohodou"
+  imageUrl    String?
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([category])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("marketplace_listings")
+}
+
+// ============================================================================
+// FIREBASE CLOUD MESSAGING
+// ============================================================================
+
+model FcmToken {
+  id         String     @id @default(cuid())
+  token      String     @unique
+  deviceType DeviceType @default(WEB)
+  deviceName String?
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("fcm_tokens")
+}
+
+// ============================================================================
+// IN-APP NOTIFICATIONS
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  link      String?          // Deep link within the app, e.g., "/hr/requests/abc"
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ============================================================================
+// AUDIT LOG (for tracking admin actions)
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // e.g., "HR_REQUEST_APPROVED", "POINTS_AWARDED"
+  entityType String   // e.g., "HrRequest", "PointTransaction"
+  entityId   String
+  details    Json?    // Snapshot of what changed
+  performedBy String  // userId of actor
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([performedBy])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
