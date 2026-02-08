@@ -24,8 +24,8 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
       {/* Search Modal */}
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      {/* Main Content — padded for top bar + bottom nav */}
-      <main className="flex-1 overflow-y-auto px-4 pb-24 pt-18">
+      {/* Main Content — padded for top bar + bottom nav + iOS safe area */}
+      <main className="flex-1 overflow-y-auto px-4 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] pt-18">
         {/* Connectivity / Push opt-in prompts */}
         <OfflineIndicator />
         <NotificationPrompt />

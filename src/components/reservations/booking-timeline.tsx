@@ -148,7 +148,7 @@ export default function BookingTimeline({
                     occupied
                       ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30"
                       : isPast
-                        ? "border-slate-100 dark:border-slate-700 bg-background"
+                        ? "border-border bg-background"
                         : "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30",
                     isCurrent && "ring-2 ring-accent ring-offset-1 dark:ring-offset-background",
                   )}
@@ -172,7 +172,7 @@ export default function BookingTimeline({
 
                   {/* Tooltip on hover */}
                   {occupied && reservation && (
-                    <div className="pointer-events-none absolute -top-10 left-1/2 z-10 hidden -translate-x-1/2 rounded-lg bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-lg group-hover:block whitespace-nowrap">
+                    <div className="pointer-events-none absolute -top-10 left-1/2 z-10 hidden -translate-x-1/2 rounded-lg bg-foreground px-2.5 py-1.5 text-[11px] font-medium text-background shadow-lg group-hover:block whitespace-nowrap">
                       {reservation.user.name}
                     </div>
                   )}

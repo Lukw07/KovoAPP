@@ -72,7 +72,7 @@ export function BottomNav({ userRole: _userRole }: BottomNavProps) {
   }, [pathname]);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t glass-nav safe-bottom" aria-label="Hlavní navigace">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t glass-nav pb-[env(safe-area-inset-bottom,0px)]" aria-label="Hlavní navigace">
       <div className="mx-auto grid max-w-lg grid-cols-4">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.matchPrefix);
@@ -141,8 +141,6 @@ export function BottomNav({ userRole: _userRole }: BottomNavProps) {
           );
         })}
       </div>
-      {/* Safe area spacer for iOS home bar */}
-      <div className="h-[env(safe-area-inset-bottom)]" />
     </nav>
   );
 }

@@ -113,7 +113,7 @@ export default function ReservationsClient({
           className={cn(
             "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
             dateOffset === 0
-              ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
+              ? "bg-accent text-white"
               : "bg-background-secondary text-foreground-secondary",
           )}
         >

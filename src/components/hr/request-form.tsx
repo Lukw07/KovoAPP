@@ -161,6 +161,9 @@ export default function RequestForm({
               disabled={{ before: new Date() }}
               classNames={{
                 root: "w-full",
+                months: "w-full",
+                month: "w-full",
+                month_grid: "w-full border-collapse",
                 month_caption:
                   "text-sm font-semibold text-foreground capitalize",
                 nav: "flex gap-1",
@@ -169,7 +172,10 @@ export default function RequestForm({
                 button_next:
                   "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
                 weekdays: "text-xs font-medium text-foreground-muted uppercase",
-                day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground",
+                weekday: "text-center py-1",
+                week: "w-full",
+                day: "h-9 w-full text-sm rounded-lg transition-colors text-foreground text-center p-1",
+                day_button: "w-full h-full rounded-lg flex items-center justify-center",
                 today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
                 selected: "!bg-blue-600 !text-white",
                 range_start: "!bg-blue-600 !text-white !rounded-l-lg",

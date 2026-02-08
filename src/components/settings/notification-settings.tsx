@@ -20,6 +20,7 @@ export function NotificationSettings() {
     isIOS,
     shouldPromptA2HS,
     requestPermission,
+    unsubscribe,
     isLoading,
     error,
   } = useNotificationPermission();
@@ -99,7 +100,7 @@ export function NotificationSettings() {
         </div>
       )}
 
-      {/* Action button */}
+      {/* Action button — enable */}
       {!isGranted && !isDenied && isSupported && (
         <button
           onClick={requestPermission}
@@ -108,7 +109,7 @@ export function NotificationSettings() {
             "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             isLoading || shouldPromptA2HS
               ? "bg-background-secondary text-foreground-muted cursor-not-allowed"
-              : "bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 animate-pulse-ring btn-press",
+              : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 btn-press",
           )}
         >
           {isLoading ? (
@@ -120,6 +121,32 @@ export function NotificationSettings() {
             <>
               <Bell className="h-4 w-4" />
               Povolit notifikace
+            </>
+          )}
+        </button>
+      )}
+
+      {/* Unsubscribe button — when granted */}
+      {isGranted && (
+        <button
+          onClick={unsubscribe}
+          disabled={isLoading}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
+            isLoading
+              ? "bg-background-secondary text-foreground-muted cursor-not-allowed"
+              : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 btn-press",
+          )}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Odhlašování…
+            </>
+          ) : (
+            <>
+              <BellOff className="h-4 w-4" />
+              Odhlásit se z notifikací
             </>
           )}
         </button>

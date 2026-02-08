@@ -61,8 +61,8 @@ const STATUS_CFG: Record<
   COMPLETED: {
     icon: Ban,
     label: "Dokončeno",
-    color: "text-slate-500 dark:text-slate-400",
-    bg: "bg-slate-50 dark:bg-slate-700/50",
+    color: "text-foreground-secondary",
+    bg: "bg-background-secondary",
   },
 };
 

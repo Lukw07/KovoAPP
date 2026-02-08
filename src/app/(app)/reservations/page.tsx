@@ -14,8 +14,8 @@ export default async function ReservationsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Rezervace zdrojů</h1>
-        <p className="text-xs text-slate-400 dark:text-slate-500">
+        <h1 className="text-xl font-bold text-foreground">Rezervace zdrojů</h1>
+        <p className="text-xs text-foreground-muted">
           Auta, zasedací místnosti, nástroje a parkování
         </p>
       </div>

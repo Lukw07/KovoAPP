@@ -123,6 +123,7 @@ export default function VacationCalendar({
           root: "w-full",
           months: "w-full",
           month: "w-full",
+          month_grid: "w-full border-collapse",
           month_caption: "text-sm sm:text-base font-semibold text-foreground capitalize",
           nav: "flex gap-1",
           button_previous:
@@ -130,7 +131,10 @@ export default function VacationCalendar({
           button_next:
             "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
           weekdays: "text-[10px] sm:text-xs font-medium text-foreground-muted uppercase",
-          day: "h-8 w-8 sm:h-9 sm:w-9 text-xs sm:text-sm rounded-lg transition-colors text-foreground",
+          weekday: "text-center py-1",
+          week: "w-full",
+          day: "h-8 w-full sm:h-9 text-xs sm:text-sm rounded-lg transition-colors text-foreground text-center p-1",
+          day_button: "w-full h-full rounded-lg flex items-center justify-center",
           today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
           selected: "!bg-blue-600 !text-white",
           outside: "text-foreground-muted/40",

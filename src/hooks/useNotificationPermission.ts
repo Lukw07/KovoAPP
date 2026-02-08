@@ -20,6 +20,8 @@ interface NotificationPermissionResult {
   shouldPromptA2HS: boolean;
   /** Request permission and register FCM token */
   requestPermission: () => Promise<void>;
+  /** Unsubscribe from push notifications (deactivate token) */
+  unsubscribe: () => Promise<void>;
   /** Whether a request is in progress */
   isLoading: boolean;
   /** Error message if any */
@@ -160,6 +162,35 @@ export function useNotificationPermission(): NotificationPermissionResult {
     }
   }, [isSupported, shouldPromptA2HS, isIOS]);
 
+  const unsubscribe = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const messaging = await getFirebaseMessaging();
+      if (messaging) {
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+        const registration = await navigator.serviceWorker.getRegistration("/");
+        if (registration) {
+          const fcmToken = await getToken(messaging, {
+            vapidKey,
+            serviceWorkerRegistration: registration,
+          });
+          if (fcmToken) {
+            await deactivateFcmToken(fcmToken);
+          }
+        }
+      }
+      // Mark as unsubscribed in localStorage so the prompt doesn't reappear
+      localStorage.setItem("fcm-unsubscribed", "true");
+      setPermission("default");
+    } catch (err) {
+      console.error("[useNotificationPermission] unsubscribe error:", err);
+      setError("Nepodařilo se odhlásit z notifikací");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     permission,
     isSupported,
@@ -167,6 +198,7 @@ export function useNotificationPermission(): NotificationPermissionResult {
     isIOS,
     shouldPromptA2HS,
     requestPermission,
+    unsubscribe,
     isLoading,
     error,
   };

@@ -196,6 +196,17 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* iOS Safari: robust viewport height + scroll fixes */
+@supports (-webkit-touch-callout: none) {
+  html {
+    height: -webkit-fill-available;
+  }
+  body {
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+  }
+}
+
 /* Touch-friendly: Prevent text selection on interactive elements */
 button,
 a,

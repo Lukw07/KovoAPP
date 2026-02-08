@@ -21,7 +21,7 @@ export default function ReservationsLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5"
+            className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5"
           >
             <Skeleton className="h-10 w-10 rounded-xl" />
             <div className="flex-1 space-y-1.5">

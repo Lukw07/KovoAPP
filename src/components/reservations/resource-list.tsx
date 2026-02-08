@@ -99,7 +99,7 @@ export default function ResourceList({
               className={cn(
                 "flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-all active:scale-95",
                 filter === tab.value
-                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
+                  ? "bg-accent text-white shadow-sm"
                   : "bg-background-secondary text-foreground-secondary hover:bg-border",
               )}
             >

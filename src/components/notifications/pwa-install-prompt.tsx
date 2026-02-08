@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DownloadSimple, X } from "@phosphor-icons/react";
+import { DownloadSimple, X, ShareNetwork } from "@phosphor-icons/react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * PWA Install Banner — captures the `beforeinstallprompt` event on Android/Chrome
  * and shows a native-looking banner to install the app to the home screen.
- * On iOS Safari, shows A2HS instructions.
+ * On iOS Safari (not standalone), shows A2HS instructions.
+ * Hidden entirely when running as an installed PWA.
  */
 
 interface BeforeInstallPromptEvent extends Event {
@@ -20,15 +22,27 @@ export function PwaInstallPrompt() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOSSafari, setIsIOSSafari] = useState(false);
 
   useEffect(() => {
     // Check if already installed (standalone mode)
-    if (
+    const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone
-    ) {
+      (window.navigator as unknown as { standalone?: boolean }).standalone;
+    if (standalone) {
       setIsInstalled(true);
       return;
+    }
+
+    // iOS Safari detection (not in standalone mode)
+    const ios =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isSafari =
+      /Safari/.test(navigator.userAgent) &&
+      !/CriOS|FxiOS|Chrome/.test(navigator.userAgent);
+    if (ios && isSafari) {
+      setIsIOSSafari(true);
     }
 
     // Check localStorage for previous dismiss
@@ -61,7 +75,11 @@ export function PwaInstallPrompt() {
     };
   }, []);
 
-  if (isInstalled || dismissed || !deferredPrompt) return null;
+  // Don't show when installed or dismissed
+  if (isInstalled || dismissed) return null;
+
+  // Nothing to show on non-iOS, non-Chrome browsers with no prompt
+  if (!deferredPrompt && !isIOSSafari) return null;
 
   async function handleInstall() {
     if (!deferredPrompt) return;
@@ -78,17 +96,52 @@ export function PwaInstallPrompt() {
     localStorage.setItem("pwa-install-dismissed", String(Date.now()));
   }
 
+  // iOS Safari — show A2HS instructions
+  if (isIOSSafari && !deferredPrompt) {
+    return (
+      <div className="mx-4 mt-3 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-800">
+            <DownloadSimple className="h-5 w-5 text-blue-600 dark:text-blue-400" weight="bold" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+              Nainstalujte si aplikaci
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Přidejte KOVO Apku na plochu pro rychlejší přístup:
+            </p>
+            <div className="flex items-center gap-2 text-xs font-medium text-blue-600 dark:text-blue-400">
+              <ShareNetwork className="h-4 w-4" weight="bold" />
+              <span>Sdílet</span>
+              <span className="text-blue-400 dark:text-blue-500">→</span>
+              <Plus className="h-3.5 w-3.5" />
+              <span>Přidat na plochu</span>
+            </div>
+          </div>
+          <button
+            onClick={handleDismiss}
+            className="shrink-0 rounded-lg p-1.5 text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Android / Chrome — native install prompt
   return (
-    <div className="mx-4 mt-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4">
+    <div className="mx-4 mt-3 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-800">
-          <DownloadSimple className="h-5 w-5 text-indigo-600 dark:text-indigo-400" weight="bold" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-800">
+          <DownloadSimple className="h-5 w-5 text-blue-600 dark:text-blue-400" weight="bold" />
         </div>
         <div className="flex-1 space-y-2">
-          <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
             Nainstalujte si aplikaci
           </p>
-          <p className="text-xs text-indigo-700 dark:text-indigo-300">
+          <p className="text-xs text-blue-700 dark:text-blue-300">
             Přidejte KOVO Apku na plochu pro rychlejší přístup a offline podporu.
           </p>
           <button
@@ -103,7 +156,7 @@ export function PwaInstallPrompt() {
         </div>
         <button
           onClick={handleDismiss}
-          className="shrink-0 rounded-lg p-1.5 text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-800"
+          className="shrink-0 rounded-lg p-1.5 text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800"
         >
           <X className="h-4 w-4" />
         </button>
