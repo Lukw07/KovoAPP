@@ -54,8 +54,8 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/package.json ./package.json
 
-# Install Prisma CLI so `prisma db push` works inside the container
-RUN npm install --no-save prisma @prisma/adapter-pg
+# Install Prisma CLI + tsx so `prisma db push` and `db:seed` work inside the container
+RUN npm install --no-save prisma @prisma/adapter-pg tsx
 
 # Ensure runtime user can write generated Prisma client
 RUN chown -R nextjs:nodejs /app/src/generated
