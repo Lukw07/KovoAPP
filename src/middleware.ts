@@ -2,7 +2,7 @@ import { authMiddleware } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 
 // Routes that don't require auth
-const PUBLIC_ROUTES = ["/login", "/api/auth", "/api/upload/"];
+const PUBLIC_ROUTES = ["/login", "/api/auth", "/api/upload/", "/api/cron/"];
 
 // Routes requiring ADMIN or MANAGER role (management panel)
 const MANAGEMENT_ROUTES = ["/admin"];

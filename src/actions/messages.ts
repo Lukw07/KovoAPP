@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sendNotification } from "@/lib/notifications";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -39,6 +40,11 @@ export async function sendMessage(formData: FormData) {
   }
 
   try {
+    const senderUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true },
+    });
+
     await prisma.message.create({
       data: {
         content: parsed.data.content,
@@ -46,6 +52,17 @@ export async function sendMessage(formData: FormData) {
         receiverId: parsed.data.receiverId,
         listingId: parsed.data.listingId || null,
       },
+    });
+
+    // Push notification to receiver
+    await sendNotification({
+      userId: parsed.data.receiverId,
+      type: "NEW_MESSAGE",
+      title: `Nová zpráva od ${senderUser?.name ?? "uživatele"}`,
+      body: parsed.data.content.length > 100
+        ? parsed.data.content.slice(0, 100) + "…"
+        : parsed.data.content,
+      link: "/messages",
     });
 
     revalidatePath("/messages");

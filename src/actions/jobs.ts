@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { sendPushToAll } from "@/lib/notifications";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -72,6 +73,13 @@ export async function createJobPosting(formData: FormData) {
         publishedAt: new Date(),
       },
     });
+
+    // Broadcast push to all employees about the new job
+    await sendPushToAll(
+      "💼 Nový inzerát",
+      parsed.data.title,
+      "/jobs",
+    );
 
     revalidatePath("/jobs");
     revalidatePath("/admin");

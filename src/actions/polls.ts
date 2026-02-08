@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { sendPushToAll } from "@/lib/notifications";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -72,6 +73,13 @@ export async function createPoll(formData: FormData) {
         creatorId: session.user.id,
       },
     });
+
+    // Broadcast push to all users about the new poll
+    await sendPushToAll(
+      "📊 Nová anketa",
+      parsed.data.question,
+      "/polls",
+    );
 
     revalidatePath("/polls");
     revalidatePath("/admin");
@@ -162,10 +170,18 @@ export async function closePoll(pollId: string) {
   }
 
   try {
-    await prisma.poll.update({
+    const poll = await prisma.poll.update({
       where: { id: pollId },
       data: { isActive: false },
+      select: { question: true },
     });
+
+    // Broadcast – poll has been closed, results are available
+    await sendPushToAll(
+      "📊 Anketa ukončena",
+      `Výsledky ankety „${poll.question}" jsou k dispozici.`,
+      "/polls",
+    );
 
     revalidatePath("/polls");
     revalidatePath("/admin");
