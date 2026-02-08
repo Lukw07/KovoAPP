@@ -5,9 +5,11 @@
 
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 const SALT_ROUNDS = 10;
 
@@ -21,6 +23,9 @@ async function hashPassword(password: string): Promise<string> {
 
 async function main() {
   console.log("Cleaning database...");
+
+  // Break circular dependencies first
+  await prisma.department.updateMany({ data: { managerId: null } });
 
   // Delete all data in correct order (respecting foreign keys)
   await prisma.auditLog.deleteMany();
