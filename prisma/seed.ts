@@ -7,7 +7,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({}); // Pass empty config object to satisfy runtime constraint
 
 const SALT_ROUNDS = 10;
 
