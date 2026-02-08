@@ -81,7 +81,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         {/* Header row: pinned badge + tags */}
         <div className="flex flex-wrap items-center gap-2">
           {post.isPinned && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
               <Pin className="h-3 w-3" />
               Připnuto
             </span>
@@ -113,7 +113,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         {/* Content */}
         <div
           className={cn(
-            "prose prose-sm prose-slate max-w-none",
+            "prose prose-sm prose-slate dark:prose-invert max-w-none",
             !expanded && hasMore && "line-clamp-4"
           )}
         >
@@ -129,7 +129,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         {hasMore && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 active:scale-95 transition-all"
+            className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 active:scale-95 transition-all"
           >
             {expanded ? (
               <>

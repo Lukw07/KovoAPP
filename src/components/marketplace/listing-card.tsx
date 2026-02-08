@@ -25,26 +25,26 @@ const CATEGORY_META: Record<
   SELLING: {
     label: "Prodám",
     icon: <Tag className="h-3 w-3" />,
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
+    color: "text-emerald-700 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-900/30",
   },
   BUYING: {
     label: "Koupím",
     icon: <ShoppingBag className="h-3 w-3" />,
-    color: "text-blue-700",
-    bg: "bg-blue-50",
+    color: "text-blue-700 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-900/30",
   },
   LOOKING_FOR: {
     label: "Hledám",
     icon: <Search className="h-3 w-3" />,
-    color: "text-amber-700",
-    bg: "bg-amber-50",
+    color: "text-amber-700 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-900/30",
   },
   OFFERING: {
     label: "Nabízím",
     icon: <Gift className="h-3 w-3" />,
-    color: "text-purple-700",
-    bg: "bg-purple-50",
+    color: "text-purple-700 dark:text-purple-400",
+    bg: "bg-purple-50 dark:bg-purple-900/30",
   },
 };
 
@@ -172,8 +172,8 @@ export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
             disabled={isPending}
             className={cn(
               "w-full flex items-center justify-center gap-1.5 rounded-xl py-2",
-              "border border-red-200 text-xs font-medium text-red-600",
-              "hover:bg-red-50 active:scale-[0.98] transition-all",
+              "border border-red-200 dark:border-red-800 text-xs font-medium text-red-600 dark:text-red-400",
+              "hover:bg-red-50 dark:hover:bg-red-900/30 active:scale-[0.98] transition-all",
               "disabled:opacity-50"
             )}
           >

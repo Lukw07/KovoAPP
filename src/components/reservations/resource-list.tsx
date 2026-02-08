@@ -42,23 +42,23 @@ const TYPE_META: Record<
   string,
   { icon: typeof Car; color: string; bg: string; label: string }
 > = {
-  CAR: { icon: Car, color: "text-blue-600", bg: "bg-blue-50", label: "Auto" },
+  CAR: { icon: Car, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/30", label: "Auto" },
   ROOM: {
     icon: DoorOpen,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-900/30",
     label: "Místnost",
   },
   TOOL: {
     icon: Wrench,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-900/30",
     label: "Nástroj",
   },
   PARKING_SPOT: {
     icon: CircleParking,
-    color: "text-violet-600",
-    bg: "bg-violet-50",
+    color: "text-violet-600 dark:text-violet-400",
+    bg: "bg-violet-50 dark:bg-violet-900/30",
     label: "Parkování",
   },
 };

@@ -42,26 +42,26 @@ const STATUS_CFG: Record<
   PENDING: {
     icon: Clock,
     label: "Čeká",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-900/30",
   },
   CONFIRMED: {
     icon: CheckCircle2,
     label: "Potvrzeno",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-900/30",
   },
   CANCELLED: {
     icon: XCircle,
     label: "Zrušeno",
-    color: "text-red-500",
-    bg: "bg-red-50",
+    color: "text-red-500 dark:text-red-400",
+    bg: "bg-red-50 dark:bg-red-900/30",
   },
   COMPLETED: {
     icon: Ban,
     label: "Dokončeno",
-    color: "text-slate-500",
-    bg: "bg-slate-50",
+    color: "text-slate-500 dark:text-slate-400",
+    bg: "bg-slate-50 dark:bg-slate-700/50",
   },
 };
 

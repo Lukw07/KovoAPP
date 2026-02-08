@@ -103,14 +103,14 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
             <div className="flex items-center gap-1 shrink-0">
               {poll.isAnonymous && (
                 <span
-                  className="flex items-center gap-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500"
+                  className="flex items-center gap-0.5 rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400"
                   title="Anonymní hlasování"
                 >
                   <Lock className="h-3 w-3" />
                 </span>
               )}
               {!poll.isActive && (
-                <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
+                <span className="flex items-center gap-0.5 rounded-full bg-red-50 dark:bg-red-900/30 px-2 py-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">
                   <Ban className="h-3 w-3" />
                   Ukončeno
                 </span>
@@ -147,7 +147,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                   isSelected
                     ? "border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/30"
                     : poll.isActive && !hasVoted
-                      ? "border-slate-200 dark:border-slate-600 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer"
+                      ? "border-slate-200 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-900/20 cursor-pointer"
                       : "border-slate-100 dark:border-slate-700 cursor-default"
                 )}
               >
@@ -187,7 +187,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                       <span
                         className={cn(
                           "text-xs font-bold",
-                          isSelected ? "text-blue-700" : "text-slate-600"
+                          isSelected ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"
                         )}
                       >
                         {percentage}%
@@ -202,7 +202,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
 
         {/* Error */}
         {error && (
-          <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+          <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2">
             {error}
           </p>
         )}

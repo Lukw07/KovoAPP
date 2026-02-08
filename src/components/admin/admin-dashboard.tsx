@@ -127,32 +127,32 @@ export function AdminDashboard({
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard
-              icon={<Users className="h-5 w-5 text-blue-600" />}
+              icon={<Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
               label="Celkem uživatelů"
               value={overview.totalUsers}
               sub={`${overview.activeUsers} aktivních`}
-              bgColor="bg-blue-50"
+              bgColor="bg-blue-50 dark:bg-blue-900/30"
             />
             <StatCard
-              icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
+              icon={<AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
               label="Čekající žádosti"
               value={overview.pendingRequests}
               sub="ke schválení"
-              bgColor="bg-amber-50"
+              bgColor="bg-amber-50 dark:bg-amber-900/30"
             />
             <StatCard
-              icon={<UserCheck className="h-5 w-5 text-red-600" />}
+              icon={<UserCheck className="h-5 w-5 text-red-600 dark:text-red-400" />}
               label="Dnes nepřítomni"
               value={overview.todayAbsent}
               sub="bez home office"
-              bgColor="bg-red-50"
+              bgColor="bg-red-50 dark:bg-red-900/30"
             />
             <StatCard
-              icon={<TrendingUp className="h-5 w-5 text-green-600" />}
+              icon={<TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />}
               label="Body tento měsíc"
               value={pointsStats.totalPoints}
               sub={`${pointsStats.totalTransactions} transakcí`}
-              bgColor="bg-green-50"
+              bgColor="bg-green-50 dark:bg-green-900/30"
             />
           </div>
 

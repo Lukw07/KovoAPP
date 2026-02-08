@@ -18,26 +18,26 @@ const STATUS_CONFIG: Record<
   PENDING: {
     icon: Clock,
     label: "Čeká na schválení",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-900/30",
   },
   APPROVED: {
     icon: CheckCircle2,
     label: "Schváleno",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-900/30",
   },
   REJECTED: {
     icon: XCircle,
     label: "Zamítnuto",
-    color: "text-red-600",
-    bg: "bg-red-50",
+    color: "text-red-600 dark:text-red-400",
+    bg: "bg-red-50 dark:bg-red-900/30",
   },
   CANCELLED: {
     icon: Ban,
     label: "Zrušeno",
-    color: "text-slate-500",
-    bg: "bg-slate-50",
+    color: "text-slate-500 dark:text-slate-400",
+    bg: "bg-slate-50 dark:bg-slate-700/50",
   },
 };
 

@@ -113,7 +113,7 @@ export function JobCard({ job }: JobCardProps) {
             {job.title}
           </h3>
           {job.contractType && (
-            <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
+            <span className="shrink-0 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
               {job.contractType}
             </span>
           )}
@@ -122,19 +122,19 @@ export function JobCard({ job }: JobCardProps) {
         {/* Meta pills */}
         <div className="flex flex-wrap gap-2">
           {job.location && (
-            <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
               <MapPin className="h-3 w-3" />
               {job.location}
             </span>
           )}
           {job.salaryRange && (
-            <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
               <Banknote className="h-3 w-3" />
               {job.salaryRange}
             </span>
           )}
           {job.referralBonus > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               <Award className="h-3 w-3" />
               +{job.referralBonus} bodů za doporučení
             </span>
@@ -166,7 +166,7 @@ export function JobCard({ job }: JobCardProps) {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 active:scale-95 transition-all"
+          className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 active:scale-95 transition-all"
         >
           {expanded ? (
             <>

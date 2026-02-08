@@ -60,7 +60,7 @@ export function TopBar({ user, onMenuClick }: TopBarProps) {
         {user && (
           <div className="flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 border border-amber-200 dark:border-amber-700">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-            <span className="text-sm font-bold text-amber-700">
+            <span className="text-sm font-bold text-amber-700 dark:text-amber-400">
               {user.pointsBalance}
             </span>
           </div>

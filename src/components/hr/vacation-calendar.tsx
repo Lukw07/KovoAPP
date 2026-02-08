@@ -117,8 +117,8 @@ export default function VacationCalendar({
           holiday: holidays,
         }}
         modifiersClassNames={{
-          vacation: "!bg-blue-100 !text-blue-700 !font-semibold !rounded-lg",
-          holiday: "!bg-red-50 !text-red-600 !font-semibold !rounded-lg",
+          vacation: "!bg-blue-100 dark:!bg-blue-900/40 !text-blue-700 dark:!text-blue-300 !font-semibold !rounded-lg",
+          holiday: "!bg-red-50 dark:!bg-red-900/30 !text-red-600 dark:!text-red-400 !font-semibold !rounded-lg",
         }}
         classNames={{
           root: "w-full",
@@ -129,8 +129,8 @@ export default function VacationCalendar({
           button_next:
             "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 text-slate-600 dark:text-slate-400",
           weekdays: "text-xs font-medium text-slate-400 dark:text-slate-500 uppercase",
-          day: "h-9 w-9 text-sm rounded-lg transition-colors",
-          today: "!bg-slate-900 !text-white !rounded-lg !font-bold",
+          day: "h-9 w-9 text-sm rounded-lg transition-colors dark:text-slate-300",
+          today: "!bg-slate-900 dark:!bg-slate-100 !text-white dark:!text-slate-900 !rounded-lg !font-bold",
           selected: "!bg-blue-600 !text-white",
           outside: "text-slate-300 dark:text-slate-600",
         }}

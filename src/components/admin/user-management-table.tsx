@@ -42,9 +42,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  ADMIN: "bg-red-100 text-red-700",
-  MANAGER: "bg-amber-100 text-amber-700",
-  EMPLOYEE: "bg-blue-100 text-blue-700",
+  ADMIN: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+  MANAGER: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
+  EMPLOYEE: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
 };
 
 export function UserManagementTable({
@@ -352,7 +352,7 @@ export function UserManagementTable({
                       <span
                         className={cn(
                           "inline-block h-2.5 w-2.5 rounded-full",
-                          user.isActive ? "bg-green-500" : "bg-slate-300"
+                          user.isActive ? "bg-green-500" : "bg-slate-300 dark:bg-slate-600"
                         )}
                         title={user.isActive ? "Aktivní" : "Neaktivní"}
                       />

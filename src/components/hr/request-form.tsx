@@ -174,7 +174,7 @@ export default function RequestForm({
                 selected: "!bg-blue-600 !text-white",
                 range_start: "!bg-blue-600 !text-white !rounded-l-lg",
                 range_end: "!bg-blue-600 !text-white !rounded-r-lg",
-                range_middle: "!bg-blue-100 !text-blue-800",
+                range_middle: "!bg-blue-100 dark:!bg-blue-900/30 !text-blue-800 dark:!text-blue-300",
                 outside: "text-slate-300 dark:text-slate-600",
               }}
               components={{

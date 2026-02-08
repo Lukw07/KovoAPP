@@ -3,18 +3,55 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f8fafc;
+  /* Light Mode — čistý, vzdušný design */
+  --background: #ffffff;
+  --background-secondary: #f1f5f9;
   --foreground: #0f172a;
+  --foreground-secondary: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+
+  /* Recharts / grafy */
+  --chart-grid: #e2e8f0;
+  --chart-axis: #64748b;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e2e8f0;
+  --chart-tooltip-text: #0f172a;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* Dark Mode — harmonická břidlicová paleta, bez čisté černé */
+  --background: #0f172a;
+  --background-secondary: #1e293b;
+  --foreground: #f1f5f9;
+  --foreground-secondary: #94a3b8;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --border: #334155;
+  --card: #1e293b;
+  --card-hover: #263548;
+
+  /* Recharts / grafy */
+  --chart-grid: #334155;
+  --chart-axis: #94a3b8;
+  --chart-tooltip-bg: #1e293b;
+  --chart-tooltip-border: #334155;
+  --chart-tooltip-text: #f1f5f9;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -43,4 +80,21 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   overscroll-behavior: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Plynulý přechod při přepínání tmavého režimu */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+}
+
+/* Vypnout přechody pro elementy, kde mohou rušit UX */
+.no-transition,
+.no-transition *,
+input,
+textarea,
+select {
+  transition: none !important;
 }

@@ -31,31 +31,31 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3">
         <QuickAction
           href="/requests"
-          icon={<CalendarDays className="h-6 w-6 text-blue-600" />}
+          icon={<CalendarDays className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
           label="Nová žádost"
           sublabel="Dovolená / Sick day"
-          bgColor="bg-blue-50"
+          bgColor="bg-blue-50 dark:bg-blue-900/30"
         />
         <QuickAction
           href="/reservations"
-          icon={<Car className="h-6 w-6 text-emerald-600" />}
+          icon={<Car className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />}
           label="Rezervovat"
           sublabel="Auto / Místnost"
-          bgColor="bg-emerald-50"
+          bgColor="bg-emerald-50 dark:bg-emerald-900/30"
         />
         <QuickAction
           href="/news"
-          icon={<LayoutDashboard className="h-6 w-6 text-purple-600" />}
+          icon={<LayoutDashboard className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
           label="Novinky"
           sublabel="Firemní zprávy"
-          bgColor="bg-purple-50"
+          bgColor="bg-purple-50 dark:bg-purple-900/30"
         />
         <QuickAction
           href="/rewards"
-          icon={<Star className="h-6 w-6 text-amber-600" />}
+          icon={<Star className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
           label="Odměny"
           sublabel="Vyměnit body"
-          bgColor="bg-amber-50"
+          bgColor="bg-amber-50 dark:bg-amber-900/30"
         />
       </div>
 

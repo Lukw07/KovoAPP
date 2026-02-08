@@ -78,7 +78,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800 active:scale-95 transition-all"
+        className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 active:scale-95 transition-all"
       >
         <ArrowLeft className="h-4 w-4" />
         Zpět na novinky
@@ -101,7 +101,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
           {/* Badge + tags */}
           <div className="flex flex-wrap items-center gap-2">
             {post.isPinned && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
                 <Pin className="h-3 w-3" />
                 Připnuto
               </span>
@@ -138,7 +138,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
                 <User className="h-3.5 w-3.5 text-slate-400" />
               )}
             </div>
-            <span className="font-medium text-slate-700">
+            <span className="font-medium text-slate-700 dark:text-slate-300">
               {post.author.name}
             </span>
             <span>·</span>
@@ -151,7 +151,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
           </div>
 
           {/* Markdown content */}
-          <div className="prose prose-sm prose-slate max-w-none">
+          <div className="prose prose-sm prose-slate dark:prose-invert max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {post.content}
             </ReactMarkdown>
@@ -243,7 +243,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
           </div>
 
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+            <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2">
               {error}
             </p>
           )}

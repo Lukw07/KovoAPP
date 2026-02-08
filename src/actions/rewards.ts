@@ -1,0 +1,91 @@
+"use server";
+
+// ============================================================================
+// Rewards — Server Actions (claim a reward, deduct points)
+// ============================================================================
+
+import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+// ---------------------------------------------------------------------------
+// claimReward — User spends points to claim a reward
+// ---------------------------------------------------------------------------
+
+export async function claimReward(rewardId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nepřihlášen" };
+
+  const userId = session.user.id;
+
+  try {
+    // Fetch reward and user balance in parallel
+    const [reward, user] = await Promise.all([
+      prisma.reward.findUnique({ where: { id: rewardId } }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { pointsBalance: true },
+      }),
+    ]);
+
+    if (!reward || !reward.isActive) {
+      return { error: "Tato odměna není dostupná" };
+    }
+
+    if (!user) {
+      return { error: "Uživatel nenalezen" };
+    }
+
+    if (user.pointsBalance < reward.pointsCost) {
+      return {
+        error: `Nemáte dostatek bodů. Potřebujete ${reward.pointsCost}, máte ${user.pointsBalance}.`,
+      };
+    }
+
+    if (reward.stock === 0) {
+      return { error: "Tato odměna je vyprodaná" };
+    }
+
+    // Atomic transaction: create claim + deduct points + decrease stock
+    await prisma.$transaction([
+      // Create the claim
+      prisma.rewardClaim.create({
+        data: {
+          userId,
+          rewardId: reward.id,
+          status: "PENDING",
+        },
+      }),
+      // Create a point transaction (negative = spent)
+      prisma.pointTransaction.create({
+        data: {
+          amount: -reward.pointsCost,
+          reason: `Uplatnění odměny: ${reward.name}`,
+          category: "reward_claim",
+          userId,
+        },
+      }),
+      // Deduct points from user balance
+      prisma.user.update({
+        where: { id: userId },
+        data: { pointsBalance: { decrement: reward.pointsCost } },
+      }),
+      // Decrease stock if not unlimited (-1 = unlimited)
+      ...(reward.stock > 0
+        ? [
+            prisma.reward.update({
+              where: { id: reward.id },
+              data: { stock: { decrement: 1 } },
+            }),
+          ]
+        : []),
+    ]);
+
+    revalidatePath("/rewards");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (err) {
+    console.error("claimReward error:", err);
+    return { error: "Nepodařilo se uplatnit odměnu. Zkuste to znovu." };
+  }
+}

@@ -200,12 +200,12 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+                className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400"
               >
                 {tag}
                 <button
                   onClick={() => removeTag(tag)}
-                  className="hover:text-blue-900"
+                  className="hover:text-blue-900 dark:hover:text-blue-300"
                 >
                   <X className="h-3 w-3" />
                 </button>

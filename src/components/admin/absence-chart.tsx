@@ -41,23 +41,24 @@ export function AbsenceChart({ data }: { data: AbsenceStat[] }) {
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 12, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
+            axisLine={{ stroke: "var(--chart-grid)" }}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fontSize: 12, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
+            axisLine={{ stroke: "var(--chart-grid)" }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #e2e8f0",
+              backgroundColor: "var(--chart-tooltip-bg)",
+              border: "1px solid var(--chart-tooltip-border)",
               borderRadius: "8px",
               fontSize: "13px",
+              color: "var(--chart-tooltip-text)",
             }}
             formatter={(value, name) => {
               if (name === "count") return [`${value}`, "Počet žádostí"];

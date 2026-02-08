@@ -150,7 +150,7 @@ export default function BookingTimeline({
                       : isPast
                         ? "border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                         : "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30",
-                    isCurrent && "ring-2 ring-blue-400 ring-offset-1",
+                    isCurrent && "ring-2 ring-blue-400 ring-offset-1 dark:ring-offset-slate-800",
                   )}
                   title={
                     occupied && reservation
@@ -165,7 +165,7 @@ export default function BookingTimeline({
                       occupied
                         ? "bg-red-500"
                         : isPast
-                          ? "bg-slate-300"
+                          ? "bg-slate-300 dark:bg-slate-600"
                           : "bg-emerald-500",
                     )}
                   />
@@ -185,7 +185,7 @@ export default function BookingTimeline({
 
       {/* Summary text */}
       {reservations.length === 0 ? (
-        <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
           <Clock className="h-3.5 w-3.5" />
           Celý den volný
         </p>
