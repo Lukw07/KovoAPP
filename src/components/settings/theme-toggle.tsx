@@ -35,7 +35,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
       {/* Section header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -70,9 +70,9 @@ export function ThemeToggle() {
               key={value}
               onClick={() => setTheme(value)}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 rounded-lg py-2.5 text-xs font-medium transition-all",
+                "flex flex-1 flex-col items-center gap-1 rounded-lg py-2.5 text-xs font-medium transition-all duration-300",
                 isActive
-                  ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-slate-100 shadow-sm"
+                  ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-slate-100 shadow-md"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300",
               )}
               aria-pressed={isActive}

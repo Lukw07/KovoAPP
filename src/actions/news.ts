@@ -14,7 +14,17 @@ const createPostSchema = z.object({
   title: z.string().min(3, "Nadpis musí mít alespoň 3 znaky").max(200),
   content: z.string().min(10, "Obsah musí mít alespoň 10 znaků"),
   excerpt: z.string().max(300).optional(),
-  imageUrl: z.string().url("Neplatná URL obrázku").optional().or(z.literal("")),
+  imageUrl: z
+    .string()
+    .refine(
+      (val) =>
+        val === "" ||
+        val.startsWith("/api/upload/") ||
+        /^https?:\/\/.+/.test(val),
+      "Neplatná URL obrázku",
+    )
+    .optional()
+    .or(z.literal("")),
   isPinned: z.boolean().optional().default(false),
   allowComments: z.boolean().optional().default(true),
   tags: z.array(z.string()).optional().default([]),
@@ -95,13 +105,13 @@ export async function createPost(formData: FormData) {
 }
 
 // ---------------------------------------------------------------------------
-// DELETE POST (Admin only)
+// DELETE POST (Admin / Manager)
 // ---------------------------------------------------------------------------
 
 export async function deletePost(postId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění mazat příspěvky" };
   }
 
@@ -117,13 +127,13 @@ export async function deletePost(postId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// TOGGLE PIN (Admin only)
+// TOGGLE PIN (Admin / Manager)
 // ---------------------------------------------------------------------------
 
 export async function togglePinPost(postId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění" };
   }
 

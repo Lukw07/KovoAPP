@@ -28,19 +28,19 @@ export function NotificationSettings() {
   const isDenied = permission === "denied";
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-2 space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-500",
             isGranted
               ? "bg-emerald-100 dark:bg-emerald-900/30"
               : "bg-slate-100 dark:bg-slate-700",
           )}
         >
           {isGranted ? (
-            <Bell className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <Bell className="h-5 w-5 text-emerald-600 dark:text-emerald-400 animate-check-pop" />
           ) : (
             <BellOff className="h-5 w-5 text-slate-400 dark:text-slate-500" />
           )}
@@ -105,10 +105,10 @@ export function NotificationSettings() {
           onClick={requestPermission}
           disabled={isLoading || shouldPromptA2HS}
           className={cn(
-            "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all",
+            "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             isLoading || shouldPromptA2HS
               ? "bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-[0.98]",
+              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 animate-pulse-ring btn-press",
           )}
         >
           {isLoading ? (

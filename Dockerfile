@@ -38,6 +38,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Create uploads directory (persistent volume mount point)
+RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
+
 # Copy public assets
 COPY --from=builder /app/public ./public
 

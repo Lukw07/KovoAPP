@@ -11,6 +11,7 @@ import {
   UserCheck,
   AlertCircle,
   Clock,
+  Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AbsenceChart } from "@/components/admin/absence-chart";
@@ -18,8 +19,10 @@ import { PointsChart } from "@/components/admin/points-chart";
 import { UserManagementTable } from "@/components/admin/user-management-table";
 import { CsvExport } from "@/components/admin/csv-export";
 import { AdminPanel } from "@/components/admin/admin-panel";
+import { RewardClaimsManager } from "@/components/admin/reward-claims-manager";
+import type { Role } from "@/generated/prisma/enums";
 
-type AdminSection = "dashboard" | "users" | "create" | "export";
+type AdminSection = "dashboard" | "users" | "create" | "rewards" | "export";
 
 interface OverviewStats {
   totalUsers: number;
@@ -56,37 +59,62 @@ type UserRow = {
 
 type Department = { id: string; name: string; code: string };
 
+type RewardClaimRow = {
+  id: string;
+  status: string;
+  createdAt: Date;
+  reward: { name: string; pointsCost: number; imageUrl: string | null };
+  user: { id: string; name: string; email: string; avatarUrl: string | null };
+};
+
 interface AdminDashboardProps {
   overview: OverviewStats;
   absenceStats: AbsenceStat[];
   pointsStats: PointsStatsData;
   users: UserRow[];
   departments: Department[];
+  rewardClaims: RewardClaimRow[];
+  userRole: Role;
 }
 
-const SECTIONS: { key: AdminSection; label: string; icon: React.ReactNode }[] =
-  [
-    {
-      key: "dashboard",
-      label: "Přehled",
-      icon: <LayoutDashboard className="h-4 w-4" />,
-    },
-    {
-      key: "users",
-      label: "Uživatelé",
-      icon: <Users className="h-4 w-4" />,
-    },
-    {
-      key: "create",
-      label: "Vytvořit",
-      icon: <PenTool className="h-4 w-4" />,
-    },
-    {
-      key: "export",
-      label: "Export",
-      icon: <Download className="h-4 w-4" />,
-    },
-  ];
+// Section definitions with role visibility
+const ALL_SECTIONS: {
+  key: AdminSection;
+  label: string;
+  icon: React.ReactNode;
+  roles: Role[];
+}[] = [
+  {
+    key: "dashboard",
+    label: "Přehled",
+    icon: <LayoutDashboard className="h-4 w-4" />,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    key: "users",
+    label: "Uživatelé",
+    icon: <Users className="h-4 w-4" />,
+    roles: ["ADMIN"],
+  },
+  {
+    key: "create",
+    label: "Vytvořit",
+    icon: <PenTool className="h-4 w-4" />,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    key: "rewards",
+    label: "Odměny",
+    icon: <Gift className="h-4 w-4" />,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    key: "export",
+    label: "Export",
+    icon: <Download className="h-4 w-4" />,
+    roles: ["ADMIN"],
+  },
+];
 
 export function AdminDashboard({
   overview,
@@ -94,8 +122,17 @@ export function AdminDashboard({
   pointsStats,
   users,
   departments,
+  rewardClaims,
+  userRole,
 }: AdminDashboardProps) {
-  const [section, setSection] = useState<AdminSection>("dashboard");
+  // Filter sections by role
+  const visibleSections = ALL_SECTIONS.filter((s) =>
+    s.roles.includes(userRole),
+  );
+
+  const [section, setSection] = useState<AdminSection>(
+    visibleSections[0]?.key ?? "dashboard",
+  );
 
   const now = new Date();
   const monthName = now.toLocaleDateString("cs-CZ", { month: "long" });
@@ -104,7 +141,7 @@ export function AdminDashboard({
     <div className="space-y-6">
       {/* Section nav */}
       <div className="flex gap-2 overflow-x-auto">
-        {SECTIONS.map((s) => (
+        {visibleSections.map((s) => (
           <button
             key={s.key}
             onClick={() => setSection(s.key)}
@@ -213,6 +250,13 @@ export function AdminDashboard({
 
       {/* ─── Create (existing AdminPanel) ────────────────────────────── */}
       {section === "create" && <AdminPanel />}
+
+      {/* ─── Reward Claims ───────────────────────────────────────────── */}
+      {section === "rewards" && (
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+          <RewardClaimsManager claims={rewardClaims} />
+        </div>
+      )}
 
       {/* ─── Export ───────────────────────────────────────────────────── */}
       {section === "export" && (

@@ -1,10 +1,23 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+// ─── Auth guard: ADMIN or MANAGER ────────────────────────────────────────────
+
+async function requireManagement() {
+  const session = await auth();
+  const role = session?.user?.role;
+  if (role !== "ADMIN" && role !== "MANAGER") {
+    throw new Error("Přístup odepřen");
+  }
+  return session;
+}
 
 // ─── Absence stats for current month ──────────────────────────────────────────
 
 export async function getAbsenceStats() {
+  await requireManagement();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -59,6 +72,7 @@ function absenceLabel(type: string): string {
 // ─── Points distributed this month ───────────────────────────────────────────
 
 export async function getPointsStats() {
+  await requireManagement();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -131,6 +145,7 @@ function formatDateShort(iso: string): string {
 // ─── All users for management table ──────────────────────────────────────────
 
 export async function getAllUsers() {
+  await requireManagement();
   const users = await prisma.user.findMany({
     select: {
       id: true,
@@ -154,6 +169,7 @@ export async function getAllUsers() {
 // ─── Departments list ─────────────────────────────────────────────────────────
 
 export async function getDepartments() {
+  await requireManagement();
   return prisma.department.findMany({
     select: { id: true, name: true, code: true },
     orderBy: { name: "asc" },
@@ -163,6 +179,7 @@ export async function getDepartments() {
 // ─── Vacation export data (for Helios CSV) ───────────────────────────────────
 
 export async function getVacationExportData(year?: number, month?: number) {
+  await requireManagement();
   const now = new Date();
   const y = year ?? now.getFullYear();
   const m = month ?? now.getMonth(); // 0-indexed
@@ -206,6 +223,7 @@ export async function getVacationExportData(year?: number, month?: number) {
 // ─── Dashboard overview stats ─────────────────────────────────────────────────
 
 export async function getDashboardOverview() {
+  await requireManagement();
   const [totalUsers, activeUsers, pendingRequests, todayAbsent] =
     await Promise.all([
       prisma.user.count(),

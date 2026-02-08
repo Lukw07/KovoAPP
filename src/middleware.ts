@@ -2,13 +2,10 @@ import { authMiddleware } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 
 // Routes that don't require auth
-const PUBLIC_ROUTES = ["/login", "/api/auth"];
+const PUBLIC_ROUTES = ["/login", "/api/auth", "/api/upload/"];
 
-// Admin-only routes
-const ADMIN_ROUTES = ["/admin"];
-
-// Manager + Admin routes
-const MANAGER_ROUTES = ["/admin/hr"];
+// Routes requiring ADMIN or MANAGER role (management panel)
+const MANAGEMENT_ROUTES = ["/admin"];
 
 export default authMiddleware((req) => {
   const { pathname } = req.nextUrl;
@@ -28,15 +25,8 @@ export default authMiddleware((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Admin-only route protection
-  if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
-    if (userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
-    }
-  }
-
-  // Manager+ route protection
-  if (MANAGER_ROUTES.some((route) => pathname.startsWith(route))) {
+  // Management routes — accessible to ADMIN and MANAGER only
+  if (MANAGEMENT_ROUTES.some((route) => pathname.startsWith(route))) {
     if (userRole !== "ADMIN" && userRole !== "MANAGER") {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
     }

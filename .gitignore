@@ -38,6 +38,9 @@ node_modules/
 # ── Prisma generated client ─────────────────────────────────────────────────
 /src/generated/
 
+# ── Uploaded files (served via API, persisted in Docker volume) ──────────────
+/uploads/
+
 # ── Firebase service account keys ────────────────────────────────────────────
 **/serviceAccountKey*.json
 **/firebase-adminsdk*.json

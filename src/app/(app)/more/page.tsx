@@ -8,11 +8,22 @@ import {
   Settings,
   ChevronRight,
   Store,
+  MessageCircle,
 } from "lucide-react";
+import { getUnreadMessageCount } from "@/actions/messages";
 
 export const metadata = { title: "Více" };
 
 const ITEMS = [
+  {
+    label: "Zprávy",
+    href: "/messages",
+    icon: MessageCircle,
+    description: "Soukromé zprávy",
+    color: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-900/30",
+    hasBadge: true,
+  },
   {
     label: "Novinky",
     href: "/news",
@@ -71,7 +82,9 @@ const ITEMS = [
   },
 ] as const;
 
-export default function MorePage() {
+export default async function MorePage() {
+  const unreadCount = await getUnreadMessageCount();
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Více</h1>
@@ -79,6 +92,7 @@ export default function MorePage() {
       <div className="space-y-2">
         {ITEMS.map((item) => {
           const Icon = item.icon;
+          const badge = 'hasBadge' in item && item.hasBadge ? unreadCount : 0;
           return (
             <Link
               key={item.href}
@@ -86,9 +100,14 @@ export default function MorePage() {
               className="flex items-center gap-4 rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-100 dark:border-slate-700 transition-transform active:scale-[0.98]"
             >
               <div
-                className={`${item.bg} flex h-11 w-11 items-center justify-center rounded-xl`}
+                className={`${item.bg} relative flex h-11 w-11 items-center justify-center rounded-xl`}
               >
                 <Icon className={`h-5 w-5 ${item.color}`} />
+                {badge > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">

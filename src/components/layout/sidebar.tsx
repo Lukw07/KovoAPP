@@ -14,6 +14,9 @@ import {
   Settings,
   LogOut,
   Star,
+  ClipboardList,
+  MessageCircle,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -32,6 +35,7 @@ const MENU_SECTIONS = [
     items: [
       { label: "Novinky", href: "/news", icon: Newspaper },
       { label: "Ankety", href: "/polls", icon: BarChart3 },
+      { label: "Zprávy", href: "/messages", icon: MessageCircle },
     ],
   },
   {
@@ -39,9 +43,10 @@ const MENU_SECTIONS = [
     items: [{ label: "Odměny", href: "/rewards", icon: Gift }],
   },
   {
-    title: "Kariéra",
+    title: "Kariéra & Tržiště",
     items: [
       { label: "Volné pozice", href: "/jobs", icon: Briefcase },
+      { label: "Tržiště", href: "/marketplace", icon: Store },
     ],
   },
   {
@@ -57,6 +62,13 @@ const ADMIN_SECTION = {
   title: "Správa",
   items: [
     { label: "Admin panel", href: "/admin", icon: ShieldCheck },
+  ],
+} as const;
+
+const MANAGER_SECTION = {
+  title: "Správa",
+  items: [
+    { label: "Správa systému", href: "/admin", icon: ClipboardList },
   ],
 } as const;
 
@@ -86,10 +98,16 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
     };
   }, [open, onClose]);
 
-  const sections =
+  const managementSection =
     user?.role === "ADMIN"
-      ? [ADMIN_SECTION, ...MENU_SECTIONS]
-      : [...MENU_SECTIONS];
+      ? ADMIN_SECTION
+      : user?.role === "MANAGER"
+        ? MANAGER_SECTION
+        : null;
+
+  const sections = managementSection
+    ? [managementSection, ...MENU_SECTIONS]
+    : [...MENU_SECTIONS];
 
   return (
     <>

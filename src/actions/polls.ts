@@ -151,13 +151,13 @@ export async function voteInPoll(pollId: string, optionIndex: number) {
 }
 
 // ---------------------------------------------------------------------------
-// CLOSE POLL (Admin only)
+// CLOSE POLL (Admin / Manager)
 // ---------------------------------------------------------------------------
 
 export async function closePoll(pollId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění" };
   }
 

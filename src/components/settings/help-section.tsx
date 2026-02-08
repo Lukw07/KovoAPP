@@ -57,7 +57,7 @@ export function HelpSection() {
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-4 space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
@@ -84,13 +84,13 @@ export function HelpSection() {
               <span>{item.question}</span>
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500 transition-transform duration-200",
+                  "h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500 transition-transform duration-300 ease-out",
                   openIndex === i && "rotate-180",
                 )}
               />
             </button>
             {openIndex === i && (
-              <div className="px-3 pb-3 pt-1">
+              <div className="animate-accordion-open px-3 pb-3 pt-1">
                 <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   {item.answer}
                 </p>

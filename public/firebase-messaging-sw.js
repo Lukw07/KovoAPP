@@ -8,16 +8,15 @@
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
-// Firebase config is injected at runtime via the query string or hardcoded.
-// For simplicity, we read from a well-known endpoint or hardcode public keys.
-// These are PUBLIC keys — safe to expose.
+// These are PUBLIC Firebase keys — safe to expose in the service worker.
+// They must match the values in .env.local (NEXT_PUBLIC_FIREBASE_*).
 firebase.initializeApp({
-  apiKey: self.__FIREBASE_CONFIG__?.apiKey || "",
-  authDomain: self.__FIREBASE_CONFIG__?.authDomain || "",
-  projectId: self.__FIREBASE_CONFIG__?.projectId || "",
-  storageBucket: self.__FIREBASE_CONFIG__?.storageBucket || "",
-  messagingSenderId: self.__FIREBASE_CONFIG__?.messagingSenderId || "",
-  appId: self.__FIREBASE_CONFIG__?.appId || "",
+  apiKey: "AIzaSyByu1QRURCXMSt69IS5DxMyVd7GduUrb8I",
+  authDomain: "kovo-2544d.firebaseapp.com",
+  projectId: "kovo-2544d",
+  storageBucket: "kovo-2544d.firebasestorage.app",
+  messagingSenderId: "374185364721",
+  appId: "1:374185364721:web:955c0b46591cf84a346d50",
 });
 
 const messaging = firebase.messaging();

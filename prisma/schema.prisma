@@ -131,6 +131,10 @@ model User {
   // Marketplace
   marketplaceListings MarketplaceListing[]
 
+  // Messages
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+
   // FCM tokens
   fcmTokens FcmToken[]
 
@@ -553,7 +557,7 @@ model MarketplaceListing {
   description String              @db.Text
   category    MarketplaceCategory
   price       String?             // Free-text e.g. "500 Kč", "Zdarma", "Dohodou"
-  imageUrl    String?
+  imageUrl    String?             // Primary / cover image
   isActive    Boolean             @default(true)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
@@ -561,11 +565,58 @@ model MarketplaceListing {
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  // Multiple images
+  images MarketplaceImage[]
+
+  // Messages
+  messages Message[]
+
   @@index([authorId])
   @@index([category])
   @@index([isActive])
   @@index([createdAt])
   @@map("marketplace_listings")
+}
+
+model MarketplaceImage {
+  id        String   @id @default(cuid())
+  url       String   // /api/upload/xxx.webp
+  thumbUrl  String?  // /api/upload/thumb-xxx.webp
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  listingId String
+  listing   MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@map("marketplace_images")
+}
+
+// ============================================================================
+// MESSAGING (Marketplace DMs)
+// ============================================================================
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  senderId   String
+  sender     User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // Optional: link to a marketplace listing for context
+  listingId String?
+  listing   MarketplaceListing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([listingId])
+  @@index([createdAt])
+  @@map("messages")
 }
 
 // ============================================================================

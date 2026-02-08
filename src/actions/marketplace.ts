@@ -7,15 +7,32 @@ import { revalidatePath } from "next/cache";
 import type { MarketplaceCategory } from "@/generated/prisma/enums";
 
 // ---------------------------------------------------------------------------
-// Zod schema
+// Zod schemas
 // ---------------------------------------------------------------------------
+
+const imageUrlValidator = z
+  .string()
+  .refine(
+    (val) =>
+      val === "" ||
+      val.startsWith("/api/upload/") ||
+      /^https?:\/\/.+/.test(val),
+    "Neplatná URL obrázku",
+  );
+
+const imageItemSchema = z.object({
+  url: imageUrlValidator,
+  thumbUrl: imageUrlValidator.optional(),
+  order: z.number().int().min(0).default(0),
+});
 
 const createListingSchema = z.object({
   title: z.string().min(3, "Název musí mít alespoň 3 znaky").max(200),
   description: z.string().min(5, "Popis musí mít alespoň 5 znaků"),
   category: z.enum(["SELLING", "BUYING", "LOOKING_FOR", "OFFERING"]),
   price: z.string().max(50).optional(),
-  imageUrl: z.string().url("Neplatná URL obrázku").optional().or(z.literal("")),
+  imageUrl: imageUrlValidator.optional().or(z.literal("")),
+  images: z.array(imageItemSchema).max(5).optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -26,12 +43,24 @@ export async function createListing(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
 
+  // Parse images JSON from form
+  let images: { url: string; thumbUrl?: string; order: number }[] = [];
+  const imagesStr = formData.get("images") as string | null;
+  if (imagesStr) {
+    try {
+      images = JSON.parse(imagesStr);
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
   const raw = {
     title: formData.get("title") as string,
     description: formData.get("description") as string,
     category: formData.get("category") as string,
     price: (formData.get("price") as string) || undefined,
     imageUrl: (formData.get("imageUrl") as string) || undefined,
+    images,
   };
 
   const parsed = createListingSchema.safeParse(raw);
@@ -40,14 +69,28 @@ export async function createListing(formData: FormData) {
   }
 
   try {
+    const data = parsed.data;
+    // Use first image as cover if no explicit imageUrl
+    const coverUrl = data.imageUrl || data.images?.[0]?.url || null;
+
     await prisma.marketplaceListing.create({
       data: {
-        title: parsed.data.title,
-        description: parsed.data.description,
-        category: parsed.data.category as MarketplaceCategory,
-        price: parsed.data.price || null,
-        imageUrl: parsed.data.imageUrl || null,
+        title: data.title,
+        description: data.description,
+        category: data.category as MarketplaceCategory,
+        price: data.price || null,
+        imageUrl: coverUrl,
         authorId: session.user.id,
+        images:
+          data.images && data.images.length > 0
+            ? {
+                create: data.images.map((img, i) => ({
+                  url: img.url,
+                  thumbUrl: img.thumbUrl || null,
+                  order: img.order ?? i,
+                })),
+              }
+            : undefined,
       },
     });
 

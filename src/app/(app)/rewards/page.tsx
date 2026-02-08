@@ -15,7 +15,7 @@ export default async function RewardsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Odměny</h1>
+      <h1 className="animate-fade-in-up text-xl font-bold text-slate-900 dark:text-slate-100">Odměny</h1>
       <RewardsShop
         rewards={rewards}
         claims={claims}

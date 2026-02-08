@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Gift, Star, Loader2, Check, ShoppingCart } from "lucide-react";
+import { Gift, Star, Loader2, Check, ShoppingCart, Sparkles } from "lucide-react";
 import { claimReward } from "@/actions/rewards";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +17,10 @@ interface RewardData {
 interface RewardCardProps {
   reward: RewardData;
   userBalance: number;
+  index?: number;
 }
 
-export function RewardCard({ reward, userBalance }: RewardCardProps) {
+export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [claimed, setClaimed] = useState(false);
@@ -44,31 +45,38 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
+    <div
+      className="animate-fade-in-scale card-hover rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden"
+      style={{ "--delay": `${index * 80}ms` } as React.CSSProperties}
+    >
       {/* Image or gradient placeholder */}
       {reward.imageUrl ? (
-        <div className="h-32 w-full overflow-hidden">
+        <div className="relative h-36 w-full overflow-hidden group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={reward.imageUrl}
             alt={reward.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
       ) : (
-        <div className="flex h-32 w-full items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-          <Gift className="h-12 w-12 text-amber-300 dark:text-amber-600" />
+        <div className="relative flex h-36 w-full items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/15 dark:to-yellow-900/20 overflow-hidden group">
+          <div className="absolute inset-0 animate-shimmer" />
+          <Gift className="h-14 w-14 text-amber-300 dark:text-amber-600 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
+          {/* Floating sparkles */}
+          <Sparkles className="absolute top-3 right-3 h-4 w-4 text-amber-200 dark:text-amber-700 animate-sparkle" />
         </div>
       )}
 
       <div className="p-4 space-y-3">
         {/* Title + stock */}
         <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">
             {reward.name}
           </h3>
           {reward.description && (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
               {reward.description}
             </p>
           )}
@@ -77,11 +85,11 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
         {/* Price + stock indicator */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400 animate-sparkle" />
+            <span className="text-base font-extrabold text-slate-900 dark:text-slate-100">
               {reward.pointsCost}
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">
               bodů
             </span>
           </div>
@@ -89,7 +97,7 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
           {reward.stock >= 0 && (
             <span
               className={cn(
-                "text-[11px] font-medium rounded-full px-2 py-0.5",
+                "text-[11px] font-semibold rounded-full px-2.5 py-0.5 transition-colors",
                 isSoldOut
                   ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400"
                   : reward.stock <= 5
@@ -99,7 +107,7 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
             >
               {isSoldOut
                 ? "Vyprodáno"
-                : `Skladem ${reward.stock} ks`}
+                : `${reward.stock} ks`}
             </span>
           )}
         </div>
@@ -109,21 +117,21 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
           onClick={handleClaim}
           disabled={isDisabled}
           className={cn(
-            "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
+            "btn-press w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             claimed
-              ? "bg-emerald-500 text-white"
+              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
               : canAfford && !isSoldOut
-                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-600/20"
+                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30"
                 : "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed",
           )}
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : claimed ? (
-            <>
-              <Check className="h-4 w-4" />
+            <span className="flex items-center gap-2 animate-bounce-in">
+              <Check className="h-4 w-4 animate-check-pop" />
               Uplatněno!
-            </>
+            </span>
           ) : isSoldOut ? (
             "Vyprodáno"
           ) : !canAfford ? (
@@ -138,7 +146,7 @@ export function RewardCard({ reward, userBalance }: RewardCardProps) {
 
         {/* Error */}
         {error && (
-          <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2">
+          <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2 animate-fade-in-up">
             {error}
           </p>
         )}

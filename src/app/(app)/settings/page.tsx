@@ -8,7 +8,7 @@ export const metadata = { title: "Nastavení" };
 export default function SettingsPage() {
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+      <h1 className="animate-fade-in-up text-xl font-bold text-slate-900 dark:text-slate-100">
         Nastavení
       </h1>
 

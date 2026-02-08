@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Tržiště" };
 
 export default async function MarketplacePage() {
-  const [listings, session] = await Promise.all([getListings(), auth()]);
+  const [result, session] = await Promise.all([getListings(), auth()]);
 
   return (
     <div className="space-y-4">
@@ -28,7 +28,7 @@ export default async function MarketplacePage() {
       <CreateListingForm />
 
       <MarketplaceFeed
-        listings={listings as unknown as ListingData[]}
+        listings={result.listings as unknown as ListingData[]}
         currentUserId={session?.user?.id}
       />
     </div>

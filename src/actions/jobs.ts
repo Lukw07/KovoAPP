@@ -35,7 +35,7 @@ const referralSchema = z.object({
 export async function createJobPosting(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění vytvářet inzeráty" };
   }
 
@@ -92,7 +92,7 @@ export async function updateJobStatus(
 ) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění" };
   }
 
@@ -121,7 +121,7 @@ export async function updateJobStatus(
 export async function deleteJobPosting(jobId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return { error: "Nemáte oprávnění" };
   }
 

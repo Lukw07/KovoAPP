@@ -7,13 +7,15 @@ import {
   ShoppingBag,
   Search,
   Tag,
-  Heart,
   User,
   Trash2,
   Package,
   HandHelping,
-  Megaphone,
   Gift,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  MessageCircle,
 } from "lucide-react";
 import { deactivateListing } from "@/actions/marketplace";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,13 @@ const CATEGORY_META: Record<
   },
 };
 
+export interface ImageData {
+  id: string;
+  url: string;
+  thumbUrl: string | null;
+  order: number;
+}
+
 export interface ListingData {
   id: string;
   title: string;
@@ -63,15 +72,83 @@ export interface ListingData {
     avatarUrl: string | null;
     department?: { name: string } | null;
   };
+  images?: ImageData[];
 }
+
+// ---------------------------------------------------------------------------
+// IMAGE CAROUSEL
+// ---------------------------------------------------------------------------
+
+function ImageCarousel({ images, title }: { images: ImageData[]; title: string }) {
+  const [current, setCurrent] = useState(0);
+
+  if (images.length === 0) return null;
+
+  const prev = () => setCurrent((c) => (c === 0 ? images.length - 1 : c - 1));
+  const next = () => setCurrent((c) => (c === images.length - 1 ? 0 : c + 1));
+
+  return (
+    <div className="relative h-44 w-full overflow-hidden group">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={images[current].url}
+        alt={`${title} - ${current + 1}`}
+        className="h-full w-full object-cover transition-opacity duration-200"
+      />
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === current
+                    ? "w-4 bg-white"
+                    : "w-1.5 bg-white/50 hover:bg-white/70"
+                )}
+              />
+            ))}
+          </div>
+
+          {/* Counter */}
+          <span className="absolute top-2 right-2 bg-black/50 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md">
+            {current + 1}/{images.length}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// LISTING CARD
+// ---------------------------------------------------------------------------
 
 interface ListingCardProps {
   listing: ListingData;
   isOwner?: boolean;
   onRemoved?: () => void;
+  onContact?: (listing: ListingData) => void;
 }
 
-export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
+export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingCardProps) {
   const [isPending, startTransition] = useTransition();
   const meta = CATEGORY_META[listing.category] || CATEGORY_META.SELLING;
 
@@ -88,23 +165,26 @@ export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
     locale: cs,
   });
 
+  // Use images array or fallback to single imageUrl
+  const allImages: ImageData[] =
+    listing.images && listing.images.length > 0
+      ? listing.images
+      : listing.imageUrl
+        ? [{ id: "cover", url: listing.imageUrl, thumbUrl: null, order: 0 }]
+        : [];
+
   return (
     <div
       className={cn(
         "rounded-2xl border bg-white dark:bg-slate-800 shadow-sm overflow-hidden",
-        !listing.isActive ? "opacity-60 border-slate-100 dark:border-slate-800" : "border-slate-200 dark:border-slate-700"
+        !listing.isActive
+          ? "opacity-60 border-slate-100 dark:border-slate-800"
+          : "border-slate-200 dark:border-slate-700",
       )}
     >
-      {/* Image */}
-      {listing.imageUrl && (
-        <div className="h-36 w-full overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={listing.imageUrl}
-            alt={listing.title}
-            className="h-full w-full object-cover"
-          />
-        </div>
+      {/* Image carousel */}
+      {allImages.length > 0 && (
+        <ImageCarousel images={allImages} title={listing.title} />
       )}
 
       <div className="p-4 space-y-2.5">
@@ -114,7 +194,7 @@ export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
             className={cn(
               "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
               meta.bg,
-              meta.color
+              meta.color,
             )}
           >
             {meta.icon}
@@ -128,7 +208,9 @@ export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{listing.title}</h3>
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          {listing.title}
+        </h3>
 
         {/* Description */}
         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 whitespace-pre-line">
@@ -165,90 +247,151 @@ export function ListingCard({ listing, isOwner, onRemoved }: ListingCardProps) {
           <span className="text-[11px] text-slate-400">{timeAgo}</span>
         </div>
 
-        {/* Owner: deactivate button */}
-        {isOwner && listing.isActive && (
-          <button
-            onClick={handleDeactivate}
-            disabled={isPending}
-            className={cn(
-              "w-full flex items-center justify-center gap-1.5 rounded-xl py-2",
-              "border border-red-200 dark:border-red-800 text-xs font-medium text-red-600 dark:text-red-400",
-              "hover:bg-red-50 dark:hover:bg-red-900/30 active:scale-[0.98] transition-all",
-              "disabled:opacity-50"
-            )}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            {isPending ? "Odstraňuji..." : "Stáhnout inzerát"}
-          </button>
-        )}
+        {/* Actions */}
+        <div className="flex gap-2">
+          {/* Contact button (non-owners) */}
+          {!isOwner && listing.isActive && onContact && (
+            <button
+              onClick={() => onContact(listing)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2",
+                "border border-blue-200 dark:border-blue-800 text-xs font-medium text-blue-600 dark:text-blue-400",
+                "hover:bg-blue-50 dark:hover:bg-blue-900/30 active:scale-[0.98] transition-all",
+              )}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              Napsat
+            </button>
+          )}
+
+          {/* Owner: deactivate button */}
+          {isOwner && listing.isActive && (
+            <button
+              onClick={handleDeactivate}
+              disabled={isPending}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2",
+                "border border-red-200 dark:border-red-800 text-xs font-medium text-red-600 dark:text-red-400",
+                "hover:bg-red-50 dark:hover:bg-red-900/30 active:scale-[0.98] transition-all",
+                "disabled:opacity-50",
+              )}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {isPending ? "Odstraňuji..." : "Stáhnout inzerát"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// MARKETPLACE FEED
+// MARKETPLACE FEED (with search + sorting)
 // ---------------------------------------------------------------------------
 
 interface MarketplaceFeedProps {
   listings: ListingData[];
   currentUserId?: string;
+  onContact?: (listing: ListingData) => void;
 }
 
 export function MarketplaceFeed({
   listings,
   currentUserId,
+  onContact,
 }: MarketplaceFeedProps) {
   const [filter, setFilter] = useState<string>("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const tabs = [
     { key: "ALL", label: "Vše", icon: <Package className="h-3.5 w-3.5" /> },
-    {
-      key: "SELLING",
-      label: "Prodám",
-      icon: <Tag className="h-3.5 w-3.5" />,
-    },
-    {
-      key: "BUYING",
-      label: "Koupím",
-      icon: <ShoppingBag className="h-3.5 w-3.5" />,
-    },
-    {
-      key: "LOOKING_FOR",
-      label: "Hledám",
-      icon: <Search className="h-3.5 w-3.5" />,
-    },
-    {
-      key: "OFFERING",
-      label: "Nabízím",
-      icon: <Gift className="h-3.5 w-3.5" />,
-    },
+    { key: "SELLING", label: "Prodám", icon: <Tag className="h-3.5 w-3.5" /> },
+    { key: "BUYING", label: "Koupím", icon: <ShoppingBag className="h-3.5 w-3.5" /> },
+    { key: "LOOKING_FOR", label: "Hledám", icon: <Search className="h-3.5 w-3.5" /> },
+    { key: "OFFERING", label: "Nabízím", icon: <Gift className="h-3.5 w-3.5" /> },
   ];
 
-  const filtered =
-    filter === "ALL"
-      ? listings
-      : listings.filter((l) => l.category === filter);
+  // Client-side filtering (already fetched on server, but filter/search locally for instant UX)
+  let filtered = filter === "ALL" ? listings : listings.filter((l) => l.category === filter);
+
+  // Local search
+  if (searchTerm.trim()) {
+    const term = searchTerm.trim().toLowerCase();
+    filtered = filtered.filter(
+      (l) =>
+        l.title.toLowerCase().includes(term) ||
+        l.description.toLowerCase().includes(term),
+    );
+  }
+
+  // Local sort
+  filtered = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case "oldest":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "newest":
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  });
 
   return (
-    <div className="space-y-4">
-      {/* Category filter tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setFilter(tab.key)}
+    <div className="space-y-3">
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Hledat v inzerátech..."
+          className={cn(
+            "w-full rounded-xl border border-slate-200 dark:border-slate-600 pl-9 pr-3 py-2.5 text-sm",
+            "bg-white dark:bg-slate-800 dark:text-slate-200",
+            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+            "placeholder:text-slate-400",
+          )}
+        />
+      </div>
+
+      {/* Category filter tabs + sort */}
+      <div className="flex items-center gap-2">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 flex-1 -mx-1 px-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all active:scale-95",
+                filter === tab.key
+                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
+                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort dropdown */}
+        <div className="relative flex-shrink-0">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
             className={cn(
-              "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all active:scale-95",
-              filter === tab.key
-                ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
-                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+              "appearance-none rounded-xl border border-slate-200 dark:border-slate-700 pl-7 pr-3 py-1.5",
+              "text-xs font-medium bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300",
+              "focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
             )}
           >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+            <option value="newest">Nejnovější</option>
+            <option value="oldest">Nejstarší</option>
+          </select>
+          <ArrowUpDown className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+        </div>
       </div>
 
       {/* Grid */}
@@ -256,7 +399,9 @@ export function MarketplaceFeed({
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-16 text-center">
           <HandHelping className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Žádné inzeráty v této kategorii
+            {searchTerm
+              ? "Žádné výsledky pro hledaný výraz"
+              : "Žádné inzeráty v této kategorii"}
           </p>
         </div>
       ) : (
@@ -266,6 +411,7 @@ export function MarketplaceFeed({
               key={listing.id}
               listing={listing}
               isOwner={currentUserId === listing.author.id}
+              onContact={onContact}
             />
           ))}
         </div>

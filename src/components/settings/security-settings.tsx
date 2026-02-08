@@ -46,7 +46,7 @@ export function SecuritySettings() {
   };
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-3 space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
@@ -91,10 +91,10 @@ export function SecuritySettings() {
           type="submit"
           disabled={isPending}
           className={cn(
-            "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all active:scale-[0.98]",
+            "btn-press w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             success
-              ? "bg-emerald-500 text-white"
-              : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed",
+              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 disabled:opacity-60 disabled:cursor-not-allowed",
           )}
         >
           {isPending ? (
@@ -103,10 +103,10 @@ export function SecuritySettings() {
               Ukládám…
             </>
           ) : success ? (
-            <>
-              <Check className="h-4 w-4" />
+            <span className="flex items-center gap-2 animate-bounce-in">
+              <Check className="h-4 w-4 animate-check-pop" />
               Heslo změněno!
-            </>
+            </span>
           ) : (
             <>
               <Lock className="h-4 w-4" />
@@ -118,14 +118,14 @@ export function SecuritySettings() {
 
       {/* Error */}
       {error && (
-        <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2">
+        <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-2 animate-fade-in-up">
           {error}
         </p>
       )}
 
       {/* Success */}
       {success && (
-        <p className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg px-3 py-2">
+        <p className="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg px-3 py-2 animate-bounce-in">
           Heslo bylo úspěšně změněno.
         </p>
       )}
