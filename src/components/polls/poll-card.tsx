@@ -11,8 +11,9 @@ import {
   Users,
   User,
   Ban,
+  RotateCcw,
 } from "lucide-react";
-import { voteInPoll } from "@/actions/polls";
+import { voteInPoll, removeVoteFromPoll } from "@/actions/polls";
 import { cn } from "@/lib/utils";
 
 interface PollOption {
@@ -74,6 +75,29 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
           )
         );
         setLocalTotalVotes((prev) => prev + 1);
+        onVoted?.();
+      }
+    });
+  };
+
+  const handleRemoveVote = () => {
+    if (!poll.isActive || isPending) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await removeVoteFromPoll(poll.id);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Optimistic update — remove all user votes
+        setLocalOptions((prev) =>
+          prev.map((opt) =>
+            localUserVotes.includes(opt.index)
+              ? { ...opt, count: Math.max(0, opt.count - 1) }
+              : opt
+          )
+        );
+        setLocalTotalVotes((prev) => Math.max(0, prev - localUserVotes.length));
+        setLocalUserVotes([]);
         onVoted?.();
       }
     });
@@ -226,6 +250,17 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
           </div>
 
           <div className="flex items-center gap-3 text-xs text-foreground-muted">
+            {/* Unvote button */}
+            {hasVoted && poll.isActive && (
+              <button
+                onClick={handleRemoveVote}
+                disabled={isPending}
+                className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50"
+              >
+                <RotateCcw className="h-3 w-3" />
+                Zrušit hlas
+              </button>
+            )}
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
               {localTotalVotes} {localTotalVotes === 1 ? "hlas" : localTotalVotes < 5 ? "hlasy" : "hlasů"}

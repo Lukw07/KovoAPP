@@ -17,6 +17,7 @@ import {
   ClipboardText,
   ChatCircle,
   Storefront,
+  CalendarDots,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -30,24 +31,14 @@ interface SidebarProps {
 }
 
 // Drawer menu items — using Phosphor icons with weight switching
+// Only items NOT in bottom-nav or "Více" page to avoid duplication
 const MENU_SECTIONS = [
   {
-    title: "Komunikace",
+    title: "Rychlý přístup",
     items: [
+      { label: "Kalendář", href: "/calendar", icon: CalendarDots },
       { label: "Novinky", href: "/news", icon: Newspaper },
-      { label: "Ankety", href: "/polls", icon: ChartBar },
-      { label: "Zprávy", href: "/messages", icon: ChatCircle },
-    ],
-  },
-  {
-    title: "Gamifikace",
-    items: [{ label: "Odměny", href: "/rewards", icon: Gift }],
-  },
-  {
-    title: "Kariéra & Tržiště",
-    items: [
-      { label: "Volné pozice", href: "/jobs", icon: Briefcase },
-      { label: "Tržiště", href: "/marketplace", icon: Storefront },
+      { label: "Odměny", href: "/rewards", icon: Gift },
     ],
   },
   {

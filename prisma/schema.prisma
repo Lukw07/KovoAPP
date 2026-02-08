@@ -155,6 +155,9 @@ model User {
   documents      EmployeeDocument[]
   vacationEntitlements VacationEntitlement[]
 
+  // Calendar events
+  calendarEvents CalendarEvent[]
+
   // Sessions (for NextAuth)
   sessions Session[]
   accounts Account[]
@@ -796,6 +799,29 @@ model EmployeeDocument {
   @@index([category])
   @@index([expiresAt])
   @@map("employee_documents")
+}
+
+// ============================================================================
+// CALENDAR EVENTS (custom events by managers / admins)
+// ============================================================================
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  date        DateTime
+  endDate     DateTime? // optional end date for multi-day events
+  color       String?   // hex color for UI display
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Creator (manager or admin)
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([creatorId])
+  @@map("calendar_events")
 }
 
 // Vacation entitlement tracking (zákonný nárok na dovolenou)

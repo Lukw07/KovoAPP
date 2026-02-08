@@ -203,3 +203,40 @@ export async function getUnreadMessageCount() {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// SEARCH USERS (for new conversation)
+// ---------------------------------------------------------------------------
+
+export async function searchUsers(query: string) {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+
+  const users = await prisma.user.findMany({
+    where: {
+      AND: [
+        { id: { not: session.user.id } },
+        { isActive: true },
+        {
+          OR: [
+            { name: { contains: trimmed, mode: "insensitive" } },
+            { email: { contains: trimmed, mode: "insensitive" } },
+          ],
+        },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+      avatarUrl: true,
+      position: true,
+    },
+    take: 10,
+    orderBy: { name: "asc" },
+  });
+
+  return users;
+}

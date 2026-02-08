@@ -8,6 +8,7 @@ import { Sidebar } from "./sidebar";
 import { NotificationPrompt } from "@/components/notifications/notification-prompt";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { SearchModal } from "@/components/ui/search-modal";
+import { PwaInstallPrompt } from "@/components/notifications/pwa-install-prompt";
 
 export function MobileLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -38,6 +39,7 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
         {/* Connectivity / Push opt-in prompts */}
         <OfflineIndicator />
         <NotificationPrompt />
+        <PwaInstallPrompt />
         {children}
       </main>
 

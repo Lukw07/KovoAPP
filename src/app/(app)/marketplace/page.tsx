@@ -1,7 +1,6 @@
 import { getListings } from "@/actions/marketplace-queries";
 import { auth } from "@/lib/auth";
-import { MarketplaceFeed } from "@/components/marketplace/listing-card";
-import { CreateListingForm } from "@/components/marketplace/create-listing-form";
+import { MarketplacePageClient } from "@/components/marketplace/marketplace-page-client";
 import type { ListingData } from "@/components/marketplace/listing-card";
 import { Store } from "lucide-react";
 
@@ -25,9 +24,7 @@ export default async function MarketplacePage() {
         </div>
       </div>
 
-      <CreateListingForm />
-
-      <MarketplaceFeed
+      <MarketplacePageClient
         listings={result.listings as unknown as ListingData[]}
         currentUserId={session?.user?.id}
       />

@@ -23,12 +23,14 @@ import {
   CaretLeft,
   CaretRight,
   Users,
+  Calendar,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
 import { NotificationPrompt } from "@/components/notifications/notification-prompt";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { SearchModal } from "@/components/ui/search-modal";
+import { PwaInstallPrompt } from "@/components/notifications/pwa-install-prompt";
 
 // ============================================================================
 // Desktop-first layout — persistent sidebar, no bottom nav
@@ -40,6 +42,7 @@ const NAV_SECTIONS = [
     items: [
       { label: "Přehled", href: "/dashboard", icon: SquaresFour },
       { label: "Žádosti", href: "/requests", icon: CalendarDots },
+      { label: "Kalendář", href: "/calendar", icon: Calendar },
       { label: "Zprávy", href: "/messages", icon: ChatCircle },
     ],
   },
@@ -272,6 +275,7 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
           <div className="mx-auto max-w-5xl px-6 py-6">
             <OfflineIndicator />
             <NotificationPrompt />
+            <PwaInstallPrompt />
             {children}
           </div>
         </main>

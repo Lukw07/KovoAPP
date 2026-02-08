@@ -8,11 +8,15 @@ import {
   MessageCircle,
   Package,
   Inbox,
+  Plus,
+  Search,
+  X,
 } from "lucide-react";
 import {
   sendMessage,
   getConversations,
   getConversationMessages,
+  searchUsers,
 } from "@/actions/messages";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -46,32 +50,181 @@ interface ChatMessage {
 }
 
 // ---------------------------------------------------------------------------
+// NEW CONVERSATION — User Search Picker
+// ---------------------------------------------------------------------------
+
+function NewConversation({
+  onSelect,
+  onBack,
+}: {
+  onSelect: (user: { id: string; name: string | null; avatarUrl: string | null }) => void;
+  onBack: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<
+    { id: string; name: string | null; avatarUrl: string | null; position: string | null }[]
+  >([]);
+  const [isPending, startTransition] = useTransition();
+  const [searched, setSearched] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  function handleChange(value: string) {
+    setQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (value.trim().length < 2) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      startTransition(async () => {
+        const users = await searchUsers(value);
+        setResults(users);
+        setSearched(true);
+      });
+    }, 300);
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-secondary text-foreground-secondary hover:text-foreground flex-shrink-0"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <h3 className="text-sm font-bold text-foreground">Nová konverzace</h3>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder="Hledat kolegu..."
+          className={cn(
+            "w-full rounded-xl border border-border pl-9 pr-8 py-2.5 text-sm",
+            "bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
+            "placeholder:text-foreground-muted",
+          )}
+        />
+        {query && (
+          <button
+            onClick={() => handleChange("")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {isPending && (
+        <div className="flex items-center justify-center py-6">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-foreground-muted border-t-accent" />
+        </div>
+      )}
+
+      {!isPending && searched && results.length === 0 && (
+        <p className="text-xs text-foreground-muted text-center py-6">
+          Žádní uživatelé nalezeni
+        </p>
+      )}
+
+      {!isPending && results.length > 0 && (
+        <div className="divide-y divide-border">
+          {results.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => onSelect(user)}
+              className="w-full flex items-center gap-3 p-3 text-left hover:bg-background-secondary transition-colors"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-background-secondary overflow-hidden">
+                {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <User className="h-4 w-4 text-foreground-muted" />
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {user.name || "Neznámý"}
+                </p>
+                {user.position && (
+                  <p className="text-xs text-foreground-muted">{user.position}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!isPending && !searched && (
+        <p className="text-xs text-foreground-muted text-center py-6">
+          Zadejte jméno kolegy
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // CONVERSATION LIST
 // ---------------------------------------------------------------------------
 
 function ConversationList({
   conversations,
   onSelect,
+  onNewConversation,
 }: {
   conversations: Conversation[];
   onSelect: (conv: Conversation) => void;
+  onNewConversation: () => void;
 }) {
-  if (conversations.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Inbox className="mb-3 h-12 w-12 text-foreground-muted" />
-        <p className="text-sm font-medium text-foreground-secondary">
-          Žádné zprávy
-        </p>
-        <p className="text-xs text-foreground-muted mt-1">
-          Kontaktujte prodejce přes tržiště
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="divide-y divide-border">
+    <div>
+      {/* New conversation button */}
+      <button
+        onClick={onNewConversation}
+        className={cn(
+          "w-full flex items-center gap-3 p-3 mb-1 rounded-xl text-left transition-colors",
+          "border-2 border-dashed border-border hover:border-accent/50 hover:text-accent",
+          "text-foreground-muted",
+        )}
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+          <Plus className="h-5 w-5 text-accent" />
+        </div>
+        <span className="text-sm font-medium">Napsat novou zprávu</span>
+      </button>
+
+      {conversations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Inbox className="mb-3 h-12 w-12 text-foreground-muted" />
+          <p className="text-sm font-medium text-foreground-secondary">
+            Žádné zprávy
+          </p>
+          <p className="text-xs text-foreground-muted mt-1">
+            Zahajte konverzaci tlačítkem výše
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y divide-border">
       {conversations.map((conv) => {
         const key = `${conv.partnerId}:${conv.listingId || "direct"}`;
         return (
@@ -148,6 +301,8 @@ function ConversationList({
           </button>
         );
       })}
+        </div>
+      )}
     </div>
   );
 }
@@ -395,6 +550,28 @@ export function MessagesClient({
         }
       : null,
   );
+  const [showNewConv, setShowNewConv] = useState(false);
+
+  if (showNewConv) {
+    return (
+      <NewConversation
+        onBack={() => setShowNewConv(false)}
+        onSelect={(user) => {
+          setActiveConv({
+            partnerId: user.id,
+            partnerName: user.name,
+            partnerAvatar: user.avatarUrl,
+            lastMessage: "",
+            lastMessageAt: new Date(),
+            unreadCount: 0,
+            listingId: null,
+            listingTitle: null,
+          });
+          setShowNewConv(false);
+        }}
+      />
+    );
+  }
 
   if (activeConv) {
     return (
@@ -414,6 +591,7 @@ export function MessagesClient({
     <ConversationList
       conversations={conversations}
       onSelect={(conv) => setActiveConv(conv)}
+      onNewConversation={() => setShowNewConv(true)}
     />
   );
 }

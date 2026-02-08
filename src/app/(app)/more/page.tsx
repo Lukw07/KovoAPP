@@ -11,6 +11,7 @@ import {
   MessageCircle,
   ShieldCheck,
   ClipboardList,
+  CalendarDays,
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/actions/messages";
 import { auth } from "@/lib/auth";
@@ -26,6 +27,14 @@ const ITEMS = [
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-900/30",
     hasBadge: true,
+  },
+  {
+    label: "Kalendář",
+    href: "/calendar",
+    icon: CalendarDays,
+    description: "Svátky a firemní události",
+    color: "text-indigo-600 dark:text-indigo-400",
+    bg: "bg-indigo-50 dark:bg-indigo-900/30",
   },
   {
     label: "Novinky",

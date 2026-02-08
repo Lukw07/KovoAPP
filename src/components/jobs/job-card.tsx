@@ -49,10 +49,11 @@ export function JobCard({ job }: JobCardProps) {
 
   // Share via native share API
   const handleShare = async () => {
+    const jobUrl = `https://kovodecin.cz/jobs`;
     const shareData = {
       title: job.title,
       text: `Hledáme: ${job.title}${job.location ? ` (${job.location})` : ""}${job.salaryRange ? ` - ${job.salaryRange}` : ""}`,
-      url: window.location.href,
+      url: jobUrl,
     };
 
     if (navigator.share) {
@@ -64,7 +65,7 @@ export function JobCard({ job }: JobCardProps) {
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(
-        `${shareData.text}\n${shareData.url}`
+        `${shareData.text}\n${jobUrl}`
       );
       toast.success("Odkaz zkopírován do schránky!");
     }

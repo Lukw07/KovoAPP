@@ -6,10 +6,21 @@ import { MessageCircle } from "lucide-react";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Zprávy" };
 
-export default async function MessagesPage() {
-  const [session, conversations] = await Promise.all([
+interface MessagesPageProps {
+  searchParams: Promise<{
+    partnerId?: string;
+    partnerName?: string;
+    partnerAvatar?: string;
+    listingId?: string;
+    listingTitle?: string;
+  }>;
+}
+
+export default async function MessagesPage({ searchParams }: MessagesPageProps) {
+  const [session, conversations, params] = await Promise.all([
     auth(),
     getConversations(),
+    searchParams,
   ]);
 
   if (!session?.user?.id) return null;
@@ -34,6 +45,11 @@ export default async function MessagesPage() {
         <MessagesClient
           conversations={conversations}
           currentUserId={session.user.id}
+          initialPartnerId={params.partnerId}
+          initialPartnerName={params.partnerName}
+          initialPartnerAvatar={params.partnerAvatar}
+          initialListingId={params.listingId}
+          initialListingTitle={params.listingTitle}
         />
       </div>
     </div>

@@ -162,6 +162,39 @@ export async function voteInPoll(pollId: string, optionIndex: number) {
 // CLOSE POLL (Admin / Manager)
 // ---------------------------------------------------------------------------
 
+export async function removeVoteFromPoll(pollId: string, optionIndex?: number) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nepřihlášen" };
+
+  try {
+    const poll = await prisma.poll.findUnique({ where: { id: pollId } });
+    if (!poll) return { error: "Anketa nenalezena" };
+    if (!poll.isActive) return { error: "Anketa je ukončena" };
+
+    if (typeof optionIndex === "number") {
+      // Remove specific vote (multi-choice)
+      await prisma.pollVote.deleteMany({
+        where: { pollId, userId: session.user.id, optionIndex },
+      });
+    } else {
+      // Remove all votes from this poll
+      await prisma.pollVote.deleteMany({
+        where: { pollId, userId: session.user.id },
+      });
+    }
+
+    revalidatePath("/polls");
+    return { success: true };
+  } catch (err) {
+    console.error("removeVoteFromPoll error:", err);
+    return { error: "Nepodařilo se odebrat hlas" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CLOSE POLL (Admin / Manager)
+// ---------------------------------------------------------------------------
+
 export async function closePoll(pollId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
