@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   User,
@@ -130,31 +131,41 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
     : [...MENU_SECTIONS];
 
   return (
-    <>
-      {/* Backdrop — blur overlay */}
-      <div
-        className={cn(
-          "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={onClose}
-        aria-hidden="true"
-      />
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop — blur overlay */}
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={onClose}
+            aria-hidden="true"
+          />
 
-      {/* Drawer panel — premium glass surface */}
-      <div
-        ref={drawerRef}
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col",
-          "bg-card dark:bg-background-secondary",
-          "shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.8)]",
-          "transition-transform duration-300 ease-[cubic-bezier(0.4,0.14,0.3,1)]",
-          open ? "translate-x-0" : "-translate-x-full",
-        )}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Boční menu"
-      >
+          {/* Drawer panel — premium glass surface */}
+          <motion.div
+            ref={drawerRef}
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col",
+              "bg-card dark:bg-background-secondary",
+              "shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.8)]",
+            )}
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{
+              type: "spring",
+              stiffness: 350,
+              damping: 30,
+              mass: 0.8,
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Boční menu"
+          >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-5">
           {user && (
@@ -241,8 +252,10 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
             </button>
           </form>
         </div>
-      </div>
+      </motion.div>
     </>
+  )}
+  </AnimatePresence>
   );
 }
 

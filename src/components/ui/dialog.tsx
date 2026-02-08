@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -105,15 +106,19 @@ export function Dialog({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-fade-in-scale"
+      <motion.div
+        className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
         onClick={loading ? undefined : onClose}
         aria-hidden="true"
       />
 
       {/* Dialog */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div
+        <motion.div
           ref={dialogRef}
           role="alertdialog"
           aria-modal="true"
@@ -123,8 +128,16 @@ export function Dialog({
             "w-full max-w-sm rounded-2xl p-6",
             "bg-card border border-border",
             "shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.8)]",
-            "animate-bounce-in",
           )}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 25,
+            mass: 0.8,
+          }}
         >
           {/* Header */}
           <div className="flex items-start justify-between mb-2">
@@ -182,7 +195,7 @@ export function Dialog({
               </Button>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
   );

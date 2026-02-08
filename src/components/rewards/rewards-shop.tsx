@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star, History, ShoppingBag, Gift, Clock, Check, X, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { RewardCard } from "./reward-card";
 import { cn } from "@/lib/utils";
 
@@ -106,7 +107,14 @@ export function RewardsShop({ rewards, claims, userBalance, userName }: RewardsS
       </div>
 
       {/* Tab content — animated transitions */}
-      <div key={tab} className="animate-tab-content">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -8, filter: "blur(2px)" }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
         {tab === "shop" ? (
           rewards.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in-up">
@@ -182,7 +190,8 @@ export function RewardsShop({ rewards, claims, userBalance, userName }: RewardsS
             })}
           </div>
         )}
-      </div>
+      </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

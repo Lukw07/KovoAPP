@@ -2,10 +2,37 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Newspaper, RefreshCw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getNewsFeed, getPostDetail } from "@/actions/news-queries";
 import { NewsCard, type NewsPost } from "@/components/news/news-card";
 import { PostDetail } from "@/components/news/post-detail";
 import { cn } from "@/lib/utils";
+
+const listVariants = {
+  initial: {},
+  animate: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
+  },
+};
+
+const cardVariants = {
+  initial: { opacity: 0, y: 20, scale: 0.98 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.45,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.97,
+    transition: { duration: 0.2 },
+  },
+};
 
 interface NewsFeedProps {
   initialPosts: NewsPost[];
@@ -105,13 +132,19 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <NewsCard
-              key={post.id}
-              post={post}
-              onOpenDetail={openDetail}
-            />
+        <motion.div
+          className="space-y-4"
+          variants={listVariants}
+          initial="initial"
+          animate="animate"
+        >
+          {posts.map((post, i) => (
+            <motion.div key={post.id} variants={cardVariants}>
+              <NewsCard
+                post={post}
+                onOpenDetail={openDetail}
+              />
+            </motion.div>
           ))}
 
           {/* Load more */}
@@ -129,7 +162,7 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
               {loading ? "Načítání..." : "Zobrazit další"}
             </button>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

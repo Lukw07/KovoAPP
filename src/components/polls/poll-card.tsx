@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
   Check,
@@ -177,20 +178,35 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
               >
                 {/* Progress bar background */}
                 {showResults && (
-                  <div
+                  <motion.div
                     className={cn(
-                      "absolute inset-0 rounded-xl transition-all duration-500",
+                      "absolute inset-0 rounded-xl",
                       isSelected ? "bg-accent-light" : "bg-background-secondary/50"
                     )}
-                    style={{ width: `${percentage}%` }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{
+                      duration: 0.8,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: option.index * 0.1,
+                    }}
                   />
                 )}
 
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {isSelected && (
-                      <Check className="h-4 w-4 text-blue-600 shrink-0" />
-                    )}
+                    <AnimatePresence>
+                      {isSelected && (
+                        <motion.span
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                        >
+                          <Check className="h-4 w-4 text-blue-600 shrink-0" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                     <span
                       className={cn(
                         "text-sm",
@@ -330,24 +346,53 @@ export function PollsList({ polls }: PollsListProps) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center">
-          <BarChart3 className="mb-3 h-12 w-12 text-foreground-muted" />
-          <p className="text-sm font-medium text-foreground-secondary">
-            {filter === "active"
-              ? "Žádné aktivní ankety"
-              : filter === "closed"
-                ? "Žádné ukončené ankety"
-                : "Žádné ankety"}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filtered.map((poll) => (
-            <PollCard key={poll.id} poll={poll} />
-          ))}
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center"
+          >
+            <BarChart3 className="mb-3 h-12 w-12 text-foreground-muted" />
+            <p className="text-sm font-medium text-foreground-secondary">
+              {filter === "active"
+                ? "Žádné aktivní ankety"
+                : filter === "closed"
+                  ? "Žádné ukončené ankety"
+                  : "Žádné ankety"}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key={filter}
+            className="space-y-4"
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={{
+              initial: {},
+              animate: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+              exit: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
+            }}
+          >
+            {filtered.map((poll) => (
+              <motion.div
+                key={poll.id}
+                variants={{
+                  initial: { opacity: 0, y: 20, scale: 0.98 },
+                  animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+                  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+                }}
+              >
+                <PollCard poll={poll} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

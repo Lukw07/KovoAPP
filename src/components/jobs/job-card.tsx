@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Banknote,
@@ -336,10 +337,26 @@ export function JobList({ jobs }: JobListProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-4"
+      initial="initial"
+      animate="animate"
+      variants={{
+        initial: {},
+        animate: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+      }}
+    >
       {jobs.map((job) => (
-        <JobCard key={job.id} job={job} />
+        <motion.div
+          key={job.id}
+          variants={{
+            initial: { opacity: 0, y: 20, scale: 0.98 },
+            animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+          }}
+        >
+          <JobCard job={job} />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

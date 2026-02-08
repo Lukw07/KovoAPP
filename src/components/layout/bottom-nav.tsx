@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   SquaresFour,
   CalendarDots,
@@ -93,25 +94,47 @@ export function BottomNav({ userRole: _userRole }: BottomNavProps) {
               )}
             >
               {/* Active indicator dot */}
-              {isActive && (
-                <span className="absolute top-1 h-1 w-1 rounded-full bg-accent animate-fade-in-scale" />
-              )}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.span
+                    layoutId="bottomNavIndicator"
+                    className="absolute top-1 h-1 w-1 rounded-full bg-accent"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  />
+                )}
+              </AnimatePresence>
 
               {/* Icon with optional badge */}
               <span className="relative">
-                <Icon
-                  className={cn(
-                    "h-6 w-6 transition-transform duration-150",
-                    isActive && "scale-110",
-                  )}
-                  weight={isActive ? "fill" : "regular"}
-                />
+                <motion.span
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="inline-block"
+                >
+                  <Icon
+                    className="h-6 w-6"
+                    weight={isActive ? "fill" : "regular"}
+                  />
+                </motion.span>
                 {/* Unread badge */}
-                {showBadge && (
-                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white animate-fade-in-scale">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
+                <AnimatePresence>
+                  {showBadge && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                      className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white"
+                    >
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </span>
               <span>{item.label}</span>
             </Link>

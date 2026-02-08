@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/actions/messages";
 import { auth } from "@/lib/auth";
+import { MorePageAnimations } from "./more-animations";
 
 export const metadata = { title: "Více" };
 
@@ -103,7 +104,7 @@ export default async function MorePage() {
   const isManagement = role === "ADMIN" || role === "MANAGER";
 
   return (
-    <div className="space-y-4">
+    <MorePageAnimations>
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Více</h1>
 
       {/* Management link for Admin/Manager */}
@@ -164,6 +165,6 @@ export default async function MorePage() {
           );
         })}
       </div>
-    </div>
+    </MorePageAnimations>
   );
 }

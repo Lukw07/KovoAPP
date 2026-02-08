@@ -13,6 +13,7 @@ import {
   Newspaper,
   Gift,
 } from "@phosphor-icons/react/dist/ssr";
+import { DashboardAnimations } from "./dashboard-animations";
 
 export const metadata = { title: "Přehled" };
 
@@ -29,9 +30,9 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <DashboardAnimations>
       {/* ── Welcome hero — premium gradient with layered glow ──── */}
-      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 text-white shadow-[0_4px_24px_rgba(99,102,241,0.35)]">
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 text-white shadow-[0_4px_24px_rgba(99,102,241,0.35)]" data-hero>
         {/* Subtle noise texture overlay */}
         <div className="noise absolute inset-0 rounded-2xl" />
 
@@ -40,7 +41,7 @@ export default async function DashboardPage() {
         <div className="relative mt-4 flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2 rounded-xl bg-white/12 px-3 py-2 backdrop-blur-sm border border-white/10">
             <Star className="h-4 w-4 text-amber-300" weight="fill" />
-            <span className="text-sm font-semibold tabular-nums">
+            <span className="text-sm font-semibold tabular-nums" data-points>
               {user?.pointsBalance} bodů
             </span>
           </div>
@@ -84,7 +85,7 @@ export default async function DashboardPage() {
       )}
 
       {/* ── Quick actions — Bento grid layout ──────────────── */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" data-bento>
         <QuickAction
           href="/requests"
           icon={<CalendarDots className="h-6 w-6 text-indigo-600 dark:text-indigo-400" weight="duotone" />}
@@ -125,7 +126,7 @@ export default async function DashboardPage() {
 
       {/* ── Who is absent today ────────────────────────────── */}
       <TeamStatus />
-    </div>
+    </DashboardAnimations>
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlass,
   Newspaper,
@@ -95,13 +96,23 @@ export function SearchModal({
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
       {/* Backdrop */}
-      <div
+      <motion.div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="relative mx-auto mt-[10vh] w-[90%] max-w-lg animate-in fade-in slide-in-from-top-4 duration-200">
+      <motion.div
+        className="relative mx-auto mt-[10vh] w-[90%] max-w-lg"
+        initial={{ opacity: 0, y: -30, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -20, scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      >
         <div className="rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
           {/* Search input */}
           <div className="flex items-center gap-3 border-b border-border px-4 py-3">
@@ -177,7 +188,7 @@ export function SearchModal({
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
