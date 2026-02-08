@@ -170,12 +170,12 @@ export default function RequestForm({
                   "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
                 weekdays: "text-xs font-medium text-foreground-muted uppercase",
                 day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground",
-                today: "!bg-slate-900 dark:!bg-slate-100 !text-white dark:!text-slate-900 !rounded-lg !font-bold",
+                today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
                 selected: "!bg-blue-600 !text-white",
                 range_start: "!bg-blue-600 !text-white !rounded-l-lg",
                 range_end: "!bg-blue-600 !text-white !rounded-r-lg",
                 range_middle: "!bg-blue-100 dark:!bg-blue-900/30 !text-blue-800 dark:!text-blue-300",
-                outside: "text-slate-300 dark:text-slate-600",
+                outside: "text-foreground-muted/40",
               }}
               components={{
                 Chevron: ({ orientation }) =>

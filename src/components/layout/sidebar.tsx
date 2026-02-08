@@ -171,7 +171,7 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
           {user && (
             <div className="flex items-center gap-3">
               {/* Avatar with brand gradient */}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-base font-bold text-white shadow-[0_2px_12px_rgba(99,102,241,0.35)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-base font-bold text-white shadow-[0_2px_12px_rgba(37,99,235,0.3)]">
                 {user.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
@@ -184,8 +184,8 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
               </div>
               <div>
                 <p className="font-semibold tracking-tight text-foreground">{user.name}</p>
-                <div className="flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
-                  <Star className="h-3.5 w-3.5 text-amber-400" weight="fill" />
+                <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
+                  <Star className="h-3.5 w-3.5 text-blue-500" weight="fill" />
                   <span className="font-medium tabular-nums">{user.pointsBalance} bodů</span>
                 </div>
               </div>

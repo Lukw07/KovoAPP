@@ -79,7 +79,7 @@ export default async function RequestsPage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg font-bold text-foreground">
               Ke schválení
             </h2>
             {pendingRequests.length > 0 && (
@@ -95,28 +95,28 @@ export default async function RequestsPage() {
       {/* ── Separator between sections ───────────────────────────────── */}
       {isManagement && (
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-          <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">
             Moje žádosti
           </span>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          <div className="h-px flex-1 bg-border" />
         </div>
       )}
 
       {/* ── Header ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl font-bold text-foreground">
             Moje žádosti
           </h1>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-xs text-foreground-muted">
             Celkem {total}{" "}
             {total === 1 ? "žádost" : total < 5 ? "žádosti" : "žádostí"}
           </p>
         </div>
         <Link
           href="/requests/new"
-          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 active:scale-[0.97] transition-transform"
+          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 active:scale-[0.97] transition-transform hover:bg-blue-700"
         >
           + Nová žádost
         </Link>
@@ -124,12 +124,12 @@ export default async function RequestsPage() {
 
       {/* List */}
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-16 text-center">
-          <CalendarDays className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center">
+          <CalendarDays className="mb-3 h-12 w-12 text-foreground-muted" />
+          <p className="text-sm font-medium text-foreground-secondary">
             Zatím nemáte žádné žádosti
           </p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+          <p className="mt-1 text-xs text-foreground-muted">
             Klikněte na &quot;+ Nová žádost&quot; pro vytvoření
           </p>
         </div>
@@ -142,21 +142,21 @@ export default async function RequestsPage() {
             return (
               <li
                 key={req.id}
-                className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm"
+                className="rounded-2xl border border-border bg-card p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    <p className="text-sm font-semibold text-foreground">
                       {TYPE_LABELS[req.type] ?? req.type}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-0.5 text-xs text-foreground-secondary">
                       {format(new Date(req.startDate), "d. MMM yyyy", {
                         locale: cs,
                       })}
                       {new Date(req.startDate).getTime() !==
                         new Date(req.endDate).getTime() &&
                         ` — ${format(new Date(req.endDate), "d. MMM yyyy", { locale: cs })}`}
-                      <span className="ml-1.5 text-slate-400">
+                      <span className="ml-1.5 text-foreground-muted">
                         ({req.totalDays}{" "}
                         {req.totalDays === 1
                           ? "den"
@@ -166,17 +166,17 @@ export default async function RequestsPage() {
                       </span>
                     </p>
                     {req.reason && (
-                      <p className="mt-1.5 text-xs text-slate-400 line-clamp-2">
+                      <p className="mt-1.5 text-xs text-foreground-muted line-clamp-2">
                         {req.reason}
                       </p>
                     )}
                     {req.note && (
-                      <p className="mt-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/50 px-2.5 py-1.5 text-xs text-slate-500 dark:text-slate-400 italic">
+                      <p className="mt-1.5 rounded-lg bg-background-secondary px-2.5 py-1.5 text-xs text-foreground-secondary italic">
                         📝 {req.note}
                       </p>
                     )}
                     {req.approver && (
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-foreground-muted">
                         Schválil/a: {req.approver.name}
                       </p>
                     )}

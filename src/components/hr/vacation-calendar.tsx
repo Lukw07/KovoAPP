@@ -106,9 +106,8 @@ export default function VacationCalendar({
   }, [vacations]);
 
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-4", className)}>
+    <div className={cn("rounded-2xl border border-border bg-card p-3 sm:p-4 overflow-hidden", className)}>
       <DayPicker
-        mode="multiple"
         locale={cs}
         month={month}
         onMonthChange={setMonth}
@@ -122,17 +121,19 @@ export default function VacationCalendar({
         }}
         classNames={{
           root: "w-full",
-          month_caption: "text-base font-semibold text-foreground capitalize",
+          months: "w-full",
+          month: "w-full",
+          month_caption: "text-sm sm:text-base font-semibold text-foreground capitalize",
           nav: "flex gap-1",
           button_previous:
             "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
           button_next:
             "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
-          weekdays: "text-xs font-medium text-foreground-muted uppercase",
-          day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground",
-          today: "!bg-slate-900 dark:!bg-slate-100 !text-white dark:!text-slate-900 !rounded-lg !font-bold",
+          weekdays: "text-[10px] sm:text-xs font-medium text-foreground-muted uppercase",
+          day: "h-8 w-8 sm:h-9 sm:w-9 text-xs sm:text-sm rounded-lg transition-colors text-foreground",
+          today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
           selected: "!bg-blue-600 !text-white",
-          outside: "text-slate-300 dark:text-slate-600",
+          outside: "text-foreground-muted/40",
         }}
         components={{
           Chevron: ({ orientation }) =>
@@ -143,6 +144,7 @@ export default function VacationCalendar({
             ),
         }}
         disabled={false}
+        hideNavigation={false}
       />
 
       {/* Legend */}

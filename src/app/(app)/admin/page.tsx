@@ -59,10 +59,10 @@ export default async function AdminPage() {
           )}
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl font-bold text-foreground">
             {isManagerOnly ? "Správa" : "Admin panel"}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-foreground-secondary">
             {isManagerOnly
               ? "Schvalování, tvorba obsahu a přehledy"
               : "Správa systému KOVO Apka"}

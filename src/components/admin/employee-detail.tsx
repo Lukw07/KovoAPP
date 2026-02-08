@@ -68,7 +68,7 @@ export function EmployeeDetail({ employee }: EmployeeDetailProps) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-violet-600 text-lg font-bold text-white overflow-hidden">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white overflow-hidden">
             {employee.avatarUrl ? (
               <img
                 src={employee.avatarUrl}

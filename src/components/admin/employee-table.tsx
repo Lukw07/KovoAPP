@@ -230,7 +230,7 @@ function EmployeeCard({ employee: e }: { employee: EmployeeListItem }) {
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white overflow-hidden">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white overflow-hidden">
           {e.avatarUrl ? (
             <img
               src={e.avatarUrl}
@@ -314,7 +314,7 @@ function EmployeeRow({ employee: e }: { employee: EmployeeListItem }) {
           href={`/admin/employees/${e.id}`}
           className="flex items-center gap-3"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white overflow-hidden">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white overflow-hidden">
             {e.avatarUrl ? (
               <img
                 src={e.avatarUrl}

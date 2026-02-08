@@ -32,6 +32,8 @@ import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { SearchModal } from "@/components/ui/search-modal";
 import { PwaInstallPrompt } from "@/components/notifications/pwa-install-prompt";
 
+import { NotificationBell } from "@/components/notifications/notification-bell";
+
 // ============================================================================
 // Desktop-first layout — persistent sidebar, no bottom nav
 // ============================================================================
@@ -73,16 +75,16 @@ const NAV_SECTIONS = [
 const MANAGER_NAV = {
   title: "Správa",
   items: [
-    { label: "Admin panel", href: "/admin", icon: ShieldCheck },
+    { label: "Přehled správy", href: "/admin", icon: ShieldCheck },
     { label: "Zaměstnanci", href: "/admin/employees", icon: Users },
   ],
 };
 
 const ADMIN_NAV = {
-  title: "Správa",
+  title: "Administrace",
   items: [
     { label: "Admin panel", href: "/admin", icon: ShieldCheck },
-    { label: "Zaměstnanci", href: "/admin/employees", icon: Users },
+    { label: "Správa uživatelů", href: "/admin/employees", icon: Users },
   ],
 };
 
@@ -117,7 +119,7 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-accent text-white text-sm font-bold">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-bold">
                 K
               </div>
               <span className="text-base font-bold tracking-tight text-foreground">
@@ -126,7 +128,7 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
             </div>
           )}
           {collapsed && (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-accent text-white text-sm font-bold">
+            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-bold">
               K
             </div>
           )}
@@ -202,7 +204,7 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border p-3">
           {user && !collapsed && (
             <div className="mb-2 flex items-center gap-2.5 rounded-lg bg-background-secondary px-3 py-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shrink-0">
                 {user.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
@@ -221,7 +223,7 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
                 <p className="text-[13px] font-semibold text-foreground truncate">
                   {user.name}
                 </p>
-                <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
                   <Star className="h-3 w-3" weight="fill" />
                   <span className="font-medium tabular-nums">
                     {user.pointsBalance}
@@ -264,10 +266,11 @@ export function DesktopLayout({ children }: { children: React.ReactNode }) {
       {/* ── Main content area ────────────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         {/* Thin top bar — breadcrumb / page context */}
-        <header className="flex h-14 items-center border-b border-border bg-card px-6">
+        <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6">
           <h1 className="text-sm font-semibold text-foreground tracking-tight">
             {getPageTitle(pathname)}
           </h1>
+          <NotificationBell />
         </header>
 
         {/* Scrollable content */}

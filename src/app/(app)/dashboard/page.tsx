@@ -31,16 +31,13 @@ export default async function DashboardPage() {
 
   return (
     <DashboardAnimations>
-      {/* ── Welcome hero — premium gradient with layered glow ──── */}
-      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 text-white shadow-[0_4px_24px_rgba(99,102,241,0.35)]" data-hero>
-        {/* Subtle noise texture overlay */}
-        <div className="noise absolute inset-0 rounded-2xl" />
-
-        <p className="relative text-sm font-medium text-indigo-200">Vítejte zpět,</p>
+      {/* ── Welcome hero — solid blue brand card ────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 text-white shadow-[0_4px_24px_rgba(37,99,235,0.3)]" data-hero>
+        <p className="relative text-sm font-medium text-blue-200">Vítejte zpět,</p>
         <h1 className="relative mt-1 text-2xl font-bold tracking-tight">{user?.name}</h1>
         <div className="relative mt-4 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 rounded-xl bg-white/12 px-3 py-2 backdrop-blur-sm border border-white/10">
-            <Star className="h-4 w-4 text-amber-300" weight="fill" />
+          <div className="flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 border border-white/15">
+            <Star className="h-4 w-4 text-yellow-300" weight="fill" />
             <span className="text-sm font-semibold tabular-nums" data-points>
               {user?.pointsBalance} bodů
             </span>
@@ -48,7 +45,7 @@ export default async function DashboardPage() {
           {isManagement && (
             <Link
               href="/admin"
-              className="flex items-center gap-2 rounded-xl bg-white/12 px-3 py-2 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all duration-150 btn-press active:scale-[0.97]"
+              className="flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 border border-white/15 hover:bg-white/25 transition-all duration-150 btn-press active:scale-[0.97]"
             >
               <ShieldCheck className="h-4 w-4" weight="bold" />
               <span className="text-sm font-semibold">Správa</span>
@@ -88,10 +85,10 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3" data-bento>
         <QuickAction
           href="/requests"
-          icon={<CalendarDots className="h-6 w-6 text-indigo-600 dark:text-indigo-400" weight="duotone" />}
+          icon={<CalendarDots className="h-6 w-6 text-blue-600 dark:text-blue-400" weight="duotone" />}
           label="Nová žádost"
           sublabel="Dovolená / Sick day"
-          accentColor="indigo"
+          accentColor="blue"
         />
         <QuickAction
           href="/reservations"
@@ -102,10 +99,10 @@ export default async function DashboardPage() {
         />
         <QuickAction
           href="/news"
-          icon={<Newspaper className="h-6 w-6 text-violet-600 dark:text-violet-400" weight="duotone" />}
+          icon={<Newspaper className="h-6 w-6 text-blue-600 dark:text-blue-400" weight="duotone" />}
           label="Novinky"
           sublabel="Firemní zprávy"
-          accentColor="violet"
+          accentColor="blue"
         />
         <QuickAction
           href="/rewards"
@@ -132,9 +129,8 @@ export default async function DashboardPage() {
 
 /* Bento-style quick action tile */
 const ACCENT_BG: Record<string, string> = {
-  indigo: "bg-indigo-50 dark:bg-indigo-950/30",
+  blue: "bg-blue-50 dark:bg-blue-950/30",
   emerald: "bg-emerald-50 dark:bg-emerald-950/30",
-  violet: "bg-violet-50 dark:bg-violet-950/30",
   amber: "bg-amber-50 dark:bg-amber-950/30",
 };
 

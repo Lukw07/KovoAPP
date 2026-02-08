@@ -82,16 +82,16 @@ const ITEMS = [
     href: "/profile",
     icon: User,
     description: "Vaše údaje a nastavení",
-    color: "text-slate-600 dark:text-slate-400",
-    bg: "bg-slate-100 dark:bg-slate-700",
+    color: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-900/30",
   },
   {
     label: "Nastavení",
     href: "/settings",
     icon: Settings,
     description: "Notifikace, jazyk, vzhled",
-    color: "text-slate-600 dark:text-slate-400",
-    bg: "bg-slate-100 dark:bg-slate-700",
+    color: "text-foreground-secondary",
+    bg: "bg-background-secondary",
   },
 ] as const;
 
@@ -105,13 +105,13 @@ export default async function MorePage() {
 
   return (
     <MorePageAnimations>
-      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Více</h1>
+      <h1 className="text-xl font-bold text-foreground">Více</h1>
 
       {/* Management link for Admin/Manager */}
       {isManagement && (
         <Link
           href="/admin"
-          className="flex items-center gap-4 rounded-2xl p-4 shadow-sm border transition-transform active:scale-[0.98] bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800"
+          className="flex items-center gap-4 rounded-2xl p-4 shadow-sm border transition-transform active:scale-[0.98] bg-blue-50 dark:bg-blue-900/15 border-blue-200 dark:border-blue-800"
         >
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-800">
             {role === "ADMIN" ? (
@@ -121,10 +121,10 @@ export default async function MorePage() {
             )}
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-semibold text-foreground">
               {role === "ADMIN" ? "Admin panel" : "Správa systému"}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-foreground-secondary">
               {role === "ADMIN"
                 ? "Uživatelé, statistiky, export"
                 : "Schvalování, ankety, inzeráty, odměny"}
@@ -142,7 +142,7 @@ export default async function MorePage() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-4 rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm border border-slate-100 dark:border-slate-700 transition-transform active:scale-[0.98]"
+              className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-sm border border-border transition-transform active:scale-[0.98]"
             >
               <div
                 className={`${item.bg} relative flex h-11 w-11 items-center justify-center rounded-xl`}
@@ -155,12 +155,12 @@ export default async function MorePage() {
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <p className="text-sm font-semibold text-foreground">
                   {item.label}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{item.description}</p>
+                <p className="text-xs text-foreground-secondary">{item.description}</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600" />
+              <ChevronRight className="h-4 w-4 text-foreground-muted" />
             </Link>
           );
         })}

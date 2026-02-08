@@ -1,37 +1,32 @@
 "use client";
 
-import { List, Star, MagnifyingGlass } from "@phosphor-icons/react";
+import { Star, MagnifyingGlass } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { Session } from "next-auth";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface TopBarProps {
   user: Session["user"] | null;
-  onMenuClick: () => void;
   onSearchClick?: () => void;
 }
 
-export function TopBar({ user, onMenuClick, onSearchClick }: TopBarProps) {
+export function TopBar({ user, onSearchClick }: TopBarProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b glass-nav">
       <div className="flex h-16 items-center justify-between px-4">
-        {/* Left: Menu + Avatar + Name */}
+        {/* Left: Logo + User Name */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={onMenuClick}
-            aria-label="Otevřít menu"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-background-secondary hover:bg-background-tertiary active:scale-[0.97] btn-press focus-ring"
-          >
-            <List className="h-5 w-5 text-foreground-secondary" weight="bold" />
-          </button>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-bold">
+            K
+          </div>
 
           {user && (
             <div className="flex items-center gap-2.5">
-              {/* Avatar with brand gradient */}
+              {/* Avatar */}
               <div
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white",
-                  "bg-linear-to-br from-indigo-500 to-violet-600",
-                  "shadow-[0_2px_8px_rgba(99,102,241,0.3)]",
+                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white",
+                  "bg-blue-600",
                 )}
               >
                 {user.avatarUrl ? (
@@ -45,7 +40,7 @@ export function TopBar({ user, onMenuClick, onSearchClick }: TopBarProps) {
                 )}
               </div>
 
-              {/* Name + Role — tight heading typography */}
+              {/* Name + Role */}
               <div className="hidden min-[380px]:block">
                 <p className="text-sm font-semibold tracking-tight text-foreground leading-tight">
                   {user.name}
@@ -73,10 +68,12 @@ export function TopBar({ user, onMenuClick, onSearchClick }: TopBarProps) {
             </button>
           )}
 
+          <NotificationBell />
+
           {user && (
-            <div className="flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 border border-amber-200/60 dark:border-amber-700/40 inner-glow">
-              <Star className="h-4 w-4 text-amber-400" weight="fill" />
-              <span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 border border-blue-200/60 dark:border-blue-700/40">
+              <Star className="h-4 w-4 text-blue-500 dark:text-blue-400" weight="fill" />
+              <span className="text-sm font-bold tabular-nums text-blue-700 dark:text-blue-300">
                 {user.pointsBalance}
               </span>
             </div>

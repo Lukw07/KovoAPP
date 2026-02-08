@@ -130,7 +130,7 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
         <div className="flex items-center gap-4">
           {/* Avatar with upload overlay */}
           <div className="relative group">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-700 text-2xl font-bold text-white overflow-hidden ring-4 ring-white dark:ring-slate-800">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-2xl font-bold text-white overflow-hidden ring-4 ring-white dark:ring-slate-800">
               {user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

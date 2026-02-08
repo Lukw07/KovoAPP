@@ -61,7 +61,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
       className={cn(
         "rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md card-hover",
         post.isPinned
-          ? "border-amber-200 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-900/10"
+          ? "border-blue-200 dark:border-blue-700/40 bg-blue-50/30 dark:bg-blue-900/10"
           : "border-border"
       )}
     >
@@ -81,7 +81,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         {/* Header row: pinned badge + tags */}
         <div className="flex flex-wrap items-center gap-2">
           {post.isPinned && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400">
               <Pin className="h-3 w-3" />
               Připnuto
             </span>
