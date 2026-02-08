@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -75,6 +76,14 @@ export async function givePoints(formData: FormData) {
       }),
     ]);
 
+    await logAudit({
+      action: "POINTS_AWARDED",
+      entityType: "PointTransaction",
+      entityId: userId,
+      performedBy: session.user.id,
+      details: { amount, reason, category },
+    });
+
     // Send push notification to the recipient
     await sendNotification({
       userId,
@@ -134,6 +143,14 @@ export async function deductPoints(formData: FormData) {
         data: { pointsBalance: { decrement: amount } },
       }),
     ]);
+
+    await logAudit({
+      action: "POINTS_DEDUCTED",
+      entityType: "PointTransaction",
+      entityId: userId,
+      performedBy: session.user.id,
+      details: { amount, reason, category },
+    });
 
     await sendNotification({
       userId,

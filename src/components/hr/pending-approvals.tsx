@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { approveRequest, rejectRequest } from "@/actions/hr";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 
@@ -82,15 +83,33 @@ function ApprovalCard({
 
   const handleApprove = () => {
     startTransition(async () => {
-      const result = await approveRequest(request.id, note || undefined);
-      if (result.success) setStatus("approved");
+      try {
+        const result = await approveRequest(request.id, note || undefined);
+        if (result.success) {
+          setStatus("approved");
+          toast.success(`Žádost ${request.user.name} schválena`);
+        } else {
+          toast.error("Nepodařilo se schválit žádost");
+        }
+      } catch {
+        toast.error("Chyba při schvalování žádosti");
+      }
     });
   };
 
   const handleReject = () => {
     startTransition(async () => {
-      const result = await rejectRequest(request.id, note || undefined);
-      if (result.success) setStatus("rejected");
+      try {
+        const result = await rejectRequest(request.id, note || undefined);
+        if (result.success) {
+          setStatus("rejected");
+          toast.success(`Žádost ${request.user.name} zamítnuta`);
+        } else {
+          toast.error("Nepodařilo se zamítnout žádost");
+        }
+      } catch {
+        toast.error("Chyba při zamítání žádosti");
+      }
     });
   };
 

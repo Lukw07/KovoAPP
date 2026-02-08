@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { logAudit } from "@/lib/audit";
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ export async function createUser(formData: FormData) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
+  const newUser = await prisma.user.create({
     data: {
       email,
       name,
@@ -78,6 +79,15 @@ export async function createUser(formData: FormData) {
       position,
       departmentId: departmentId || null,
     },
+  });
+
+  const session = await auth();
+  await logAudit({
+    action: "USER_CREATED",
+    entityType: "User",
+    entityId: newUser.id,
+    performedBy: session!.user!.id!,
+    details: { email, name, role },
   });
 
   return { success: true };
@@ -134,6 +144,15 @@ export async function updateUser(formData: FormData) {
     data: updateData,
   });
 
+  const session = await auth();
+  await logAudit({
+    action: "USER_UPDATED",
+    entityType: "User",
+    entityId: userId,
+    performedBy: session!.user!.id!,
+    details: updateData,
+  });
+
   return { success: true };
 }
 
@@ -157,6 +176,14 @@ export async function resetPassword(formData: FormData) {
   await prisma.user.update({
     where: { id: userId },
     data: { password: hashedPassword },
+  });
+
+  const session = await auth();
+  await logAudit({
+    action: "PASSWORD_RESET",
+    entityType: "User",
+    entityId: userId,
+    performedBy: session!.user!.id!,
   });
 
   return { success: true };

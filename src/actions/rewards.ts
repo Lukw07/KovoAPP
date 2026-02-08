@@ -4,9 +4,19 @@
 // Rewards — Server Actions (claim a reward, deduct points)
 // ============================================================================
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/audit";
+
+// ---------------------------------------------------------------------------
+// Zod Schema
+// ---------------------------------------------------------------------------
+
+const claimRewardSchema = z.object({
+  rewardId: z.string().cuid("Neplatné ID odměny"),
+});
 
 // ---------------------------------------------------------------------------
 // claimReward — User spends points to claim a reward
@@ -15,6 +25,9 @@ import { prisma } from "@/lib/prisma";
 export async function claimReward(rewardId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nepřihlášen" };
+
+  const parsed = claimRewardSchema.safeParse({ rewardId });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const userId = session.user.id;
 
@@ -83,6 +96,15 @@ export async function claimReward(rewardId: string) {
 
     revalidatePath("/rewards");
     revalidatePath("/dashboard");
+
+    await logAudit({
+      action: "REWARD_CLAIMED",
+      entityType: "Reward",
+      entityId: reward.id,
+      performedBy: userId,
+      details: { rewardName: reward.name, pointsCost: reward.pointsCost },
+    });
+
     return { success: true };
   } catch (err) {
     console.error("claimReward error:", err);

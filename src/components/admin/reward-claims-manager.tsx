@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { fulfillRewardClaim, cancelRewardClaim } from "@/actions/admin-rewards";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ClaimRow {
   id: string;
@@ -50,10 +51,16 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
   const handleAction = (claimId: string, action: "fulfill" | "cancel") => {
     setActioningId(claimId);
     startTransition(async () => {
-      if (action === "fulfill") {
-        await fulfillRewardClaim(claimId);
-      } else {
-        await cancelRewardClaim(claimId);
+      try {
+        if (action === "fulfill") {
+          await fulfillRewardClaim(claimId);
+          toast.success("Odměna schválena");
+        } else {
+          await cancelRewardClaim(claimId);
+          toast.success("Žádost zamítnuta, body vráceny");
+        }
+      } catch {
+        toast.error("Nepodařilo se zpracovat žádost");
       }
       setActioningId(null);
     });

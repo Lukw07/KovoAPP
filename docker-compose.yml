@@ -45,6 +45,7 @@ services:
       NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID:-}
       NEXT_PUBLIC_FIREBASE_VAPID_KEY: ${NEXT_PUBLIC_FIREBASE_VAPID_KEY:-}
       FIREBASE_ADMIN_SDK_KEY: ${FIREBASE_ADMIN_SDK_KEY:-}
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET in .env}
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads_data:/app/uploads

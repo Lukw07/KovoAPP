@@ -1,15 +1,16 @@
 "use client";
 
-import { List, Star } from "@phosphor-icons/react";
+import { List, Star, MagnifyingGlass } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { Session } from "next-auth";
 
 interface TopBarProps {
   user: Session["user"] | null;
   onMenuClick: () => void;
+  onSearchClick?: () => void;
 }
 
-export function TopBar({ user, onMenuClick }: TopBarProps) {
+export function TopBar({ user, onMenuClick, onSearchClick }: TopBarProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b glass-nav">
       <div className="flex h-16 items-center justify-between px-4">
@@ -57,15 +58,30 @@ export function TopBar({ user, onMenuClick }: TopBarProps) {
           )}
         </div>
 
-        {/* Right: Points Balance — monospace for numbers */}
-        {user && (
-          <div className="flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 border border-amber-200/60 dark:border-amber-700/40 inner-glow">
-            <Star className="h-4 w-4 text-amber-400" weight="fill" />
-            <span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
-              {user.pointsBalance}
-            </span>
-          </div>
-        )}
+        {/* Right: Search + Points Balance */}
+        <div className="flex items-center gap-2">
+          {onSearchClick && (
+            <button
+              onClick={onSearchClick}
+              aria-label="Vyhledávání"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-background-secondary hover:bg-background-tertiary active:scale-[0.97] btn-press focus-ring"
+            >
+              <MagnifyingGlass
+                className="h-4.5 w-4.5 text-foreground-secondary"
+                weight="bold"
+              />
+            </button>
+          )}
+
+          {user && (
+            <div className="flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 border border-amber-200/60 dark:border-amber-700/40 inner-glow">
+              <Star className="h-4 w-4 text-amber-400" weight="fill" />
+              <span className="text-sm font-bold tabular-nums text-amber-700 dark:text-amber-400">
+                {user.pointsBalance}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

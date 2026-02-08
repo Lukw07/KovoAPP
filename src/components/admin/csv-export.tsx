@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Download, Calendar } from "lucide-react";
 import { getVacationExportData } from "@/actions/admin-queries";
+import { toast } from "sonner";
 
 const MONTH_NAMES = [
   "Leden",
@@ -30,7 +31,7 @@ export function CsvExport() {
       const data = await getVacationExportData(year, month);
 
       if (data.length === 0) {
-        alert("Žádná schválená dovolená pro vybraný měsíc.");
+        toast.info("Žádná schválená dovolená pro vybraný měsíc.");
         return;
       }
 

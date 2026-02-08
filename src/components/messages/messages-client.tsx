@@ -15,6 +15,7 @@ import {
   getConversationMessages,
 } from "@/actions/messages";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
 
@@ -221,6 +222,7 @@ function ChatView({
       if (result.error) {
         // Remove optimistic message on error
         setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+        toast.error("Zprávu se nepodařilo odeslat");
       }
     });
   };

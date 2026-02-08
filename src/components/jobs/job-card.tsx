@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { submitReferral } from "@/actions/jobs";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export interface JobData {
   id: string;
@@ -65,7 +66,7 @@ export function JobCard({ job }: JobCardProps) {
       await navigator.clipboard.writeText(
         `${shareData.text}\n${shareData.url}`
       );
-      alert("Odkaz zkopírován do schránky!");
+      toast.success("Odkaz zkopírován do schránky!");
     }
   };
 

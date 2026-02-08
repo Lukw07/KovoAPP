@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { deactivateListing } from "@/actions/marketplace";
 import { cn } from "@/lib/utils";
+import { useConfirmDialog } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const CATEGORY_META: Record<
   string,
@@ -150,13 +152,25 @@ interface ListingCardProps {
 
 export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingCardProps) {
   const [isPending, startTransition] = useTransition();
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const meta = CATEGORY_META[listing.category] || CATEGORY_META.SELLING;
 
-  const handleDeactivate = () => {
-    if (!confirm("Opravdu chcete stáhnout tento inzerát?")) return;
+  const handleDeactivate = async () => {
+    const ok = await confirm({
+      title: "Stáhnout inzerát",
+      description: "Opravdu chcete stáhnout tento inzerát?",
+      confirmLabel: "Stáhnout",
+      confirmVariant: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
-      await deactivateListing(listing.id);
-      onRemoved?.();
+      try {
+        await deactivateListing(listing.id);
+        toast.success("Inzerát stažen");
+        onRemoved?.();
+      } catch {
+        toast.error("Nepodařilo se stáhnout inzerát");
+      }
     });
   };
 
@@ -182,6 +196,7 @@ export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingC
           : "border-border",
       )}
     >
+      <ConfirmDialog />
       {/* Image carousel */}
       {allImages.length > 0 && (
         <ImageCarousel images={allImages} title={listing.title} />

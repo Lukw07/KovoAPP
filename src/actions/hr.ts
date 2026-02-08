@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications";
+import { logAudit } from "@/lib/audit";
 import {
   differenceInBusinessDays,
   eachDayOfInterval,
@@ -189,6 +190,14 @@ export async function approveRequest(
     },
   });
 
+  await logAudit({
+    action: "HR_REQUEST_APPROVED",
+    entityType: "HrRequest",
+    entityId: requestId,
+    performedBy: session.user.id,
+    details: { userId: request.userId, type: request.type, note },
+  });
+
   // Notify the requester
   await sendNotification({
     userId: request.userId,
@@ -234,6 +243,14 @@ export async function rejectRequest(
       approverId: session.user.id,
       note: note ?? null,
     },
+  });
+
+  await logAudit({
+    action: "HR_REQUEST_REJECTED",
+    entityType: "HrRequest",
+    entityId: requestId,
+    performedBy: session.user.id,
+    details: { userId: request.userId, type: request.type, note },
   });
 
   // Notify the requester

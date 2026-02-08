@@ -2,6 +2,7 @@
 
 import { signIn, signOut } from "@/lib/auth";
 import { z } from "zod";
+import { checkRateLimit, LOGIN_LIMITER } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
   email: z.string().email("Neplatný email"),
@@ -20,6 +21,15 @@ export async function loginAction(
 
     if (!parsed.success) {
       return { error: "Neplatné přihlašovací údaje" };
+    }
+
+    // Rate limit by email to prevent brute-force
+    const rateCheck = checkRateLimit(LOGIN_LIMITER, parsed.data.email.toLowerCase());
+    if (!rateCheck.allowed) {
+      const minutes = Math.ceil(rateCheck.resetInMs / 60_000);
+      return {
+        error: `Příliš mnoho pokusů o přihlášení. Zkuste to znovu za ${minutes} min.`,
+      };
     }
 
     await signIn("credentials", {

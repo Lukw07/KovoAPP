@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Gift, Star, Loader2, Check, ShoppingCart, Sparkles } from "lucide-react";
 import { claimReward } from "@/actions/rewards";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface RewardData {
   id: string;
@@ -37,8 +38,10 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
       const result = await claimReward(reward.id);
       if (result.error) {
         setError(result.error);
+        toast.error(result.error);
       } else {
         setClaimed(true);
+        toast.success(`Odměna "${reward.name}" uplatněna!`);
         setTimeout(() => setClaimed(false), 3000);
       }
     });

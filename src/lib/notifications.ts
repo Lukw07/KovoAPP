@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 /**
  * Push notifications module — persists in DB + dispatches via Firebase Cloud

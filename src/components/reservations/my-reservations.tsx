@@ -6,6 +6,7 @@
 
 import { useState, useTransition } from "react";
 import { cancelReservation } from "@/actions/reservations";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,12 @@ export default function MyReservations({
   const handleCancel = (id: string) => {
     setCancellingId(id);
     startTransition(async () => {
-      await cancelReservation(id);
+      try {
+        await cancelReservation(id);
+        toast.success("Rezervace zrušena");
+      } catch {
+        toast.error("Nepodařilo se zrušit rezervaci");
+      }
       setCancellingId(null);
     });
   };

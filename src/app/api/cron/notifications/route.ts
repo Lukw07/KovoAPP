@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendNotification, sendPushToAll } from "@/lib/notifications";
+import { sendPushToAll, sendPushToUser } from "@/lib/notifications";
 
 /**
  * Scheduled notifications cron endpoint.
@@ -15,10 +15,10 @@ import { sendNotification, sendPushToAll } from "@/lib/notifications";
  *   3. Auto-close expired polls + notify all
  */
 export async function GET(request: NextRequest) {
-  // Simple API key guard — prevents public abuse
-  const key = request.nextUrl.searchParams.get("key");
+  // API key guard — fail-closed (rejects if CRON_SECRET is not set)
+  const key = request.nextUrl.searchParams.get("key") ?? request.headers.get("authorization")?.replace("Bearer ", "");
   const expectedKey = process.env.CRON_SECRET;
-  if (expectedKey && key !== expectedKey) {
+  if (!expectedKey || key !== expectedKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -40,21 +40,34 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    for (const res of expiredReservations) {
-      await prisma.reservation.update({
-        where: { id: res.id },
+    if (expiredReservations.length > 0) {
+      // Batch update all expired reservations at once
+      await prisma.reservation.updateMany({
+        where: {
+          id: { in: expiredReservations.map((r) => r.id) },
+        },
         data: { status: "COMPLETED" },
       });
 
-      await sendNotification({
-        userId: res.userId,
-        type: "RESERVATION_EXPIRED",
-        title: "Rezervace dokončena",
-        body: `Vaše rezervace ${res.resource.name} skončila.`,
-        link: "/reservations",
+      // Batch create all notifications
+      await prisma.notification.createMany({
+        data: expiredReservations.map((res) => ({
+          userId: res.userId,
+          type: "RESERVATION_EXPIRED" as const,
+          title: "Rezervace dokončena",
+          body: `Vaše rezervace ${res.resource.name} skončila.`,
+          link: "/reservations",
+        })),
       });
 
-      results.expiredReservations++;
+      // Send push notifications (non-blocking, individual per user)
+      await Promise.allSettled(
+        expiredReservations.map((res) =>
+          sendPushToUser(res.userId, "Rezervace dokončena", `Vaše rezervace ${res.resource.name} skončila.`, "/reservations"),
+        ),
+      );
+
+      results.expiredReservations = expiredReservations.length;
     }
   } catch (err) {
     console.error("[CRON] Expired reservations error:", err);
@@ -86,29 +99,51 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Avoid sending duplicate reminders — check if already notified today
+    // Avoid sending duplicate reminders — batch check instead of per-user
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    for (const vac of vacationsEndingTomorrow) {
-      const alreadySent = await prisma.notification.findFirst({
-        where: {
-          userId: vac.userId,
-          type: "VACATION_REMINDER",
-          createdAt: { gte: today },
-        },
-      });
+    // Get users already notified today
+    const alreadyNotified = await prisma.notification.findMany({
+      where: {
+        type: "VACATION_REMINDER",
+        createdAt: { gte: today },
+        userId: { in: vacationsEndingTomorrow.map((v) => v.userId) },
+      },
+      select: { userId: true },
+    });
+    const notifiedSet = new Set(alreadyNotified.map((n) => n.userId));
 
-      if (!alreadySent) {
-        await sendNotification({
+    // Filter to only unnotified users
+    const toNotify = vacationsEndingTomorrow.filter(
+      (vac) => !notifiedSet.has(vac.userId),
+    );
+
+    if (toNotify.length > 0) {
+      // Batch create notifications
+      await prisma.notification.createMany({
+        data: toNotify.map((vac) => ({
           userId: vac.userId,
-          type: "VACATION_REMINDER",
+          type: "VACATION_REMINDER" as const,
           title: "Konec dovolené zítra 🏖️",
           body: "Vaše dovolená končí zítra. Nezapomeňte se připravit na návrat!",
           link: "/requests",
-        });
-        results.vacationReminders++;
-      }
+        })),
+      });
+
+      // Send push (non-blocking)
+      await Promise.allSettled(
+        toNotify.map((vac) =>
+          sendPushToUser(
+            vac.userId,
+            "Konec dovolené zítra 🏖️",
+            "Vaše dovolená končí zítra. Nezapomeňte se připravit na návrat!",
+            "/requests",
+          ),
+        ),
+      );
+
+      results.vacationReminders = toNotify.length;
     }
   } catch (err) {
     console.error("[CRON] Vacation reminders error:", err);
@@ -127,19 +162,24 @@ export async function GET(request: NextRequest) {
       select: { id: true, question: true },
     });
 
-    for (const poll of expiredPolls) {
-      await prisma.poll.update({
-        where: { id: poll.id },
+    if (expiredPolls.length > 0) {
+      // Batch update all polls at once
+      await prisma.poll.updateMany({
+        where: {
+          id: { in: expiredPolls.map((p) => p.id) },
+        },
         data: { isActive: false },
       });
 
+      // Send a single broadcast for poll closures
+      const pollNames = expiredPolls.map((p) => `„${p.question}"`).join(", ");
       await sendPushToAll(
-        "📊 Anketa ukončena",
-        `Anketa „${poll.question}" skončila. Výsledky jsou k dispozici.`,
+        "📊 Ankety ukončeny",
+        `${expiredPolls.length === 1 ? "Anketa" : "Ankety"} ${pollNames} ${expiredPolls.length === 1 ? "skončila" : "skončily"}. Výsledky jsou k dispozici.`,
         "/polls",
       );
 
-      results.closedPolls++;
+      results.closedPolls = expiredPolls.length;
     }
   } catch (err) {
     console.error("[CRON] Expired polls error:", err);
