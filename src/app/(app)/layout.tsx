@@ -1,5 +1,5 @@
-import { MobileLayout } from "@/components/layout";
+import { ResponsiveLayout } from "@/components/layout/responsive-layout";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <MobileLayout>{children}</MobileLayout>;
+  return <ResponsiveLayout>{children}</ResponsiveLayout>;
 }

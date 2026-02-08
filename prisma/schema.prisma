@@ -149,6 +149,12 @@ model User {
   // Reward claims
   rewardClaims RewardClaim[]
 
+  // Employee management
+  contracts      EmployeeContract[]
+  medicalExams   MedicalExamination[]
+  documents      EmployeeDocument[]
+  vacationEntitlements VacationEntitlement[]
+
   // Sessions (for NextAuth)
   sessions Session[]
   accounts Account[]
@@ -685,4 +691,127 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// EMPLOYEE MANAGEMENT — Contracts, Medical Exams, Documents, Sick-day tracking
+// ============================================================================
+
+enum ContractType {
+  HPP // Hlavní pracovní poměr
+  DPP // Dohoda o provedení práce
+  DPC // Dohoda o pracovní činnosti
+}
+
+enum ContractStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+model EmployeeContract {
+  id           String         @id @default(cuid())
+  type         ContractType
+  status       ContractStatus @default(ACTIVE)
+  startDate    DateTime
+  endDate      DateTime?      // null = indefinite (na dobu neurčitou)
+  position     String         // Job title in contract
+  salary       Int?           // Gross monthly salary in CZK (optional, sensitive)
+  hoursPerWeek Float          @default(40)
+  note         String?        @db.Text
+  documentUrl  String?        // Link to uploaded PDF
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
+  @@map("employee_contracts")
+}
+
+enum MedicalExamType {
+  VSTUPNI       // Entry examination
+  PERIODICKY    // Periodic examination
+  MIMORADNA     // Extraordinary
+  VYSTUPNI      // Exit examination
+  NASLEDNA      // Follow-up
+}
+
+enum MedicalExamStatus {
+  SCHEDULED
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+model MedicalExamination {
+  id          String            @id @default(cuid())
+  type        MedicalExamType
+  status      MedicalExamStatus @default(SCHEDULED)
+  scheduledAt DateTime
+  completedAt DateTime?
+  nextDueAt   DateTime?         // When the next exam is due
+  result      String?           // "Způsobilý" / "Nezpůsobilý" / "Způsobilý s omezením"
+  doctorName  String?
+  note        String?           @db.Text
+  documentUrl String?           // Scanned result PDF
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([nextDueAt])
+  @@map("medical_examinations")
+}
+
+enum DocumentCategory {
+  CONTRACT
+  MEDICAL
+  TRAINING
+  CERTIFICATION
+  ID_CARD
+  OTHER
+}
+
+model EmployeeDocument {
+  id          String           @id @default(cuid())
+  title       String
+  category    DocumentCategory
+  description String?
+  fileUrl     String           // Path to uploaded file
+  expiresAt   DateTime?        // For certs / ID cards that expire
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([category])
+  @@index([expiresAt])
+  @@map("employee_documents")
+}
+
+// Vacation entitlement tracking (zákonný nárok na dovolenou)
+model VacationEntitlement {
+  id           String @id @default(cuid())
+  year         Int
+  totalDays    Float  @default(20) // Standard Czech = 20 working days (4 weeks)
+  usedDays     Float  @default(0)
+  carriedOver  Float  @default(0)  // From previous year
+  note         String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year])
+  @@index([userId])
+  @@index([year])
+  @@map("vacation_entitlements")
 }
