@@ -24,11 +24,11 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5",
+        "rounded-2xl border border-border bg-card p-5",
         className,
       )}
     >
-      <h2 className="mb-3 text-base font-semibold text-slate-900 dark:text-slate-100">
+      <h2 className="mb-3 text-base font-semibold text-foreground">
         Kdo dnes chybí
       </h2>
 
@@ -37,7 +37,7 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
           <div className="mb-2 rounded-full bg-emerald-50 dark:bg-emerald-900/30 p-3">
             <UserX className="h-6 w-6 text-emerald-400" />
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          <p className="text-sm font-medium text-foreground-secondary">
             Dnes jsou všichni přítomni 🎉
           </p>
         </div>
@@ -50,7 +50,7 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
             return (
               <li
                 key={entry.id}
-                className="flex items-center gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5"
+                className="flex items-center gap-3 rounded-xl bg-background-secondary px-3 py-2.5"
               >
                 {/* Avatar placeholder */}
                 {entry.user.avatarUrl ? (
@@ -60,7 +60,7 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
                     className="h-8 w-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-600 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-border text-xs font-bold text-foreground-secondary">
                     {entry.user.name
                       .split(" ")
                       .map((n) => n[0])
@@ -71,11 +71,11 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {entry.user.name}
                   </p>
                   {entry.user.position && (
-                    <p className="truncate text-xs text-slate-400">
+                    <p className="truncate text-xs text-foreground-muted">
                       {entry.user.position}
                     </p>
                   )}
@@ -86,7 +86,7 @@ export default async function TeamStatus({ className }: TeamStatusProps) {
                   className={cn(
                     "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium",
                     cfg.color,
-                    "bg-slate-100 dark:bg-slate-700",
+                    "bg-background-secondary",
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />

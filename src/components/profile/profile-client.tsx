@@ -121,16 +121,16 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
 
   return (
     <div className="space-y-4 animate-fadeInUp">
-      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+      <h1 className="text-xl font-bold text-foreground">
         Profil
       </h1>
 
       {/* Avatar + name card */}
-      <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6">
+      <div className="rounded-2xl bg-card border border-border p-6">
         <div className="flex items-center gap-4">
           {/* Avatar with upload overlay */}
           <div className="relative group">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-2xl font-bold text-white overflow-hidden ring-4 ring-white dark:ring-slate-800">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-700 text-2xl font-bold text-white overflow-hidden ring-4 ring-white dark:ring-slate-800">
               {user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -170,10 +170,10 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-bold text-slate-900 dark:text-slate-100 truncate">
+            <p className="text-lg font-bold text-foreground truncate">
               {user.name}
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+            <p className="text-sm text-foreground-secondary truncate">
               {user.email}
             </p>
             <span
@@ -201,7 +201,7 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
               "flex h-9 w-9 items-center justify-center rounded-xl transition-all",
               editing
                 ? "bg-red-50 dark:bg-red-900/30 text-red-600"
-                : "bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300",
+                : "bg-background-secondary text-foreground-secondary hover:text-foreground",
             )}
           >
             {editing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
@@ -225,13 +225,13 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
 
       {/* Edit form */}
       {editing && (
-        <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3 animate-fadeInUp">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        <div className="rounded-2xl bg-card border border-border p-4 space-y-3 animate-fadeInUp">
+          <h3 className="text-sm font-bold text-foreground">
             Upravit profil
           </h3>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <label className="text-xs font-medium text-foreground-secondary">
               Jméno
             </label>
             <input
@@ -239,14 +239,14 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={cn(
-                "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-                "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+                "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+                "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
               )}
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <label className="text-xs font-medium text-foreground-secondary">
               Telefon
             </label>
             <input
@@ -255,14 +255,14 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+420 ..."
               className={cn(
-                "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-                "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+                "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+                "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
               )}
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <label className="text-xs font-medium text-foreground-secondary">
               Pozice
             </label>
             <input
@@ -271,8 +271,8 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
               onChange={(e) => setPosition(e.target.value)}
               placeholder="Např. Programátor, Účetní..."
               className={cn(
-                "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-                "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+                "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+                "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
               )}
             />
           </div>
@@ -282,8 +282,8 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
             disabled={isPending}
             className={cn(
               "w-full flex items-center justify-center gap-2 rounded-xl py-2.5",
-              "bg-blue-600 text-white text-sm font-semibold",
-              "hover:bg-blue-700 active:scale-[0.99] transition-all",
+              "bg-accent shadow-accent glow-blue text-white text-sm font-semibold",
+              "hover:bg-accent-hover active:scale-[0.99] transition-all",
               "disabled:opacity-50 disabled:cursor-not-allowed",
             )}
           >
@@ -294,8 +294,8 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
       )}
 
       {/* Info card */}
-      <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+      <div className="rounded-2xl bg-card border border-border p-4 space-y-3">
+        <h3 className="text-sm font-bold text-foreground">
           Informace
         </h3>
 
@@ -350,15 +350,15 @@ function InfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3 last:border-0 last:pb-0">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex-shrink-0">
+    <div className="flex items-center gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-secondary text-foreground-secondary flex-shrink-0">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+        <p className="text-[11px] text-foreground-muted">
           {label}
         </p>
-        <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+        <p className="text-sm font-medium text-foreground truncate">
           {value}
         </p>
       </div>

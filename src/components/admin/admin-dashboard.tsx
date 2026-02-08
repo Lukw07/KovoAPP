@@ -149,7 +149,7 @@ export function AdminDashboard({
               "flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all active:scale-95",
               section === s.key
                 ? "bg-red-600 text-white shadow-sm"
-                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                : "bg-card border border-border text-foreground-secondary hover:bg-card-hover"
             )}
           >
             {s.icon}
@@ -195,10 +195,10 @@ export function AdminDashboard({
 
           {/* Charts */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <div className="mb-4 flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                <BarChart3 className="h-5 w-5 text-accent" />
+                <h3 className="font-semibold text-foreground">
                   Absence – {monthName}
                 </h3>
               </div>
@@ -208,7 +208,7 @@ export function AdminDashboard({
                 {absenceStats.map((stat) => (
                   <div
                     key={stat.type}
-                    className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
+                    className="flex items-center gap-1.5 text-xs text-foreground-secondary"
                   >
                     <span
                       className="inline-block h-2.5 w-2.5 rounded-full"
@@ -222,10 +222,10 @@ export function AdminDashboard({
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <div className="mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                <h3 className="font-semibold text-foreground">
                   Body – {monthName}
                 </h3>
               </div>
@@ -237,10 +237,10 @@ export function AdminDashboard({
 
       {/* ─── Users ───────────────────────────────────────────────────── */}
       {section === "users" && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <div className="mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5 text-blue-600" />
-            <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+            <Users className="h-5 w-5 text-accent" />
+            <h3 className="font-semibold text-foreground">
               Správa uživatelů
             </h3>
           </div>
@@ -253,21 +253,21 @@ export function AdminDashboard({
 
       {/* ─── Reward Claims ───────────────────────────────────────────── */}
       {section === "rewards" && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <RewardClaimsManager claims={rewardClaims} />
         </div>
       )}
 
-      {/* ─── Export ───────────────────────────────────────────────────── */}
+      {/* ─── Export ───────────────────────────────────────────────────────────── */}
       {section === "export" && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 space-y-4">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="flex items-center gap-2">
             <Download className="h-5 w-5 text-green-600" />
-            <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+            <h3 className="font-semibold text-foreground">
               Export dat pro Helios
             </h3>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-foreground-secondary">
             Exportuje schválené dovolené za vybraný měsíc do CSV souboru
             kompatibilního s Helios. Soubor používá středníky jako oddělovač a
             UTF-8 kódování.
@@ -295,7 +295,7 @@ function StatCard({
   bgColor: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center gap-3">
         <div
           className={cn(
@@ -306,9 +306,9 @@ function StatCard({
           {icon}
         </div>
         <div>
-          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
-          <p className="text-xs font-medium text-slate-600 dark:text-slate-400">{label}</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">{sub}</p>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-xs font-medium text-foreground-secondary">{label}</p>
+          <p className="text-xs text-foreground-muted">{sub}</p>
         </div>
       </div>
     </div>

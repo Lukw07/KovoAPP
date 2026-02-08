@@ -46,17 +46,17 @@ export function SecuritySettings() {
   };
 
   return (
-    <div className="animate-fade-in-up stagger-3 space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-3 space-y-4 rounded-2xl border border-border bg-card p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-          <Shield className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-secondary">
+          <Shield className="h-5 w-5 text-foreground-secondary" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-semibold text-foreground">
             Zabezpečení
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-foreground-secondary">
             Změna hesla
           </p>
         </div>
@@ -94,7 +94,7 @@ export function SecuritySettings() {
             "btn-press w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             success
               ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
-              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 disabled:opacity-60 disabled:cursor-not-allowed",
+              : "bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 disabled:opacity-60 disabled:cursor-not-allowed",
           )}
         >
           {isPending ? (
@@ -151,7 +151,7 @@ function PasswordField({
     <div className="space-y-1.5">
       <label
         htmlFor={name}
-        className="text-xs font-medium text-slate-600 dark:text-slate-400"
+        className="text-xs font-medium text-foreground-secondary"
       >
         {label}
       </label>
@@ -163,12 +163,12 @@ function PasswordField({
           placeholder={placeholder}
           required
           autoComplete={name === "currentPassword" ? "current-password" : "new-password"}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5 pr-10 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
+          className="w-full rounded-xl border border-border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-colors"
         />
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-secondary transition-colors"
           tabIndex={-1}
         >
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

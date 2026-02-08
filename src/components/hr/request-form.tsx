@@ -96,7 +96,7 @@ export default function RequestForm({
 
       {/* Type selector — pill chips */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className="mb-2 block text-sm font-medium text-foreground">
           Typ žádosti
         </label>
         <div className="flex flex-wrap gap-2">
@@ -108,8 +108,8 @@ export default function RequestForm({
               className={cn(
                 "rounded-xl px-3.5 py-2 text-sm font-medium transition-all active:scale-95",
                 selectedType === t.value
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-600/25"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700",
+                  ? "bg-accent text-white shadow-accent glow-blue"
+                  : "bg-background-secondary text-foreground-secondary hover:bg-border",
               )}
             >
               {t.emoji} {t.label}
@@ -121,20 +121,20 @@ export default function RequestForm({
 
       {/* Date range */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className="mb-2 block text-sm font-medium text-foreground">
           Období
         </label>
         <button
           type="button"
           onClick={() => setShowCalendar((v) => !v)}
           className={cn(
-            "flex w-full items-center gap-3 rounded-xl border bg-white dark:bg-slate-800 px-4 py-3 text-left text-sm transition-colors active:scale-[0.99]",
+            "flex w-full items-center gap-3 rounded-xl border bg-card px-4 py-3 text-left text-sm transition-colors active:scale-[0.99]",
             dateRange.from
-              ? "border-blue-300 text-slate-800 dark:text-slate-200"
-              : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500",
+              ? "border-accent/50 text-foreground"
+              : "border-border text-foreground-muted",
           )}
         >
-          <CalendarDays className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+          <CalendarDays className="h-5 w-5 text-foreground-muted" />
           {dateRange.from ? (
             <span>
               {format(dateRange.from, "d. M. yyyy")}
@@ -148,7 +148,7 @@ export default function RequestForm({
         </button>
 
         {showCalendar && (
-          <div className="mt-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-lg">
+          <div className="mt-2 rounded-xl border border-border bg-card p-3 shadow-lg">
             <DayPicker
               mode="range"
               locale={cs}
@@ -162,14 +162,14 @@ export default function RequestForm({
               classNames={{
                 root: "w-full",
                 month_caption:
-                  "text-sm font-semibold text-slate-900 dark:text-slate-100 capitalize",
+                  "text-sm font-semibold text-foreground capitalize",
                 nav: "flex gap-1",
                 button_previous:
-                  "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 text-slate-600 dark:text-slate-400",
+                  "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
                 button_next:
-                  "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 text-slate-600 dark:text-slate-400",
-                weekdays: "text-xs font-medium text-slate-400 dark:text-slate-500 uppercase",
-                day: "h-9 w-9 text-sm rounded-lg transition-colors dark:text-slate-300",
+                  "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
+                weekdays: "text-xs font-medium text-foreground-muted uppercase",
+                day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground",
                 today: "!bg-slate-900 dark:!bg-slate-100 !text-white dark:!text-slate-900 !rounded-lg !font-bold",
                 selected: "!bg-blue-600 !text-white",
                 range_start: "!bg-blue-600 !text-white !rounded-l-lg",
@@ -189,7 +189,7 @@ export default function RequestForm({
             <button
               type="button"
               onClick={() => setShowCalendar(false)}
-              className="mt-2 w-full rounded-lg bg-slate-100 dark:bg-slate-700 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 active:scale-[0.98]"
+              className="mt-2 w-full rounded-lg bg-background-secondary py-2 text-sm font-medium text-foreground-secondary active:scale-[0.98]"
             >
               Potvrdit
             </button>
@@ -222,23 +222,23 @@ export default function RequestForm({
       {/* Half-day toggles */}
       {dateRange.from && (
         <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+          <label className="flex items-center gap-2 text-sm text-foreground-secondary">
             <input
               type="checkbox"
               checked={isHalfDayStart}
               onChange={(e) => setIsHalfDayStart(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
             />
             Půlden na začátku
           </label>
           {dateRange.to &&
             dateRange.to.getTime() !== dateRange.from?.getTime() && (
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <label className="flex items-center gap-2 text-sm text-foreground-secondary">
                 <input
                   type="checkbox"
                   checked={isHalfDayEnd}
                   onChange={(e) => setIsHalfDayEnd(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
                 />
                 Půlden na konci
               </label>
@@ -260,10 +260,10 @@ export default function RequestForm({
       <div>
         <label
           htmlFor="reason"
-          className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-2 block text-sm font-medium text-foreground"
         >
           Poznámka{" "}
-          <span className="font-normal text-slate-400 dark:text-slate-500">(nepovinná)</span>
+          <span className="font-normal text-foreground-muted">(nepovinná)</span>
         </label>
         <textarea
           id="reason"
@@ -271,7 +271,7 @@ export default function RequestForm({
           rows={3}
           maxLength={1000}
           placeholder="Důvod žádosti..."
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 resize-none"
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
         />
       </div>
 
@@ -282,8 +282,8 @@ export default function RequestForm({
         className={cn(
           "w-full rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]",
           isPending || !dateRange.from
-            ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-            : "bg-blue-600 text-white shadow-blue-600/25 hover:bg-blue-700",
+            ? "bg-background-secondary text-foreground-muted cursor-not-allowed"
+            : "bg-accent text-white shadow-accent glow-blue hover:bg-accent-hover",
         )}
       >
         {isPending ? (

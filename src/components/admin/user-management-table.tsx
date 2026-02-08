@@ -111,11 +111,11 @@ export function UserManagementTable({
 
   function SortIcon({ field }: { field: SortField }) {
     if (sortField !== field)
-      return <ChevronDown className="h-3 w-3 text-slate-300" />;
+      return <ChevronDown className="h-3 w-3 text-foreground-muted" />;
     return sortAsc ? (
-      <ChevronUp className="h-3 w-3 text-blue-600" />
+      <ChevronUp className="h-3 w-3 text-accent" />
     ) : (
-      <ChevronDown className="h-3 w-3 text-blue-600" />
+      <ChevronDown className="h-3 w-3 text-accent" />
     );
   }
 
@@ -180,18 +180,18 @@ export function UserManagementTable({
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted" />
           <input
             type="text"
             placeholder="Hledat uživatele..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 py-2 pl-9 pr-3 text-sm dark:text-slate-200 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 active:scale-95 transition-all"
+          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-accent glow-blue hover:bg-accent-hover active:scale-95 transition-all"
         >
           <UserPlus className="h-4 w-4" />
           Nový uživatel
@@ -202,22 +202,22 @@ export function UserManagementTable({
       {showCreateForm && (
         <form
           action={handleCreateUser}
-          className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20 p-4 space-y-3"
+          className="rounded-xl border border-accent/30 bg-accent-light p-4 space-y-3"
         >
-          <h4 className="font-medium text-slate-800 dark:text-slate-200">Nový uživatel</h4>
+          <h4 className="font-medium text-foreground">Nový uživatel</h4>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <input
               name="name"
               placeholder="Jméno a příjmení"
               required
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             />
             <input
               name="email"
               type="email"
               placeholder="Email"
               required
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             />
             <input
               name="password"
@@ -225,12 +225,12 @@ export function UserManagementTable({
               placeholder="Heslo (min. 6 znaků)"
               required
               minLength={6}
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             />
             <select
               name="role"
               defaultValue="EMPLOYEE"
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             >
               <option value="EMPLOYEE">Zaměstnanec</option>
               <option value="MANAGER">Manager</option>
@@ -239,12 +239,12 @@ export function UserManagementTable({
             <input
               name="position"
               placeholder="Pozice (volitelné)"
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             />
             <select
               name="departmentId"
               defaultValue=""
-              className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
             >
               <option value="">Bez oddělení</option>
               {departments.map((d) => (
@@ -258,7 +258,7 @@ export function UserManagementTable({
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               Vytvořit
@@ -266,7 +266,7 @@ export function UserManagementTable({
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="rounded-lg border border-slate-200 dark:border-slate-600 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="rounded-lg border border-border px-4 py-2 text-sm text-foreground-secondary hover:bg-background-secondary"
             >
               Zrušit
             </button>
@@ -275,10 +275,10 @@ export function UserManagementTable({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70">
+            <tr className="border-b border-border bg-background-secondary/70">
               {(
                 [
                   ["name", "Jméno"],
@@ -291,7 +291,7 @@ export function UserManagementTable({
                 <th
                   key={field}
                   onClick={() => toggleSort(field)}
-                  className="cursor-pointer px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400 select-none hover:text-slate-900 dark:hover:text-slate-200"
+                  className="cursor-pointer px-4 py-3 text-left font-medium text-foreground-secondary select-none hover:text-foreground"
                 >
                   <span className="inline-flex items-center gap-1">
                     {label}
@@ -299,10 +299,10 @@ export function UserManagementTable({
                   </span>
                 </th>
               ))}
-              <th className="px-4 py-3 text-left font-medium text-slate-600 dark:text-slate-400">
+              <th className="px-4 py-3 text-left font-medium text-foreground-secondary">
                 Body
               </th>
-              <th className="px-4 py-3 text-right font-medium text-slate-600 dark:text-slate-400">
+              <th className="px-4 py-3 text-right font-medium text-foreground-secondary">
                 Akce
               </th>
             </tr>
@@ -312,7 +312,7 @@ export function UserManagementTable({
               <tr
                 key={user.id}
                 className={cn(
-                  "border-b border-slate-50 dark:border-slate-700 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-700/50",
+                  "border-b border-border transition-colors hover:bg-background-secondary/50",
                   !user.isActive && "opacity-50"
                 )}
               >
@@ -326,15 +326,15 @@ export function UserManagementTable({
                   />
                 ) : (
                   <>
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
+                    <td className="px-4 py-3 font-medium text-foreground">
                       {user.name}
                       {user.position && (
-                        <span className="block text-xs text-slate-400 dark:text-slate-500">
+                        <span className="block text-xs text-foreground-muted">
                           {user.position}
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{user.email}</td>
+                    <td className="px-4 py-3 text-foreground-secondary">{user.email}</td>
                     <td className="px-4 py-3">
                       <span
                         className={cn(
@@ -345,26 +345,26 @@ export function UserManagementTable({
                         {ROLE_LABELS[user.role] ?? user.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                    <td className="px-4 py-3 text-foreground-secondary">
                       {user.department?.name ?? "—"}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={cn(
                           "inline-block h-2.5 w-2.5 rounded-full",
-                          user.isActive ? "bg-green-500" : "bg-slate-300 dark:bg-slate-600"
+                          user.isActive ? "bg-green-500" : "bg-background-secondary"
                         )}
                         title={user.isActive ? "Aktivní" : "Neaktivní"}
                       />
                     </td>
-                    <td className="px-4 py-3 text-right font-medium text-slate-700 dark:text-slate-300">
+                    <td className="px-4 py-3 text-right font-medium text-foreground">
                       {user.pointsBalance}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => setEditingId(user.id)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-accent hover:bg-accent-light transition-colors"
                         >
                           Upravit
                         </button>
@@ -391,7 +391,7 @@ export function UserManagementTable({
                             placeholder="Nové heslo"
                             required
                             minLength={6}
-                            className="w-32 rounded border border-slate-200 dark:border-slate-600 px-2 py-1 text-xs dark:bg-slate-700 dark:text-slate-200 outline-none focus:border-blue-400"
+                            className="w-32 rounded border border-border px-2 py-1 text-xs bg-card text-foreground outline-none focus:border-accent"
                           />
                           <button
                             type="submit"
@@ -411,7 +411,7 @@ export function UserManagementTable({
               <tr>
                 <td
                   colSpan={7}
-                  className="px-4 py-8 text-center text-slate-400 dark:text-slate-500"
+                  className="px-4 py-8 text-center text-foreground-muted"
                 >
                   Žádní uživatelé nenalezeni
                 </td>
@@ -421,7 +421,7 @@ export function UserManagementTable({
         </table>
       </div>
 
-      <p className="text-xs text-slate-400 dark:text-slate-500">
+      <p className="text-xs text-foreground-muted">
         Celkem: {filtered.length} uživatel
         {filtered.length === 1
           ? ""
@@ -454,27 +454,27 @@ function EditRow({
         <input type="hidden" name="userId" value={user.id} />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Jméno</label>
+            <label className="text-xs text-foreground-secondary">Jméno</label>
             <input
               name="name"
               defaultValue={user.name}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Email</label>
+            <label className="text-xs text-foreground-secondary">Email</label>
             <input
               name="email"
               defaultValue={user.email}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Role</label>
+            <label className="text-xs text-foreground-secondary">Role</label>
             <select
               name="role"
               defaultValue={user.role}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             >
               <option value="EMPLOYEE">Zaměstnanec</option>
               <option value="MANAGER">Manager</option>
@@ -482,11 +482,11 @@ function EditRow({
             </select>
           </div>
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Oddělení</label>
+            <label className="text-xs text-foreground-secondary">Oddělení</label>
             <select
               name="departmentId"
               defaultValue={user.department ? departments.find(d => d.name === user.department?.name)?.id ?? "" : ""}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             >
               <option value="">Bez oddělení</option>
               {departments.map((d) => (
@@ -497,19 +497,19 @@ function EditRow({
             </select>
           </div>
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Pozice</label>
+            <label className="text-xs text-foreground-secondary">Pozice</label>
             <input
               name="position"
               defaultValue={user.position ?? ""}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-500 dark:text-slate-400">Stav</label>
+            <label className="text-xs text-foreground-secondary">Stav</label>
             <select
               name="isActive"
               defaultValue={user.isActive ? "true" : "false"}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2.5 py-1.5 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             >
               <option value="true">Aktivní</option>
               <option value="false">Neaktivní</option>
@@ -528,7 +528,7 @@ function EditRow({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground-secondary hover:bg-background-secondary"
           >
             Zrušit
           </button>

@@ -57,17 +57,17 @@ export function HelpSection() {
   };
 
   return (
-    <div className="animate-fade-in-up stagger-4 space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-4 space-y-3 rounded-2xl border border-border bg-card p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-          <HelpCircle className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-secondary">
+          <HelpCircle className="h-5 w-5 text-foreground-secondary" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-semibold text-foreground">
             Nápověda
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-foreground-secondary">
             Často kladené otázky a kontakt
           </p>
         </div>
@@ -79,19 +79,19 @@ export function HelpSection() {
           <div key={i}>
             <button
               onClick={() => toggle(i)}
-              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium text-foreground hover:bg-background-secondary transition-colors"
             >
               <span>{item.question}</span>
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500 transition-transform duration-300 ease-out",
+                  "h-4 w-4 shrink-0 text-foreground-muted transition-transform duration-300 ease-out",
                   openIndex === i && "rotate-180",
                 )}
               />
             </button>
             {openIndex === i && (
               <div className="animate-accordion-open px-3 pb-3 pt-1">
-                <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                <p className="text-xs leading-relaxed text-foreground-secondary">
                   {item.answer}
                 </p>
               </div>
@@ -101,8 +101,8 @@ export function HelpSection() {
       </div>
 
       {/* Contact section */}
-      <div className="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-2">
-        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <div className="border-t border-border pt-3 space-y-2">
+        <p className="text-xs font-semibold text-foreground">
           Potřebujete další pomoc?
         </p>
         <div className="grid gap-2">
@@ -128,15 +128,15 @@ export function HelpSection() {
       </div>
 
       {/* App version */}
-      <div className="border-t border-slate-100 dark:border-slate-700 pt-3 flex items-center justify-between">
-        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+      <div className="border-t border-border pt-3 flex items-center justify-between">
+        <span className="text-[11px] text-foreground-muted">
           KovoAPP v1.0.0
         </span>
         <a
           href="https://kovoapp.cz"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
+          className="flex items-center gap-1 text-[11px] text-accent hover:underline"
         >
           kovoapp.cz
           <ExternalLink className="h-3 w-3" />
@@ -161,16 +161,16 @@ function ContactItem({
   return (
     <a
       href={href}
-      className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group"
+      className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-background-secondary transition-colors group"
     >
-      <span className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors">
+      <span className="text-foreground-muted group-hover:text-accent transition-colors">
         {icon}
       </span>
       <div className="flex-1">
-        <span className="text-[11px] text-slate-400 dark:text-slate-500">
+        <span className="text-[11px] text-foreground-muted">
           {label}
         </span>
-        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+        <p className="text-xs font-medium text-foreground">
           {value}
         </p>
       </div>

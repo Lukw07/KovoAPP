@@ -106,7 +106,7 @@ export default function VacationCalendar({
   }, [vacations]);
 
   return (
-    <div className={cn("rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4", className)}>
+    <div className={cn("rounded-2xl border border-border bg-card p-4", className)}>
       <DayPicker
         mode="multiple"
         locale={cs}
@@ -122,14 +122,14 @@ export default function VacationCalendar({
         }}
         classNames={{
           root: "w-full",
-          month_caption: "text-base font-semibold text-slate-900 dark:text-slate-100 capitalize",
+          month_caption: "text-base font-semibold text-foreground capitalize",
           nav: "flex gap-1",
           button_previous:
-            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 text-slate-600 dark:text-slate-400",
+            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
           button_next:
-            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 text-slate-600 dark:text-slate-400",
-          weekdays: "text-xs font-medium text-slate-400 dark:text-slate-500 uppercase",
-          day: "h-9 w-9 text-sm rounded-lg transition-colors dark:text-slate-300",
+            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
+          weekdays: "text-xs font-medium text-foreground-muted uppercase",
+          day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground",
           today: "!bg-slate-900 dark:!bg-slate-100 !text-white dark:!text-slate-900 !rounded-lg !font-bold",
           selected: "!bg-blue-600 !text-white",
           outside: "text-slate-300 dark:text-slate-600",
@@ -146,8 +146,8 @@ export default function VacationCalendar({
       />
 
       {/* Legend */}
-      <div className="mt-3 flex flex-wrap gap-3 border-t border-slate-100 dark:border-slate-700 pt-3">
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+      <div className="mt-3 flex flex-wrap gap-3 border-t border-border pt-3">
+        <div className="flex items-center gap-1.5 text-xs text-foreground-secondary">
           <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
           Svátky
         </div>
@@ -156,7 +156,7 @@ export default function VacationCalendar({
           return cfg ? (
             <div
               key={t}
-              className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
+              className="flex items-center gap-1.5 text-xs text-foreground-secondary"
             >
               <span className={cn("h-2.5 w-2.5 rounded-full", cfg.dot)} />
               {cfg.label}

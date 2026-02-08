@@ -92,7 +92,7 @@ export default function MyReservations({
 
   return (
     <div className="space-y-3">
-      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+      <h2 className="text-base font-semibold text-foreground">
         Moje rezervace
       </h2>
 
@@ -107,17 +107,17 @@ export default function MyReservations({
           return (
             <li
               key={r.id}
-              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm"
+              className="rounded-2xl border border-border bg-card p-4 shadow-sm"
             >
               <div className="flex items-start gap-3">
                 {/* Type icon */}
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700">
-                  <TypeIcon className="h-4.5 w-4.5 text-slate-600 dark:text-slate-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-background-secondary">
+                  <TypeIcon className="h-4.5 w-4.5 text-foreground-secondary" />
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    <p className="truncate text-sm font-semibold text-foreground">
                       {r.resource.name}
                     </p>
                     <div
@@ -132,7 +132,7 @@ export default function MyReservations({
                     </div>
                   </div>
 
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-0.5 text-xs text-foreground-secondary">
                     {format(new Date(r.startTime), "d. M. HH:mm", {
                       locale: cs,
                     })}{" "}
@@ -143,7 +143,7 @@ export default function MyReservations({
                   </p>
 
                   {r.purpose && (
-                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 truncate">
+                    <p className="mt-1 text-xs text-foreground-muted truncate">
                       {r.purpose}
                     </p>
                   )}

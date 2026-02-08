@@ -88,20 +88,20 @@ export default function BookingTimeline({
   const currentHour = new Date().getHours();
 
   return (
-    <div className={cn("rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4", className)}>
+    <div className={cn("rounded-2xl border border-border bg-card p-4", className)}>
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          <p className="text-sm font-semibold text-foreground">
             {resourceName}
           </p>
-          <p className="text-xs capitalize text-slate-400 dark:text-slate-500">
+          <p className="text-xs capitalize text-foreground-muted">
             {getDayLabel(date)}
           </p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-foreground-muted">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             Volné
@@ -132,10 +132,10 @@ export default function BookingTimeline({
                   className={cn(
                     "text-[11px] font-medium tabular-nums",
                     isCurrent
-                      ? "text-blue-600 font-bold"
+                      ? "text-accent font-bold"
                       : isPast
-                        ? "text-slate-300 dark:text-slate-600"
-                        : "text-slate-500 dark:text-slate-400",
+                        ? "text-foreground-muted"
+                        : "text-foreground-secondary",
                   )}
                 >
                   {String(h).padStart(2, "0")}:00
@@ -148,9 +148,9 @@ export default function BookingTimeline({
                     occupied
                       ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30"
                       : isPast
-                        ? "border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+                        ? "border-slate-100 dark:border-slate-700 bg-background"
                         : "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30",
-                    isCurrent && "ring-2 ring-blue-400 ring-offset-1 dark:ring-offset-slate-800",
+                    isCurrent && "ring-2 ring-accent ring-offset-1 dark:ring-offset-background",
                   )}
                   title={
                     occupied && reservation
@@ -165,7 +165,7 @@ export default function BookingTimeline({
                       occupied
                         ? "bg-red-500"
                         : isPast
-                          ? "bg-slate-300 dark:bg-slate-600"
+                          ? "bg-border"
                           : "bg-emerald-500",
                     )}
                   />
@@ -190,7 +190,7 @@ export default function BookingTimeline({
           Celý den volný
         </p>
       ) : (
-        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+        <p className="mt-2 text-xs text-foreground-muted">
           {reservations.length}{" "}
           {reservations.length === 1
             ? "rezervace"

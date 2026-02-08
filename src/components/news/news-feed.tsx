@@ -79,13 +79,13 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
     <div className="space-y-4">
       {/* Header with refresh */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Novinky</h1>
+        <h1 className="text-xl font-bold text-foreground">Novinky</h1>
         <button
           onClick={refresh}
           disabled={loading}
           className={cn(
             "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium",
-            "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all",
+            "text-foreground-secondary hover:bg-background-secondary active:scale-95 transition-all",
             "disabled:opacity-50"
           )}
         >
@@ -98,9 +98,9 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
 
       {/* Posts list */}
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-16 text-center">
-          <Newspaper className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center">
+          <Newspaper className="mb-3 h-12 w-12 text-foreground-muted" />
+          <p className="text-sm font-medium text-foreground-secondary">
             Žádné novinky k zobrazení
           </p>
         </div>
@@ -120,9 +120,9 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
               onClick={loadMore}
               disabled={loading}
               className={cn(
-                "w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3",
-                "text-sm font-medium text-slate-600 dark:text-slate-300",
-                "hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.99] transition-all",
+                "w-full rounded-2xl border border-border bg-card py-3",
+                "text-sm font-medium text-foreground-secondary",
+                "hover:bg-card-hover active:scale-[0.99] transition-all",
                 "disabled:opacity-50"
               )}
             >

@@ -37,27 +37,27 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4"
+      className="space-y-4 rounded-2xl border border-border bg-card p-4"
     >
-      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Nový inzerát</h3>
+      <h3 className="text-base font-bold text-foreground">Nový inzerát</h3>
 
       {/* Title */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Pozice *</label>
+        <label className="text-xs font-medium text-foreground-secondary">Pozice *</label>
         <input
           name="title"
           required
           placeholder="Např. CNC operátor"
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
 
       {/* Description */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Popis práce *
         </label>
         <textarea
@@ -66,15 +66,15 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
           rows={4}
           placeholder="Popište náplň práce..."
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm resize-none dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm resize-none bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
 
       {/* Requirements */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Požadavky (volitelné)
         </label>
         <textarea
@@ -82,8 +82,8 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
           rows={3}
           placeholder="Požadujeme: vzdělání, praxe, certifikáty..."
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm resize-none dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm resize-none bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
@@ -91,25 +91,25 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
       {/* Location + Contract type */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Místo</label>
+          <label className="text-xs font-medium text-foreground-secondary">Místo</label>
           <input
             name="location"
             placeholder="Brno, Česko"
             className={cn(
-              "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+              "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             )}
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          <label className="text-xs font-medium text-foreground-secondary">
             Typ smlouvy
           </label>
           <select
             name="contractType"
             className={cn(
-              "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+              "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             )}
           >
             <option value="">-- Vyberte --</option>
@@ -125,20 +125,20 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
       {/* Salary + Referral bonus */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          <label className="text-xs font-medium text-foreground-secondary">
             Platové rozmezí
           </label>
           <input
             name="salaryRange"
             placeholder="35 000 - 45 000 Kč"
             className={cn(
-              "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+              "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             )}
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          <label className="text-xs font-medium text-foreground-secondary">
             Bonus za doporučení (body)
           </label>
           <input
@@ -147,8 +147,8 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
             min={0}
             defaultValue={0}
             className={cn(
-              "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+              "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             )}
           />
         </div>
@@ -156,15 +156,15 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
 
       {/* Closes at */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Uzávěrka přihlášek (volitelné)
         </label>
         <input
           name="closesAt"
           type="datetime-local"
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
@@ -187,8 +187,8 @@ export function CreateJobForm({ onSuccess }: CreateJobFormProps) {
         disabled={isPending}
         className={cn(
           "w-full flex items-center justify-center gap-2 rounded-xl py-3",
-          "bg-blue-600 text-white text-sm font-semibold shadow-sm",
-          "hover:bg-blue-700 active:scale-[0.99] transition-all",
+          "bg-accent text-white text-sm font-semibold shadow-accent glow-blue",
+          "hover:bg-accent-hover active:scale-[0.99] transition-all",
           "disabled:opacity-50 disabled:cursor-not-allowed"
         )}
       >

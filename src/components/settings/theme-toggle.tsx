@@ -20,13 +20,13 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
-        <div className="h-6 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="h-6 w-32 animate-pulse rounded bg-border" />
         <div className="mt-4 flex gap-2">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-12 flex-1 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"
+              className="h-12 flex-1 animate-pulse rounded-xl bg-background-secondary"
             />
           ))}
         </div>
@@ -35,14 +35,14 @@ export function ThemeToggle() {
   }
 
   return (
-    <div className="animate-fade-in-up stagger-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-1 rounded-2xl border border-border bg-card p-5">
       {/* Section header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-semibold text-foreground">
             Vzhled
           </h3>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-0.5 text-xs text-foreground-secondary">
             Aktuálně:{" "}
             <span className="font-medium">
               {resolvedTheme === "dark" ? "Tmavý režim" : "Světlý režim"}
@@ -51,7 +51,7 @@ export function ThemeToggle() {
         </div>
 
         {/* Animated icon showing current resolved theme */}
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background-secondary">
           {resolvedTheme === "dark" ? (
             <Moon className="h-5 w-5 text-blue-400" />
           ) : (
@@ -61,7 +61,7 @@ export function ThemeToggle() {
       </div>
 
       {/* 3-way segmented control */}
-      <div className="flex gap-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 p-1">
+      <div className="flex gap-2 rounded-xl bg-background-secondary p-1">
         {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
           const isActive = theme === value;
 
@@ -72,8 +72,8 @@ export function ThemeToggle() {
               className={cn(
                 "flex flex-1 flex-col items-center gap-1 rounded-lg py-2.5 text-xs font-medium transition-all duration-300",
                 isActive
-                  ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-slate-100 shadow-md"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300",
+                  ? "bg-card text-foreground shadow-md"
+                  : "text-foreground-secondary hover:text-foreground",
               )}
               aria-pressed={isActive}
             >

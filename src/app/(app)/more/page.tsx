@@ -9,8 +9,11 @@ import {
   ChevronRight,
   Store,
   MessageCircle,
+  ShieldCheck,
+  ClipboardList,
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/actions/messages";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Více" };
 
@@ -83,11 +86,43 @@ const ITEMS = [
 ] as const;
 
 export default async function MorePage() {
-  const unreadCount = await getUnreadMessageCount();
+  const [unreadCount, session] = await Promise.all([
+    getUnreadMessageCount(),
+    auth(),
+  ]);
+  const role = session?.user?.role;
+  const isManagement = role === "ADMIN" || role === "MANAGER";
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Více</h1>
+
+      {/* Management link for Admin/Manager */}
+      {isManagement && (
+        <Link
+          href="/admin"
+          className="flex items-center gap-4 rounded-2xl p-4 shadow-sm border transition-transform active:scale-[0.98] bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800"
+        >
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-800">
+            {role === "ADMIN" ? (
+              <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            ) : (
+              <ClipboardList className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              {role === "ADMIN" ? "Admin panel" : "Správa systému"}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {role === "ADMIN"
+                ? "Uživatelé, statistiky, export"
+                : "Schvalování, ankety, inzeráty, odměny"}
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-blue-400 dark:text-blue-500" />
+        </Link>
+      )}
 
       <div className="space-y-2">
         {ITEMS.map((item) => {

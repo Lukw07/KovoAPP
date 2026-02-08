@@ -75,12 +75,12 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
   };
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Nová anketa</h3>
+    <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+      <h3 className="text-base font-bold text-foreground">Nová anketa</h3>
 
       {/* Question */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Otázka *
         </label>
         <input
@@ -89,15 +89,15 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Na co se chcete zeptat?"
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
 
       {/* Description */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Popis (volitelné)
         </label>
         <textarea
@@ -106,15 +106,15 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
           placeholder="Doplňující informace k anketě..."
           rows={2}
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm resize-none dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm resize-none bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
 
       {/* Options */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Možnosti * (min. 2, max. 10)
         </label>
         {options.map((option, index) => (
@@ -125,15 +125,15 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
               onChange={(e) => updateOption(index, e.target.value)}
               placeholder={`Možnost ${index + 1}`}
               className={cn(
-                "flex-1 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm dark:bg-slate-700 dark:text-slate-200",
-                "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+                "flex-1 rounded-xl border border-border px-3 py-2 text-sm bg-card text-foreground",
+                "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
               )}
             />
             {options.length > 2 && (
               <button
                 type="button"
                 onClick={() => removeOption(index)}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 active:scale-95 transition-all"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-foreground-muted hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 active:scale-95 transition-all"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -144,7 +144,7 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
           <button
             type="button"
             onClick={addOption}
-            className="flex items-center gap-1.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:border-blue-300 hover:text-blue-600 w-full justify-center active:scale-[0.99] transition-all"
+            className="flex items-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2 text-xs font-medium text-foreground-secondary hover:border-accent hover:text-accent w-full justify-center active:scale-[0.99] transition-all"
           >
             <Plus className="h-3.5 w-3.5" />
             Přidat možnost
@@ -154,7 +154,7 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
 
       {/* Active until */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Platnost do (volitelné)
         </label>
         <input
@@ -162,29 +162,29 @@ export function CreatePollForm({ onSuccess }: CreatePollFormProps) {
           value={activeUntil}
           onChange={(e) => setActiveUntil(e.target.value)}
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           )}
         />
       </div>
 
       {/* Toggles */}
       <div className="flex flex-wrap gap-4">
-        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
           <input
             type="checkbox"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
           />
           Anonymní hlasování
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
           <input
             type="checkbox"
             checked={isMultiple}
             onChange={(e) => setIsMultiple(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
           />
           Více možností
         </label>

@@ -161,9 +161,9 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         onClick={() => setOpen(true)}
         className={cn(
           "w-full flex items-center justify-center gap-2 rounded-2xl py-3",
-          "border-2 border-dashed border-slate-300 dark:border-slate-600",
-          "text-sm font-medium text-slate-500 dark:text-slate-400",
-          "hover:border-blue-300 hover:text-blue-600 active:scale-[0.99] transition-all",
+          "border-2 border-dashed border-border",
+          "text-sm font-medium text-foreground-secondary",
+          "hover:border-accent hover:text-accent active:scale-[0.99] transition-all",
         )}
       >
         <Plus className="h-4 w-4" />
@@ -175,10 +175,10 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 animate-fadeInUp"
+      className="space-y-3 rounded-2xl border border-border bg-card p-4 animate-fadeInUp"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        <h3 className="text-sm font-bold text-foreground">
           Nový inzerát
         </h3>
         <button
@@ -187,7 +187,7 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
             setOpen(false);
             resetForm();
           }}
-          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+          className="text-foreground-muted hover:text-foreground-secondary"
         >
           <X className="h-4 w-4" />
         </button>
@@ -195,15 +195,15 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
 
       {/* Category */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Kategorie *
         </label>
         <select
           name="category"
           required
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
           )}
         >
           <option value="SELLING">Prodám</option>
@@ -219,8 +219,8 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         required
         placeholder="Název *"
         className={cn(
-          "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-          "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+          "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+          "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
         )}
       />
 
@@ -231,8 +231,8 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         rows={3}
         placeholder="Popis *"
         className={cn(
-          "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm resize-none dark:bg-slate-700 dark:text-slate-200",
-          "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+          "w-full rounded-xl border border-border px-3 py-2.5 text-sm resize-none bg-card text-foreground",
+          "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
         )}
       />
 
@@ -241,14 +241,14 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         name="price"
         placeholder="Cena (volitelné, např. 500 Kč, Zdarma, Dohodou)"
         className={cn(
-          "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-          "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+          "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+          "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
         )}
       />
 
       {/* Multi-Image Upload */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Fotky (max {MAX_IMAGES}, max 10 MB/ks)
         </label>
 
@@ -258,7 +258,7 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
             {images.map((img, idx) => (
               <div
                 key={idx}
-                className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 aspect-square group"
+                className="relative rounded-xl overflow-hidden border border-border aspect-square group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -291,9 +291,9 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
             className={cn(
               "w-full flex flex-col items-center justify-center gap-1.5 rounded-xl",
               images.length > 0 ? "py-3" : "py-6",
-              "border-2 border-dashed border-slate-200 dark:border-slate-600",
-              "text-slate-400 dark:text-slate-500",
-              "hover:border-blue-300 hover:text-blue-500 dark:hover:border-blue-600 dark:hover:text-blue-400",
+              "border-2 border-dashed border-border",
+              "text-foreground-muted",
+              "hover:border-accent hover:text-accent",
               "transition-all cursor-pointer active:scale-[0.99]",
             )}
           >
@@ -304,7 +304,7 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
                 : "Klepněte pro výběr fotek"}
             </span>
             {images.length === 0 && (
-              <span className="text-[10px] text-slate-300 dark:text-slate-600">
+              <span className="text-[10px] text-foreground-muted">
                 JPG, PNG, WebP, GIF · max 10 MB · až {MAX_IMAGES} fotek
               </span>
             )}

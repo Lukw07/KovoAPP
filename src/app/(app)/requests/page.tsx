@@ -1,9 +1,18 @@
-import { getMyRequests } from "@/actions/hr-queries";
-import { CalendarDays, Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
+import { getMyRequests, getPendingForManager } from "@/actions/hr-queries";
+import { auth } from "@/lib/auth";
+import {
+  CalendarDays,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Ban,
+  ShieldCheck,
+} from "lucide-react";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { PendingApprovals } from "@/components/hr/pending-approvals";
 
 export const metadata = { title: "Moje žádosti" };
 
@@ -54,14 +63,52 @@ const TYPE_LABELS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export default async function RequestsPage() {
-  const { items, total } = await getMyRequests();
+  const session = await auth();
+  const role = session?.user?.role;
+  const isManagement = role === "ADMIN" || role === "MANAGER";
+
+  const [{ items, total }, pendingRequests] = await Promise.all([
+    getMyRequests(),
+    isManagement ? getPendingForManager() : Promise.resolve([]),
+  ]);
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
+    <div className="space-y-6">
+      {/* ── Manager/Admin: Pending approvals section ─────────────────── */}
+      {isManagement && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              Ke schválení
+            </h2>
+            {pendingRequests.length > 0 && (
+              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white px-1.5">
+                {pendingRequests.length}
+              </span>
+            )}
+          </div>
+          <PendingApprovals requests={pendingRequests} />
+        </div>
+      )}
+
+      {/* ── Separator between sections ───────────────────────────────── */}
+      {isManagement && (
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Moje žádosti
+          </span>
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+        </div>
+      )}
+
+      {/* ── Header ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Moje žádosti</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            Moje žádosti
+          </h1>
           <p className="text-xs text-slate-400 dark:text-slate-500">
             Celkem {total}{" "}
             {total === 1 ? "žádost" : total < 5 ? "žádosti" : "žádostí"}

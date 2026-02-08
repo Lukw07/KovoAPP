@@ -31,7 +31,7 @@ export function AbsenceChart({ data }: { data: AbsenceStat[] }) {
 
   if (!hasData) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-slate-400 dark:text-slate-500">
+      <div className="flex h-64 items-center justify-center text-sm text-foreground-muted">
         Žádné absence v tomto měsíci
       </div>
     );

@@ -28,7 +28,7 @@ export function NotificationSettings() {
   const isDenied = permission === "denied";
 
   return (
-    <div className="animate-fade-in-up stagger-2 space-y-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+    <div className="animate-fade-in-up stagger-2 space-y-3 rounded-2xl border border-border bg-card p-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div
@@ -36,20 +36,20 @@ export function NotificationSettings() {
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-500",
             isGranted
               ? "bg-emerald-100 dark:bg-emerald-900/30"
-              : "bg-slate-100 dark:bg-slate-700",
+              : "bg-background-secondary",
           )}
         >
           {isGranted ? (
             <Bell className="h-5 w-5 text-emerald-600 dark:text-emerald-400 animate-check-pop" />
           ) : (
-            <BellOff className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+            <BellOff className="h-5 w-5 text-foreground-muted" />
           )}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-semibold text-foreground">
             Push notifikace
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-foreground-secondary">
             {isGranted
               ? "Notifikace jsou povoleny"
               : isDenied
@@ -107,8 +107,8 @@ export function NotificationSettings() {
           className={cn(
             "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-300",
             isLoading || shouldPromptA2HS
-              ? "bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 animate-pulse-ring btn-press",
+              ? "bg-background-secondary text-foreground-muted cursor-not-allowed"
+              : "bg-linear-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 animate-pulse-ring btn-press",
           )}
         >
           {isLoading ? (
@@ -127,7 +127,7 @@ export function NotificationSettings() {
 
       {/* Browser settings hint for denied */}
       {isDenied && (
-        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+        <p className="text-[11px] text-foreground-muted">
           Tip: V Chrome klikněte na ikonu zámku v adresním řádku → Oprávnění →
           Oznámení → Povolit
         </p>
@@ -135,7 +135,7 @@ export function NotificationSettings() {
 
       {/* Not supported */}
       {!isSupported && permission !== "loading" && (
-        <div className="flex items-center gap-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2 rounded-xl bg-background-secondary px-3 py-2.5 text-xs text-foreground-secondary">
           <AlertTriangle className="h-3.5 w-3.5" />
           Tento prohlížeč nepodporuje push notifikace.
         </div>
@@ -143,7 +143,7 @@ export function NotificationSettings() {
 
       {/* Device info */}
       {(isIOS || isStandalone) && (
-        <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+        <div className="flex items-center gap-2 text-[11px] text-foreground-muted">
           <Smartphone className="h-3 w-3" />
           {isStandalone ? "Běží jako PWA" : "iOS Safari"}
         </div>

@@ -28,7 +28,7 @@ export function PointsChart({ data }: { data: PointsStatsData }) {
 
   if (!hasData) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-slate-400 dark:text-slate-500">
+      <div className="flex h-64 items-center justify-center text-sm text-foreground-muted">
         Žádné body uděleny v tomto měsíci
       </div>
     );
@@ -52,7 +52,7 @@ export function PointsChart({ data }: { data: PointsStatsData }) {
         {/* Category Pie */}
         {data.categoryData.length > 0 && (
           <div>
-            <h4 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+            <h4 className="mb-2 text-sm font-medium text-foreground-secondary">
               Dle kategorie
             </h4>
             <div className="h-56">
@@ -86,7 +86,7 @@ export function PointsChart({ data }: { data: PointsStatsData }) {
         {/* Daily Bar Chart */}
         {data.dailyData.length > 0 && (
           <div>
-            <h4 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+            <h4 className="mb-2 text-sm font-medium text-foreground-secondary">
               Dle dnů
             </h4>
             <div className="h-56">

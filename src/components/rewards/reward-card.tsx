@@ -46,7 +46,7 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
 
   return (
     <div
-      className="animate-fade-in-scale card-hover rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden"
+      className="animate-fade-in-scale card-hover rounded-2xl border border-border bg-card shadow-sm overflow-hidden"
       style={{ "--delay": `${index * 80}ms` } as React.CSSProperties}
     >
       {/* Image or gradient placeholder */}
@@ -58,10 +58,10 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
             alt={reward.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
         </div>
       ) : (
-        <div className="relative flex h-36 w-full items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/15 dark:to-yellow-900/20 overflow-hidden group">
+        <div className="relative flex h-36 w-full items-center justify-center bg-linear-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/15 dark:to-yellow-900/20 overflow-hidden group">
           <div className="absolute inset-0 animate-shimmer" />
           <Gift className="h-14 w-14 text-amber-300 dark:text-amber-600 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
           {/* Floating sparkles */}
@@ -72,11 +72,11 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
       <div className="p-4 space-y-3">
         {/* Title + stock */}
         <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">
+          <h3 className="text-sm font-bold text-foreground leading-tight">
             {reward.name}
           </h3>
           {reward.description && (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+            <p className="mt-1 text-xs text-foreground-secondary line-clamp-2 leading-relaxed">
               {reward.description}
             </p>
           )}
@@ -86,10 +86,10 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400 animate-sparkle" />
-            <span className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+            <span className="text-base font-extrabold text-foreground">
               {reward.pointsCost}
             </span>
-            <span className="text-[11px] text-slate-400 dark:text-slate-500">
+            <span className="text-[11px] text-foreground-muted">
               bodů
             </span>
           </div>
@@ -121,8 +121,8 @@ export function RewardCard({ reward, userBalance, index = 0 }: RewardCardProps) 
             claimed
               ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
               : canAfford && !isSoldOut
-                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30"
-                : "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed",
+                ? "bg-accent text-white hover:bg-accent-hover shadow-[0_4px_14px_var(--accent-glow)]"
+                : "bg-background-secondary text-foreground-muted cursor-not-allowed",
           )}
         >
           {isPending ? (

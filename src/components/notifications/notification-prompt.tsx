@@ -70,17 +70,17 @@ export function NotificationPrompt() {
   // Permission denied
   if (permission === "denied") {
     return (
-      <div className="mx-4 mt-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4">
+      <div className="mx-4 mt-3 rounded-xl border border-border bg-background p-4">
         <div className="flex items-center gap-3">
-          <BellOff className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+          <BellOff className="h-5 w-5 text-foreground-muted" />
           <div className="flex-1">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-foreground-secondary">
               Notifikace jsou zablokované. Povolte je v nastavení prohlížeče.
             </p>
           </div>
           <button
             onClick={() => setDismissed(true)}
-            className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="shrink-0 rounded-lg p-1.5 text-foreground-muted hover:bg-background-secondary"
           >
             <X className="h-4 w-4" />
           </button>
@@ -111,7 +111,7 @@ export function NotificationPrompt() {
             onClick={requestPermission}
             disabled={isLoading}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95 hover:bg-blue-700 disabled:opacity-50",
+              "flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white transition-all active:scale-95 hover:bg-accent-hover disabled:opacity-50",
             )}
           >
             <Bell className="h-3.5 w-3.5" />

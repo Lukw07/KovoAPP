@@ -176,10 +176,10 @@ export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingC
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-white dark:bg-slate-800 shadow-sm overflow-hidden",
+        "rounded-2xl border bg-card shadow-sm overflow-hidden",
         !listing.isActive
-          ? "opacity-60 border-slate-100 dark:border-slate-800"
-          : "border-slate-200 dark:border-slate-700",
+          ? "opacity-60 border-border"
+          : "border-border",
       )}
     >
       {/* Image carousel */}
@@ -201,26 +201,26 @@ export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingC
             {meta.label}
           </span>
           {listing.price && (
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <span className="text-sm font-bold text-foreground">
               {listing.price}
             </span>
           )}
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        <h3 className="text-sm font-bold text-foreground">
           {listing.title}
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 whitespace-pre-line">
+        <p className="text-xs text-foreground-secondary line-clamp-3 whitespace-pre-line">
           {listing.description}
         </p>
 
         {/* Author + time */}
-        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-2.5">
+        <div className="flex items-center justify-between border-t border-border pt-2.5">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-background-secondary">
               {listing.author.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -229,22 +229,22 @@ export function ListingCard({ listing, isOwner, onRemoved, onContact }: ListingC
                   className="h-6 w-6 rounded-full"
                 />
               ) : (
-                <User className="h-3.5 w-3.5 text-slate-400" />
+                <User className="h-3.5 w-3.5 text-foreground-muted" />
               )}
             </div>
             <div className="text-[11px]">
-              <span className="font-medium text-slate-700 dark:text-slate-300">
+              <span className="font-medium text-foreground">
                 {listing.author.name}
               </span>
               {listing.author.department && (
-                <span className="text-slate-400">
+                <span className="text-foreground-muted">
                   {" "}
                   · {listing.author.department.name}
                 </span>
               )}
             </div>
           </div>
-          <span className="text-[11px] text-slate-400">{timeAgo}</span>
+          <span className="text-[11px] text-foreground-muted">{timeAgo}</span>
         </div>
 
         {/* Actions */}
@@ -341,17 +341,17 @@ export function MarketplaceFeed({
     <div className="space-y-3">
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Hledat v inzerátech..."
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 pl-9 pr-3 py-2.5 text-sm",
-            "bg-white dark:bg-slate-800 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
-            "placeholder:text-slate-400",
+            "w-full rounded-xl border border-border pl-9 pr-3 py-2.5 text-sm",
+            "bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
+            "placeholder:text-foreground-muted",
           )}
         />
       </div>
@@ -367,7 +367,7 @@ export function MarketplaceFeed({
                 "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all active:scale-95",
                 filter === tab.key
                   ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
-                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+                  : "bg-card border border-border text-foreground-secondary hover:bg-background-secondary",
               )}
             >
               {tab.icon}
@@ -382,9 +382,9 @@ export function MarketplaceFeed({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className={cn(
-              "appearance-none rounded-xl border border-slate-200 dark:border-slate-700 pl-7 pr-3 py-1.5",
-              "text-xs font-medium bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300",
-              "focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+              "appearance-none rounded-xl border border-border pl-7 pr-3 py-1.5",
+              "text-xs font-medium bg-card text-foreground-secondary",
+              "focus:outline-none focus:ring-2 focus:ring-accent/20",
             )}
           >
             <option value="newest">Nejnovější</option>
@@ -396,9 +396,9 @@ export function MarketplaceFeed({
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-16 text-center">
-          <HandHelping className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center">
+          <HandHelping className="mb-3 h-12 w-12 text-foreground-muted" />
+          <p className="text-sm font-medium text-foreground-secondary">
             {searchTerm
               ? "Žádné výsledky pro hledaný výraz"
               : "Žádné inzeráty v této kategorii"}

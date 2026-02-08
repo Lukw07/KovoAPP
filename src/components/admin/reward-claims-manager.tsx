@@ -67,10 +67,10 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
           <Gift className="h-5 w-5 text-amber-600 dark:text-amber-400" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-semibold text-foreground">
             Žádosti o odměny
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-foreground-secondary">
             {pendingCount > 0
               ? `${pendingCount} čeká na schválení`
               : "Žádné čekající žádosti"}
@@ -92,8 +92,8 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
               className={cn(
                 "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all",
                 statusFilter === t.key
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  ? "bg-accent text-white shadow-accent glow-blue"
+                  : "bg-background-secondary text-foreground-secondary hover:bg-border",
               )}
             >
               <Filter className="h-3 w-3" />
@@ -103,7 +103,7 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
                   "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
                   statusFilter === t.key
                     ? "bg-white/20 text-white"
-                    : "bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-400",
+                    : "bg-border text-foreground-muted",
                 )}
               >
                 {count}
@@ -116,8 +116,8 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
       {/* Claims list */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-300">
-          <Gift className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <Gift className="mb-3 h-10 w-10 text-foreground-muted" />
+          <p className="text-sm text-foreground-secondary">
             Žádné žádosti v této kategorii
           </p>
         </div>
@@ -128,12 +128,12 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
             return (
               <div
                 key={claim.id}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                className="rounded-xl border border-border bg-card p-3 animate-in fade-in slide-in-from-bottom-2 duration-300"
                 style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
               >
                 <div className="flex items-start gap-3">
                   {/* User avatar */}
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background-secondary">
                     {claim.user.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -142,25 +142,25 @@ export function RewardClaimsManager({ claims }: RewardClaimsManagerProps) {
                         className="h-9 w-9 rounded-full object-cover"
                       />
                     ) : (
-                      <User className="h-4 w-4 text-slate-400" />
+                      <User className="h-4 w-4 text-foreground-muted" />
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                    <p className="text-sm font-semibold text-foreground truncate">
                       {claim.user.name}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-xs text-foreground-secondary truncate">
                       {claim.reward.name}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="flex items-center gap-1 text-[11px] text-foreground-secondary">
                         <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                         {claim.reward.pointsCost} bodů
                       </span>
-                      <span className="text-[11px] text-slate-300 dark:text-slate-600">•</span>
-                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                      <span className="text-[11px] text-foreground-muted">•</span>
+                      <span className="text-[11px] text-foreground-muted">
                         {new Date(claim.createdAt).toLocaleDateString("cs-CZ", {
                           day: "numeric",
                           month: "short",

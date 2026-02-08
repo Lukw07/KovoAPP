@@ -78,14 +78,14 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 active:scale-95 transition-all"
+        className="flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover active:scale-95 transition-all"
       >
         <ArrowLeft className="h-4 w-4" />
         Zpět na novinky
       </button>
 
       {/* Article */}
-      <article className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
+      <article className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {post.imageUrl && (
           <div className="relative h-48 w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -122,11 +122,11 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
             ))}
           </div>
 
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{post.title}</h1>
+          <h1 className="text-xl font-bold text-foreground">{post.title}</h1>
 
           {/* Author + date */}
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+          <div className="flex items-center gap-2 text-xs text-foreground-secondary">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-background-secondary">
               {post.author.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -135,10 +135,10 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
                   className="h-6 w-6 rounded-full"
                 />
               ) : (
-                <User className="h-3.5 w-3.5 text-slate-400" />
+                <User className="h-3.5 w-3.5 text-foreground-muted" />
               )}
             </div>
-            <span className="font-medium text-slate-700 dark:text-slate-300">
+            <span className="font-medium text-foreground">
               {post.author.name}
             </span>
             <span>·</span>
@@ -162,7 +162,7 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
       {/* Comments section */}
       {post.allowComments && (
         <div className="space-y-3">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <MessageSquare className="h-4 w-4" />
             Komentáře ({comments.length})
           </h3>
@@ -170,17 +170,17 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
           {/* Comment list */}
           <div className="space-y-2">
             {comments.length === 0 && (
-              <p className="rounded-xl bg-slate-50 dark:bg-slate-700/50 p-4 text-center text-sm text-slate-400 dark:text-slate-500">
+              <p className="rounded-xl bg-background-secondary p-4 text-center text-sm text-foreground-muted">
                 Zatím žádné komentáře. Buďte první!
               </p>
             )}
             {comments.map((comment) => (
               <div
                 key={comment.id}
-                className="rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 space-y-1"
+                className="rounded-xl border border-border bg-card p-3 space-y-1"
               >
                 <div className="flex items-center gap-2 text-xs">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-background-secondary">
                     {comment.author.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -189,20 +189,20 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
                         className="h-5 w-5 rounded-full"
                       />
                     ) : (
-                      <User className="h-3 w-3 text-slate-400" />
+                      <User className="h-3 w-3 text-foreground-muted" />
                     )}
                   </div>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                  <span className="font-medium text-foreground">
                     {comment.author.name}
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500">
+                  <span className="text-foreground-muted">
                     {formatDistanceToNow(new Date(comment.createdAt), {
                       addSuffix: true,
                       locale: cs,
                     })}
                   </span>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{comment.content}</p>
+                <p className="text-sm text-foreground-secondary">{comment.content}</p>
               </div>
             ))}
           </div>
@@ -221,10 +221,10 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
               }}
               placeholder="Napište komentář..."
               className={cn(
-                "flex-1 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2.5 text-sm",
-                "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
-                "placeholder:text-slate-400 dark:placeholder:text-slate-500",
-                "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                "flex-1 rounded-xl border border-border px-3 py-2.5 text-sm",
+                "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
+                "placeholder:text-foreground-muted",
+                "bg-card text-foreground"
               )}
               disabled={isPending}
             />
@@ -233,8 +233,8 @@ export function PostDetail({ post, onBack }: PostDetailProps) {
               disabled={isPending || !commentText.trim()}
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-xl",
-                "bg-blue-600 text-white shadow-sm",
-                "hover:bg-blue-700 active:scale-95 transition-all",
+                "bg-accent text-white shadow-accent glow-blue",
+                "hover:bg-accent-hover active:scale-95 transition-all",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >

@@ -58,11 +58,11 @@ function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Inbox className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <Inbox className="mb-3 h-12 w-12 text-foreground-muted" />
+        <p className="text-sm font-medium text-foreground-secondary">
           Žádné zprávy
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+        <p className="text-xs text-foreground-muted mt-1">
           Kontaktujte prodejce přes tržiště
         </p>
       </div>
@@ -70,7 +70,7 @@ function ConversationList({
   }
 
   return (
-    <div className="divide-y divide-slate-100 dark:divide-slate-700">
+    <div className="divide-y divide-border">
       {conversations.map((conv) => {
         const key = `${conv.partnerId}:${conv.listingId || "direct"}`;
         return (
@@ -79,12 +79,12 @@ function ConversationList({
             onClick={() => onSelect(conv)}
             className={cn(
               "w-full flex items-center gap-3 p-3 text-left transition-colors",
-              "hover:bg-slate-50 dark:hover:bg-slate-700/50 active:bg-slate-100 dark:active:bg-slate-700",
+              "hover:bg-background-secondary active:bg-background-secondary",
             )}
           >
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background-secondary overflow-hidden">
                 {conv.partnerAvatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -93,7 +93,7 @@ function ConversationList({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <User className="h-5 w-5 text-slate-400" />
+                  <User className="h-5 w-5 text-foreground-muted" />
                 )}
               </div>
               {conv.unreadCount > 0 && (
@@ -110,13 +110,13 @@ function ConversationList({
                   className={cn(
                     "text-sm truncate",
                     conv.unreadCount > 0
-                      ? "font-bold text-slate-900 dark:text-slate-100"
-                      : "font-medium text-slate-700 dark:text-slate-300",
+                      ? "font-bold text-foreground"
+                      : "font-medium text-foreground",
                   )}
                 >
                   {conv.partnerName || "Neznámý"}
                 </span>
-                <span className="text-[10px] text-slate-400 ml-2 flex-shrink-0">
+                <span className="text-[10px] text-foreground-muted ml-2 flex-shrink-0">
                   {formatDistanceToNow(new Date(conv.lastMessageAt), {
                     addSuffix: true,
                     locale: cs,
@@ -126,8 +126,8 @@ function ConversationList({
 
               {conv.listingTitle && (
                 <div className="flex items-center gap-1 mt-0.5">
-                  <Package className="h-3 w-3 text-slate-400" />
-                  <span className="text-[11px] text-slate-400 truncate">
+                  <Package className="h-3 w-3 text-foreground-muted" />
+                  <span className="text-[11px] text-foreground-muted truncate">
                     {conv.listingTitle}
                   </span>
                 </div>
@@ -137,8 +137,8 @@ function ConversationList({
                 className={cn(
                   "text-xs truncate mt-0.5",
                   conv.unreadCount > 0
-                    ? "text-slate-700 dark:text-slate-300"
-                    : "text-slate-400 dark:text-slate-500",
+                    ? "text-foreground"
+                    : "text-foreground-muted",
                 )}
               >
                 {conv.lastMessage}
@@ -235,14 +235,14 @@ function ChatView({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
+      <div className="flex items-center gap-3 border-b border-border pb-3">
         <button
           onClick={onBack}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex-shrink-0"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-secondary text-foreground-secondary hover:text-foreground flex-shrink-0"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background-secondary overflow-hidden flex-shrink-0">
           {partnerAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -251,17 +251,17 @@ function ChatView({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-xs font-bold text-slate-500">
+            <span className="text-xs font-bold text-foreground-secondary">
               {initials}
             </span>
           )}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+          <p className="text-sm font-bold text-foreground truncate">
             {partnerName || "Neznámý"}
           </p>
           {listingTitle && (
-            <p className="text-[11px] text-slate-400 truncate">
+            <p className="text-[11px] text-foreground-muted truncate">
               {listingTitle}
             </p>
           )}
@@ -276,8 +276,8 @@ function ChatView({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <MessageCircle className="h-8 w-8 text-slate-300 dark:text-slate-600 mb-2" />
-            <p className="text-xs text-slate-400">Začněte konverzaci</p>
+            <MessageCircle className="h-8 w-8 text-foreground-muted mb-2" />
+            <p className="text-xs text-foreground-muted">Začněte konverzaci</p>
           </div>
         ) : (
           messages.map((msg) => {
@@ -295,7 +295,7 @@ function ChatView({
                     "max-w-[75%] rounded-2xl px-3 py-2 text-sm",
                     isMine
                       ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-bl-sm",
+                      : "bg-background-secondary text-foreground rounded-bl-sm",
                   )}
                 >
                   <p className="whitespace-pre-line break-words">
@@ -304,7 +304,7 @@ function ChatView({
                   <p
                     className={cn(
                       "text-[10px] mt-1",
-                      isMine ? "text-blue-200" : "text-slate-400",
+                      isMine ? "text-blue-200" : "text-foreground-muted",
                     )}
                   >
                     {formatDistanceToNow(new Date(msg.createdAt), {
@@ -321,7 +321,7 @@ function ChatView({
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 border-t border-slate-200 dark:border-slate-700 pt-3">
+      <div className="flex items-center gap-2 border-t border-border pt-3">
         <input
           type="text"
           value={newMessage}
@@ -334,8 +334,8 @@ function ChatView({
           }}
           placeholder="Napište zprávu..."
           className={cn(
-            "flex-1 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+            "flex-1 rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
           )}
         />
         <button
@@ -343,8 +343,8 @@ function ChatView({
           disabled={!newMessage.trim() || isPending}
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-xl",
-            "bg-blue-600 text-white",
-            "hover:bg-blue-700 active:scale-95 transition-all",
+            "bg-accent text-white shadow-accent glow-blue",
+            "hover:bg-accent-hover active:scale-95 transition-all",
             "disabled:opacity-50 disabled:cursor-not-allowed",
           )}
         >

@@ -12,7 +12,7 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
   return (
-    <div className="relative flex min-h-dvh flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="relative flex min-h-dvh flex-col bg-background">
       {/* Top Bar */}
       <TopBar
         user={session?.user ?? null}

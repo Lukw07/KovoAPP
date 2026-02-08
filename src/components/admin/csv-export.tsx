@@ -80,7 +80,7 @@ export function CsvExport() {
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+        <label className="mb-1 block text-xs font-medium text-foreground-secondary">
           Rok
         </label>
         <input
@@ -89,17 +89,17 @@ export function CsvExport() {
           max={2099}
           value={year}
           onChange={(e) => setYear(Number(e.target.value))}
-          className="w-24 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+          className="w-24 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+        <label className="mb-1 block text-xs font-medium text-foreground-secondary">
           Měsíc
         </label>
         <select
           value={month}
           onChange={(e) => setMonth(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-slate-200 outline-none focus:border-blue-400"
+          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
         >
           {MONTH_NAMES.map((name, i) => (
             <option key={i} value={i}>
@@ -116,7 +116,7 @@ export function CsvExport() {
         <Download className="h-4 w-4" />
         {isPending ? "Exportuji..." : "Export CSV pro Helios"}
       </button>
-      <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+      <span className="flex items-center gap-1 text-xs text-foreground-muted">
         <Calendar className="h-3.5 w-3.5" />
         Schválené dovolené za {MONTH_NAMES[month]} {year}
       </span>

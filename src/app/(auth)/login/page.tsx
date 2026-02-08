@@ -8,11 +8,11 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-linear-to-br from-slate-900 via-blue-950 to-slate-900 px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/30">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent shadow-lg shadow-accent/30">
             <Factory className="h-9 w-9 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">KOVO Apka</h1>
@@ -46,7 +46,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 required
                 placeholder="vas.email@kovo.cz"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-slate-500 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
             </div>
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 required
                 placeholder="••••••••"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-slate-500 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-slate-500 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-6 py-4 text-base font-semibold text-white shadow-lg shadow-accent/30 glow-blue transition-all active:scale-[0.98] disabled:opacity-60"
           >
             {isPending ? (
               <>

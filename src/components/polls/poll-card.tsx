@@ -89,21 +89,21 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-white dark:bg-slate-800 shadow-sm overflow-hidden",
-        poll.isActive ? "border-slate-200 dark:border-slate-700" : "border-slate-100 dark:border-slate-800 opacity-75"
+        "rounded-2xl border bg-card shadow-sm overflow-hidden",
+        poll.isActive ? "border-border" : "border-border opacity-75"
       )}
     >
       <div className="p-4 space-y-4">
         {/* Header */}
         <div className="space-y-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
+            <h3 className="text-base font-bold text-foreground leading-snug">
               {poll.question}
             </h3>
             <div className="flex items-center gap-1 shrink-0">
               {poll.isAnonymous && (
                 <span
-                  className="flex items-center gap-0.5 rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400"
+                  className="flex items-center gap-0.5 rounded-full bg-background-secondary px-2 py-0.5 text-[10px] font-medium text-foreground-secondary"
                   title="Anonymní hlasování"
                 >
                   <Lock className="h-3 w-3" />
@@ -118,7 +118,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
             </div>
           </div>
           {poll.description && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{poll.description}</p>
+            <p className="text-sm text-foreground-secondary">{poll.description}</p>
           )}
         </div>
 
@@ -145,10 +145,10 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                   "relative w-full text-left rounded-xl border p-3 transition-all overflow-hidden",
                   "active:scale-[0.99]",
                   isSelected
-                    ? "border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/30"
+                    ? "border-accent/50 bg-accent-light"
                     : poll.isActive && !hasVoted
-                      ? "border-slate-200 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-900/20 cursor-pointer"
-                      : "border-slate-100 dark:border-slate-700 cursor-default"
+                      ? "border-border hover:border-accent/40 hover:bg-accent-light/50 cursor-pointer"
+                      : "border-border cursor-default"
                 )}
               >
                 {/* Progress bar background */}
@@ -156,7 +156,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                   <div
                     className={cn(
                       "absolute inset-0 rounded-xl transition-all duration-500",
-                      isSelected ? "bg-blue-100/50 dark:bg-blue-900/30" : "bg-slate-100/50 dark:bg-slate-700/30"
+                      isSelected ? "bg-accent-light" : "bg-background-secondary/50"
                     )}
                     style={{ width: `${percentage}%` }}
                   />
@@ -171,8 +171,8 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                       className={cn(
                         "text-sm",
                         isSelected
-                          ? "font-semibold text-blue-900 dark:text-blue-300"
-                          : "text-slate-700 dark:text-slate-300"
+                          ? "font-semibold text-accent-text"
+                          : "text-foreground"
                       )}
                     >
                       {option.text}
@@ -181,13 +181,13 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
 
                   {showResults && (
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-medium text-foreground-secondary">
                         {option.count}
                       </span>
                       <span
                         className={cn(
                           "text-xs font-bold",
-                          isSelected ? "text-blue-700 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"
+                          isSelected ? "text-accent-text" : "text-foreground-secondary"
                         )}
                       >
                         {percentage}%
@@ -208,9 +208,9 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
         )}
 
         {/* Footer: meta info */}
-        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3">
-          <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+        <div className="flex items-center justify-between border-t border-border pt-3">
+          <div className="flex items-center gap-2 text-xs text-foreground-muted">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-background-secondary">
               {poll.creator.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -219,13 +219,13 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
                   className="h-5 w-5 rounded-full"
                 />
               ) : (
-                <User className="h-3 w-3 text-slate-400" />
+                <User className="h-3 w-3 text-foreground-muted" />
               )}
             </div>
             <span>{poll.creator.name}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+          <div className="flex items-center gap-3 text-xs text-foreground-muted">
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
               {localTotalVotes} {localTotalVotes === 1 ? "hlas" : localTotalVotes < 5 ? "hlasy" : "hlasů"}
@@ -241,7 +241,7 @@ export function PollCard({ poll, onVoted }: PollCardProps) {
 
         {/* Multi-vote hint */}
         {poll.isMultiple && poll.isActive && !hasVoted && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center">
+          <p className="text-[10px] text-foreground-muted text-center">
             Můžete vybrat více možností
           </p>
         )}
@@ -270,8 +270,8 @@ export function PollsList({ polls }: PollsListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Ankety</h1>
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5">
+        <h1 className="text-xl font-bold text-foreground">Ankety</h1>
+        <div className="flex items-center gap-1 rounded-xl bg-background-secondary p-0.5">
           {(
             [
               { key: "active", label: "Aktivní" },
@@ -285,8 +285,8 @@ export function PollsList({ polls }: PollsListProps) {
               className={cn(
                 "rounded-lg px-3 py-1 text-xs font-medium transition-all",
                 filter === tab.key
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-foreground-secondary hover:text-foreground"
               )}
             >
               {tab.label}
@@ -296,9 +296,9 @@ export function PollsList({ polls }: PollsListProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-16 text-center">
-          <BarChart3 className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-16 text-center">
+          <BarChart3 className="mb-3 h-12 w-12 text-foreground-muted" />
+          <p className="text-sm font-medium text-foreground-secondary">
             {filter === "active"
               ? "Žádné aktivní ankety"
               : filter === "closed"

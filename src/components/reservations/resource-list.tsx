@@ -100,7 +100,7 @@ export default function ResourceList({
                 "flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-all active:scale-95",
                 filter === tab.value
                   ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700",
+                  : "bg-background-secondary text-foreground-secondary hover:bg-border",
               )}
             >
               {Icon && <Icon className="h-4 w-4" />}
@@ -112,7 +112,7 @@ export default function ResourceList({
 
       {/* Resource cards */}
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+        <p className="py-8 text-center text-sm text-foreground-muted">
           Žádné zdroje v této kategorii
         </p>
       ) : (
@@ -130,8 +130,8 @@ export default function ResourceList({
                   className={cn(
                     "flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-all active:scale-[0.98]",
                     isSelected
-                      ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm shadow-blue-600/10"
-                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600",
+                      ? "border-accent bg-accent-light shadow-sm shadow-accent/10"
+                      : "border-border bg-card hover:border-border",
                   )}
                 >
                   {/* Icon */}
@@ -146,17 +146,17 @@ export default function ResourceList({
 
                   {/* Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    <p className="truncate text-sm font-semibold text-foreground">
                       {res.name}
                     </p>
                     {res.location && (
-                      <p className="flex items-center gap-1 truncate text-xs text-slate-400">
+                      <p className="flex items-center gap-1 truncate text-xs text-foreground-muted">
                         <MapPin className="h-3 w-3" />
                         {res.location}
                       </p>
                     )}
                     {res.description && (
-                      <p className="mt-0.5 truncate text-xs text-slate-400">
+                      <p className="mt-0.5 truncate text-xs text-foreground-muted">
                         {res.description}
                       </p>
                     )}
@@ -171,7 +171,7 @@ export default function ResourceList({
                       )}
                       title={res.isAvailable ? "Dostupné" : "Nedostupné"}
                     />
-                    <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600" />
+                    <ChevronRight className="h-4 w-4 text-foreground-muted" />
                   </div>
                 </button>
               </li>

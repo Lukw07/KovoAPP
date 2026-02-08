@@ -124,14 +124,14 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
   };
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+    <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+      <h3 className="text-base font-bold text-foreground">
         Nový příspěvek
       </h3>
 
       {/* Title */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Nadpis *
         </label>
         <input
@@ -140,8 +140,8 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Název příspěvku..."
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
           )}
         />
       </div>
@@ -149,25 +149,25 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
       {/* Content with preview toggle */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          <label className="text-xs font-medium text-foreground-secondary">
             Obsah (Markdown) *
           </label>
           <button
             onClick={() => setPreview(!preview)}
-            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+            className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
           >
             <Eye className="h-3 w-3" />
             {preview ? "Editor" : "Náhled"}
           </button>
         </div>
         {preview ? (
-          <div className="min-h-[160px] rounded-xl border border-slate-200 dark:border-slate-600 p-3 prose prose-sm prose-slate dark:prose-invert max-w-none">
+          <div className="min-h-[160px] rounded-xl border border-border p-3 prose prose-sm prose-slate dark:prose-invert max-w-none">
             {content ? (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>
             ) : (
-              <p className="text-slate-400 dark:text-slate-500 italic">
+              <p className="text-foreground-muted italic">
                 Prázdný obsah
               </p>
             )}
@@ -179,8 +179,8 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             placeholder="Podporuje **Markdown** formátování..."
             rows={6}
             className={cn(
-              "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm resize-none dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+              "w-full rounded-xl border border-border px-3 py-2.5 text-sm resize-none bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
               "font-mono",
             )}
           />
@@ -189,7 +189,7 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
 
       {/* Excerpt */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Krátký popis (volitelné)
         </label>
         <input
@@ -198,20 +198,20 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           onChange={(e) => setExcerpt(e.target.value)}
           placeholder="Zobrazí se v náhledu karty..."
           className={cn(
-            "w-full rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm dark:bg-slate-700 dark:text-slate-200",
-            "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+            "w-full rounded-xl border border-border px-3 py-2.5 text-sm bg-card text-foreground",
+            "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
           )}
         />
       </div>
 
       {/* Image Upload (replaces old URL input) */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Obrázek (volitelné, max 10 MB)
         </label>
 
         {imagePreview ? (
-          <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+          <div className="relative rounded-xl overflow-hidden border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imagePreview}
@@ -232,9 +232,9 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             onClick={() => fileInputRef.current?.click()}
             className={cn(
               "w-full flex flex-col items-center justify-center gap-1.5 rounded-xl py-4",
-              "border-2 border-dashed border-slate-200 dark:border-slate-600",
-              "text-slate-400 dark:text-slate-500",
-              "hover:border-blue-300 hover:text-blue-500 dark:hover:border-blue-600 dark:hover:text-blue-400",
+              "border-2 border-dashed border-border",
+              "text-foreground-muted",
+              "hover:border-accent hover:text-accent",
               "transition-all cursor-pointer active:scale-[0.99]",
             )}
           >
@@ -256,7 +256,7 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
 
       {/* Tags */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label className="text-xs font-medium text-foreground-secondary">
           Štítky
         </label>
         <div className="flex gap-2">
@@ -272,14 +272,14 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             }}
             placeholder="Přidat štítek..."
             className={cn(
-              "flex-1 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm dark:bg-slate-700 dark:text-slate-200",
-              "focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900",
+              "flex-1 rounded-xl border border-border px-3 py-2 text-sm bg-card text-foreground",
+              "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20",
             )}
           />
           <button
             type="button"
             onClick={addTag}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-background-secondary text-foreground-secondary hover:bg-border active:scale-95 transition-all"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -289,7 +289,7 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400"
+                className="inline-flex items-center gap-1 rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-medium text-accent-text"
               >
                 {tag}
                 <button
@@ -306,21 +306,21 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
 
       {/* Toggles */}
       <div className="flex flex-wrap gap-4">
-        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
           <input
             type="checkbox"
             checked={isPinned}
             onChange={(e) => setIsPinned(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
           />
           Připnout nahoře
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
           <input
             type="checkbox"
             checked={allowComments}
             onChange={(e) => setAllowComments(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
           />
           Povolit komentáře
         </label>
@@ -344,8 +344,8 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         disabled={isPending || uploading || !title.trim() || !content.trim()}
         className={cn(
           "w-full flex items-center justify-center gap-2 rounded-xl py-3",
-          "bg-blue-600 text-white text-sm font-semibold shadow-sm",
-          "hover:bg-blue-700 active:scale-[0.99] transition-all",
+          "bg-accent text-white text-sm font-semibold shadow-accent glow-blue",
+          "hover:bg-accent-hover active:scale-[0.99] transition-all",
           "disabled:opacity-50 disabled:cursor-not-allowed",
         )}
       >

@@ -59,10 +59,10 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
   return (
     <article
       className={cn(
-        "rounded-2xl border bg-white dark:bg-slate-800 shadow-sm transition-shadow hover:shadow-md",
+        "rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md card-hover",
         post.isPinned
           ? "border-amber-200 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-900/10"
-          : "border-slate-200 dark:border-slate-700"
+          : "border-border"
       )}
     >
       {/* Image banner */}
@@ -104,7 +104,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
 
         {/* Title */}
         <h2
-          className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="text-lg font-bold text-foreground leading-snug cursor-pointer hover:text-accent transition-colors"
           onClick={() => onOpenDetail?.(post.id)}
         >
           {post.title}
@@ -122,14 +122,14 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
               {post.content}
             </ReactMarkdown>
           ) : (
-            <p className="text-sm text-slate-600 dark:text-slate-400">{preview}...</p>
+            <p className="text-sm text-foreground-secondary">{preview}...</p>
           )}
         </div>
 
         {hasMore && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 active:scale-95 transition-all"
+            className="flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover active:scale-95 transition-all"
           >
             {expanded ? (
               <>
@@ -146,9 +146,9 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         )}
 
         {/* Footer: author + time + comments */}
-        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3">
+        <div className="flex items-center justify-between border-t border-border pt-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-background-secondary">
               {post.author.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -157,14 +157,14 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
                   className="h-7 w-7 rounded-full object-cover"
                 />
               ) : (
-                <User className="h-4 w-4 text-slate-400" />
+                <User className="h-4 w-4 text-foreground-muted" />
               )}
             </div>
             <div className="text-xs">
-              <span className="font-medium text-slate-700 dark:text-slate-300">
+              <span className="font-medium text-foreground">
                 {post.author.name || "Neznámý"}
               </span>
-              <div className="flex items-center gap-1 text-slate-400">
+              <div className="flex items-center gap-1 text-foreground-muted">
                 <Calendar className="h-3 w-3" />
                 {timeAgo}
               </div>
@@ -174,7 +174,7 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
           {post.allowComments && (
             <button
               onClick={() => onOpenDetail?.(post.id)}
-              className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all"
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-foreground-secondary hover:bg-background-secondary active:scale-95 transition-all"
             >
               <MessageSquare className="h-3.5 w-3.5" />
               {post._count.comments}

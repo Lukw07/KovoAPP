@@ -92,7 +92,7 @@ export default function ReservationsClient({
           setSelected(null);
           setDateOffset(0);
         }}
-        className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 active:scale-95 transition-transform"
+        className="flex items-center gap-2 text-sm font-medium text-foreground-secondary active:scale-95 transition-transform"
       >
         <ArrowLeft className="h-4 w-4" />
         Zpět na seznam
@@ -103,7 +103,7 @@ export default function ReservationsClient({
         <button
           type="button"
           onClick={() => setDateOffset((o) => o - 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-secondary text-foreground-secondary active:scale-95"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -114,7 +114,7 @@ export default function ReservationsClient({
             "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
             dateOffset === 0
               ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
-              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
+              : "bg-background-secondary text-foreground-secondary",
           )}
         >
           Dnes
@@ -122,7 +122,7 @@ export default function ReservationsClient({
         <button
           type="button"
           onClick={() => setDateOffset((o) => o + 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-secondary text-foreground-secondary active:scale-95"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -131,7 +131,7 @@ export default function ReservationsClient({
       {/* Loading overlay */}
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-blue-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent" />
         </div>
       ) : (
         <>
@@ -152,7 +152,7 @@ export default function ReservationsClient({
       )}
 
       {/* Booking form */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <BookingForm
           resourceId={selected.id}
           resourceName={selected.name}

@@ -60,7 +60,7 @@ export default function BookingForm({
         </div>
       )}
 
-      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <p className="text-sm font-medium text-foreground">
         Rezervovat: <span className="font-semibold">{resourceName}</span>
       </p>
 
@@ -68,7 +68,7 @@ export default function BookingForm({
       <div>
         <label
           htmlFor="startTime"
-          className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-1.5 block text-sm font-medium text-foreground"
         >
           Od
         </label>
@@ -78,7 +78,7 @@ export default function BookingForm({
           name="startTime"
           min={minDateTime}
           required
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
         {state?.fieldErrors?.startTime && (
           <p className="mt-1 text-xs text-red-500">
@@ -91,7 +91,7 @@ export default function BookingForm({
       <div>
         <label
           htmlFor="endTime"
-          className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-1.5 block text-sm font-medium text-foreground"
         >
           Do
         </label>
@@ -101,7 +101,7 @@ export default function BookingForm({
           name="endTime"
           min={minDateTime}
           required
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
         {state?.fieldErrors?.endTime && (
           <p className="mt-1 text-xs text-red-500">
@@ -114,10 +114,10 @@ export default function BookingForm({
       <div>
         <label
           htmlFor="purpose"
-          className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="mb-1.5 block text-sm font-medium text-foreground"
         >
           Účel{" "}
-          <span className="font-normal text-slate-400 dark:text-slate-500">(nepovinný)</span>
+          <span className="font-normal text-foreground-muted">(nepovinný)</span>
         </label>
         <input
           type="text"
@@ -125,7 +125,7 @@ export default function BookingForm({
           name="purpose"
           maxLength={500}
           placeholder="Např. služební cesta do Brna"
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
@@ -136,8 +136,8 @@ export default function BookingForm({
         className={cn(
           "w-full rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]",
           isPending
-            ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-            : "bg-blue-600 text-white shadow-blue-600/25 hover:bg-blue-700",
+            ? "bg-border text-foreground-muted cursor-not-allowed"
+            : "bg-accent text-white shadow-accent glow-blue hover:bg-accent-hover",
         )}
       >
         {isPending ? (

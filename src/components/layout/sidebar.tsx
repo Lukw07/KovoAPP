@@ -9,18 +9,19 @@ import {
   Briefcase,
   ShieldCheck,
   Newspaper,
-  BarChart3,
+  ChartBar,
   Gift,
-  Settings,
-  LogOut,
+  GearSix,
+  SignOut,
   Star,
-  ClipboardList,
-  MessageCircle,
-  Store,
-} from "lucide-react";
+  ClipboardText,
+  ChatCircle,
+  Storefront,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
 import type { Session } from "next-auth";
+import type { IconWeight } from "@phosphor-icons/react";
 
 interface SidebarProps {
   open: boolean;
@@ -28,14 +29,14 @@ interface SidebarProps {
   user: Session["user"] | null;
 }
 
-// Drawer menu items
+// Drawer menu items — using Phosphor icons with weight switching
 const MENU_SECTIONS = [
   {
     title: "Komunikace",
     items: [
       { label: "Novinky", href: "/news", icon: Newspaper },
-      { label: "Ankety", href: "/polls", icon: BarChart3 },
-      { label: "Zprávy", href: "/messages", icon: MessageCircle },
+      { label: "Ankety", href: "/polls", icon: ChartBar },
+      { label: "Zprávy", href: "/messages", icon: ChatCircle },
     ],
   },
   {
@@ -46,14 +47,14 @@ const MENU_SECTIONS = [
     title: "Kariéra & Tržiště",
     items: [
       { label: "Volné pozice", href: "/jobs", icon: Briefcase },
-      { label: "Tržiště", href: "/marketplace", icon: Store },
+      { label: "Tržiště", href: "/marketplace", icon: Storefront },
     ],
   },
   {
     title: "Účet",
     items: [
       { label: "Profil", href: "/profile", icon: User },
-      { label: "Nastavení", href: "/settings", icon: Settings },
+      { label: "Nastavení", href: "/settings", icon: GearSix },
     ],
   },
 ] as const;
@@ -68,7 +69,7 @@ const ADMIN_SECTION = {
 const MANAGER_SECTION = {
   title: "Správa",
   items: [
-    { label: "Správa systému", href: "/admin", icon: ClipboardList },
+    { label: "Správa systému", href: "/admin", icon: ClipboardText },
   ],
 } as const;
 
@@ -111,21 +112,24 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — blur overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Drawer panel */}
+      {/* Drawer panel — premium glass surface */}
       <div
         ref={drawerRef}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ease-out",
+          "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col",
+          "bg-card dark:bg-background-secondary",
+          "shadow-2xl dark:shadow-[0_0_60px_rgba(0,0,0,0.8)]",
+          "transition-transform duration-300 ease-[cubic-bezier(0.4,0.14,0.3,1)]",
           open ? "translate-x-0" : "-translate-x-full",
         )}
         role="dialog"
@@ -133,11 +137,11 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
         aria-label="Boční menu"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-5">
+        <div className="flex items-center justify-between border-b border-border px-4 py-5">
           {user && (
             <div className="flex items-center gap-3">
-              {/* Avatar */}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-base font-bold text-white">
+              {/* Avatar with brand gradient */}
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-base font-bold text-white shadow-[0_2px_12px_rgba(99,102,241,0.35)]">
                 {user.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
@@ -149,10 +153,10 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
                 )}
               </div>
               <div>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">{user.name}</p>
-                <div className="flex items-center gap-1 text-sm text-amber-600">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  <span className="font-medium">{user.pointsBalance} bodů</span>
+                <p className="font-semibold tracking-tight text-foreground">{user.name}</p>
+                <div className="flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
+                  <Star className="h-3.5 w-3.5 text-amber-400" weight="fill" />
+                  <span className="font-medium tabular-nums">{user.pointsBalance} bodů</span>
                 </div>
               </div>
             </div>
@@ -160,18 +164,19 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
 
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-700"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-foreground-muted hover:bg-background-secondary dark:hover:bg-background-tertiary active:scale-[0.95] btn-press focus-ring"
             aria-label="Zavřít menu"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" weight="bold" />
           </button>
         </div>
 
         {/* Menu items */}
         <div className="flex-1 overflow-y-auto px-3 py-4">
           {sections.map((section) => (
-            <div key={section.title} className="mb-4">
-              <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <div key={section.title} className="mb-5">
+              {/* Section label — premium uppercase tracking */}
+              <p className="mb-1.5 px-3 label-caps">
                 {section.title}
               </p>
               {section.items.map((item) => {
@@ -182,18 +187,20 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
-                    "active:bg-slate-100 dark:active:bg-slate-800",
-                    isActive
-                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800",
+                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-100",
+                      "active:scale-[0.98] btn-press",
+                      isActive
+                        ? "bg-accent-light text-accent-text inner-glow"
+                        : "text-foreground-secondary hover:bg-background-secondary dark:hover:bg-background-tertiary",
                     )}
                   >
+                    {/* Phosphor: outline → fill on active */}
                     <Icon
                       className={cn(
                         "h-5 w-5",
-                        isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500",
+                        isActive ? "text-accent" : "text-foreground-muted",
                       )}
+                      weight={isActive ? "fill" : "regular"}
                     />
                     {item.label}
                   </Link>
@@ -204,13 +211,13 @@ export function Sidebar({ open, onClose, user }: SidebarProps) {
         </div>
 
         {/* Footer: Logout */}
-        <div className="border-t border-slate-100 dark:border-slate-800 p-3">
+        <div className="border-t border-border p-3">
           <form action={logoutAction}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-100 hover:bg-red-50 dark:hover:bg-red-900/15 active:scale-[0.98] btn-press"
             >
-              <LogOut className="h-5 w-5" />
+              <SignOut className="h-5 w-5" weight="bold" />
               Odhlásit se
             </button>
           </form>

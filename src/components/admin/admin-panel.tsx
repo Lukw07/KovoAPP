@@ -41,8 +41,8 @@ export function AdminPanel() {
             className={cn(
               "flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all active:scale-95",
               activeTab === tab.key
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                ? "bg-accent text-white shadow-accent glow-blue"
+                : "bg-card border border-border text-foreground-secondary hover:bg-card-hover"
             )}
           >
             {tab.icon}
