@@ -30,14 +30,13 @@ import { useRouter } from "next/navigation";
 import {
   getAuditLogs,
   getSecurityEvents,
-  deleteUser,
-  toggleUserActive,
   clearOldAuditLogs,
   clearOldSecurityEvents,
   exportAuditLogs,
   type AuditLogFilters,
   type SecurityEventFilters,
 } from "@/actions/admin-logs";
+import { deleteUser, toggleUserActive } from "@/actions/admin-users";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

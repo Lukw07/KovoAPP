@@ -153,6 +153,7 @@ export async function getAllUsers() {
       name: true,
       role: true,
       position: true,
+      phone: true,
       isActive: true,
       hireDate: true,
       pointsBalance: true,

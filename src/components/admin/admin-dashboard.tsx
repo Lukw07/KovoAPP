@@ -52,6 +52,7 @@ type UserRow = {
   name: string;
   role: string;
   position: string | null;
+  phone: string | null;
   isActive: boolean;
   hireDate: Date;
   pointsBalance: number;

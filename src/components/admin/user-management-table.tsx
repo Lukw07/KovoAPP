@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import {
   Search,
   UserPlus,
@@ -9,9 +9,20 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  Trash2,
+  AlertTriangle,
+  UserMinus,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createUser, updateUser, resetPassword } from "@/actions/admin-users";
+import {
+  createUser,
+  updateUser,
+  resetPassword,
+  deleteUser,
+  toggleUserActive,
+} from "@/actions/admin-users";
 import { useRouter } from "next/navigation";
 
 type UserRow = {
@@ -20,6 +31,7 @@ type UserRow = {
   name: string;
   role: string;
   position: string | null;
+  phone: string | null;
   isActive: boolean;
   hireDate: Date;
   pointsBalance: number;
@@ -54,24 +66,36 @@ export function UserManagementTable({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortAsc, setSortAsc] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [resetId, setResetId] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<UserRow | null>(null);
+  const [deleteEmail, setDeleteEmail] = useState("");
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const createFormRef = useRef<HTMLFormElement>(null);
 
   // Filter
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
       u.name.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q) ||
-      (u.department?.name.toLowerCase().includes(q) ?? false)
-    );
+      (u.department?.name.toLowerCase().includes(q) ?? false) ||
+      (u.position?.toLowerCase().includes(q) ?? false);
+    const matchesRole = !roleFilter || u.role === roleFilter;
+    const matchesStatus =
+      !statusFilter ||
+      (statusFilter === "active" && u.isActive) ||
+      (statusFilter === "inactive" && !u.isActive);
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   // Sort
@@ -125,8 +149,12 @@ export function UserManagementTable({
       if (result.error) {
         setMessage({ type: "error", text: result.error });
       } else {
-        setMessage({ type: "success", text: "Uživatel vytvořen" });
+        setMessage({
+          type: "success",
+          text: `Uživatel ${result.userName ?? ""} vytvořen`,
+        });
         setShowCreateForm(false);
+        createFormRef.current?.reset();
         router.refresh();
       }
     });
@@ -153,6 +181,43 @@ export function UserManagementTable({
       } else {
         setMessage({ type: "success", text: "Heslo resetováno" });
         setResetId(null);
+        router.refresh();
+      }
+    });
+  }
+
+  async function handleDeleteUser() {
+    if (!deleteConfirm) return;
+    const fd = new FormData();
+    fd.set("userId", deleteConfirm.id);
+    fd.set("confirmEmail", deleteEmail);
+
+    startTransition(async () => {
+      const result = await deleteUser(fd);
+      if (result.error) {
+        setMessage({ type: "error", text: result.error });
+      } else {
+        setMessage({
+          type: "success",
+          text: `Uživatel ${result.deletedName} byl smazán`,
+        });
+        setDeleteConfirm(null);
+        setDeleteEmail("");
+        router.refresh();
+      }
+    });
+  }
+
+  async function handleToggleActive(userId: string, isActive: boolean) {
+    startTransition(async () => {
+      const result = await toggleUserActive(userId, isActive);
+      if (result.error) {
+        setMessage({ type: "error", text: result.error });
+      } else {
+        setMessage({
+          type: "success",
+          text: isActive ? "Uživatel aktivován" : "Uživatel deaktivován",
+        });
         router.refresh();
       }
     });
@@ -189,6 +254,25 @@ export function UserManagementTable({
             className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </div>
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+        >
+          <option value="">Všechny role</option>
+          <option value="ADMIN">Admin</option>
+          <option value="MANAGER">Manager</option>
+          <option value="EMPLOYEE">Zaměstnanec</option>
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+        >
+          <option value="">Všechny stavy</option>
+          <option value="active">Aktivní</option>
+          <option value="inactive">Neaktivní</option>
+        </select>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-accent glow-blue hover:bg-accent-hover active:scale-95 transition-all"
@@ -201,58 +285,124 @@ export function UserManagementTable({
       {/* Create form */}
       {showCreateForm && (
         <form
+          ref={createFormRef}
           action={handleCreateUser}
           className="rounded-xl border border-accent/30 bg-accent-light p-4 space-y-3"
         >
           <h4 className="font-medium text-foreground">Nový uživatel</h4>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <input
-              name="name"
-              placeholder="Jméno a příjmení"
-              required
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            />
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              required
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            />
-            <input
-              name="password"
-              type="password"
-              placeholder="Heslo (min. 6 znaků)"
-              required
-              minLength={6}
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            />
-            <select
-              name="role"
-              defaultValue="EMPLOYEE"
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            >
-              <option value="EMPLOYEE">Zaměstnanec</option>
-              <option value="MANAGER">Manager</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-            <input
-              name="position"
-              placeholder="Pozice (volitelné)"
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            />
-            <select
-              name="departmentId"
-              defaultValue=""
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
-            >
-              <option value="">Bez oddělení</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} ({d.code})
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Jméno a příjmení *
+              </label>
+              <input
+                name="name"
+                placeholder="Jan Novák"
+                required
+                minLength={2}
+                maxLength={100}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Email *
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="jan.novak@firma.cz"
+                required
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Heslo * (min. 8 znaků, velké+malé+číslo+spec. znak)
+              </label>
+              <div className="relative">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Bezpečné heslo"
+                  required
+                  minLength={8}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 pr-9 text-sm text-foreground outline-none focus:border-accent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Role *
+              </label>
+              <select
+                name="role"
+                defaultValue="EMPLOYEE"
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              >
+                <option value="EMPLOYEE">Zaměstnanec</option>
+                <option value="MANAGER">Manager</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Pozice
+              </label>
+              <input
+                name="position"
+                placeholder="Např. Operátor CNC"
+                maxLength={100}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Oddělení
+              </label>
+              <select
+                name="departmentId"
+                defaultValue=""
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              >
+                <option value="">Bez oddělení</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} ({d.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Telefon
+              </label>
+              <input
+                name="phone"
+                type="tel"
+                placeholder="+420 xxx xxx xxx"
+                maxLength={20}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-foreground-secondary">
+                Datum nástupu
+              </label>
+              <input
+                name="hireDate"
+                type="date"
+                defaultValue={new Date().toISOString().slice(0, 10)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </div>
           </div>
           <div className="flex gap-2">
             <button
@@ -261,7 +411,7 @@ export function UserManagementTable({
               className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
-              Vytvořit
+              {isPending ? "Vytvářím..." : "Vytvořit"}
             </button>
             <button
               type="button"
@@ -377,6 +527,29 @@ export function UserManagementTable({
                         >
                           <KeyRound className="h-3.5 w-3.5" />
                         </button>
+                        <button
+                          onClick={() => handleToggleActive(user.id, !user.isActive)}
+                          disabled={isPending}
+                          className={cn(
+                            "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors",
+                            user.isActive
+                              ? "text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30"
+                              : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                          )}
+                          title={user.isActive ? "Deaktivovat" : "Aktivovat"}
+                        >
+                          <UserMinus className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDeleteConfirm(user);
+                            setDeleteEmail("");
+                          }}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                          title="Smazat uživatele"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                       {/* Password reset inline */}
                       {resetId === user.id && (
@@ -388,9 +561,9 @@ export function UserManagementTable({
                           <input
                             name="newPassword"
                             type="password"
-                            placeholder="Nové heslo"
+                            placeholder="Min. 8 znaků"
                             required
-                            minLength={6}
+                            minLength={8}
                             className="w-32 rounded border border-border px-2 py-1 text-xs bg-card text-foreground outline-none focus:border-accent"
                           />
                           <button
@@ -429,6 +602,73 @@ export function UserManagementTable({
             ? "é"
             : "ů"}
       </p>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-red-200 dark:border-red-900/50 bg-card p-6 shadow-xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Smazat uživatele
+                </h3>
+                <p className="text-sm text-foreground-secondary">
+                  Tato akce je nevratná!
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
+              <p>
+                Chystáte se smazat uživatele{" "}
+                <strong>{deleteConfirm.name}</strong> (
+                {deleteConfirm.email}). Všechna data budou
+                trvale odstraněna.
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                Pro potvrzení zadejte email uživatele:
+              </label>
+              <input
+                type="email"
+                value={deleteEmail}
+                onChange={(e) => setDeleteEmail(e.target.value)}
+                placeholder={deleteConfirm.email}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-red-500"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleDeleteUser}
+                disabled={
+                  isPending ||
+                  deleteEmail.toLowerCase() !==
+                    deleteConfirm.email.toLowerCase()
+                }
+                className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isPending ? "Mažu..." : "Smazat trvale"}
+              </button>
+              <button
+                onClick={() => {
+                  setDeleteConfirm(null);
+                  setDeleteEmail("");
+                }}
+                className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground-secondary hover:bg-background-secondary transition-colors"
+              >
+                Zrušit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -454,18 +694,23 @@ function EditRow({
         <input type="hidden" name="userId" value={user.id} />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div>
-            <label className="text-xs text-foreground-secondary">Jméno</label>
+            <label className="text-xs text-foreground-secondary">Jméno *</label>
             <input
               name="name"
               defaultValue={user.name}
+              required
+              minLength={2}
+              maxLength={100}
               className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
           <div>
-            <label className="text-xs text-foreground-secondary">Email</label>
+            <label className="text-xs text-foreground-secondary">Email *</label>
             <input
               name="email"
+              type="email"
               defaultValue={user.email}
+              required
               className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
@@ -501,6 +746,17 @@ function EditRow({
             <input
               name="position"
               defaultValue={user.position ?? ""}
+              maxLength={100}
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-foreground-secondary">Telefon</label>
+            <input
+              name="phone"
+              type="tel"
+              defaultValue={user.phone ?? ""}
+              maxLength={20}
               className="w-full rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-accent"
             />
           </div>
@@ -528,7 +784,7 @@ function EditRow({
           <button
             type="button"
             onClick={onCancel}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground-secondary hover:bg-background-secondary"
+            className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground-secondary hover:bg-background-secondary"
           >
             Zrušit
           </button>

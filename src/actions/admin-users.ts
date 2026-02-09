@@ -13,20 +13,59 @@ const BCRYPT_ROUNDS = 12;
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const createUserSchema = z.object({
-  email: z.string().email("Neplatný email"),
-  name: z.string().min(2, "Jméno musí mít alespoň 2 znaky"),
+  email: z
+    .string()
+    .email("Neplatný email")
+    .transform((e) => e.toLowerCase().trim()),
+  name: z
+    .string()
+    .min(2, "Jméno musí mít alespoň 2 znaky")
+    .max(100, "Jméno je příliš dlouhé")
+    .trim(),
   password: z.string().min(8, "Heslo musí mít alespoň 8 znaků"),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
-  position: z.string().optional(),
+  position: z
+    .string()
+    .max(100, "Pozice je příliš dlouhá")
+    .optional()
+    .transform((v) => v?.trim() || undefined),
+  phone: z
+    .string()
+    .max(20, "Telefon je příliš dlouhý")
+    .optional()
+    .transform((v) => v?.trim() || undefined),
   departmentId: z.string().optional(),
+  hireDate: z
+    .string()
+    .optional()
+    .transform((v) => (v ? new Date(v) : undefined)),
 });
 
 const updateUserSchema = z.object({
   userId: z.string().min(1),
-  name: z.string().min(2, "Jméno musí mít alespoň 2 znaky").optional(),
-  email: z.string().email("Neplatný email").optional(),
+  name: z
+    .string()
+    .min(2, "Jméno musí mít alespoň 2 znaky")
+    .max(100, "Jméno je příliš dlouhé")
+    .trim()
+    .optional(),
+  email: z
+    .string()
+    .email("Neplatný email")
+    .transform((e) => e.toLowerCase().trim())
+    .optional(),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]).optional(),
-  position: z.string().optional(),
+  position: z
+    .string()
+    .max(100)
+    .optional()
+    .transform((v) => (v !== undefined ? v.trim() : undefined)),
+  phone: z
+    .string()
+    .max(20)
+    .nullable()
+    .optional()
+    .transform((v) => (v !== undefined ? (v?.trim() || null) : undefined)),
   departmentId: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
 });
@@ -49,7 +88,7 @@ async function requireAdmin() {
 // ─── Create User ─────────────────────────────────────────────────────────────
 
 export async function createUser(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = createUserSchema.safeParse({
     email: formData.get("email"),
@@ -57,14 +96,17 @@ export async function createUser(formData: FormData) {
     password: formData.get("password"),
     role: formData.get("role"),
     position: formData.get("position") || undefined,
+    phone: formData.get("phone") || undefined,
     departmentId: formData.get("departmentId") || undefined,
+    hireDate: formData.get("hireDate") || undefined,
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const { email, name, password, role, position, departmentId } = parsed.data;
+  const { email, name, password, role, position, phone, departmentId, hireDate } =
+    parsed.data;
 
   // Validate password strength
   const strength = validatePasswordStrength(password);
@@ -78,6 +120,14 @@ export async function createUser(formData: FormData) {
     return { error: "Uživatel s tímto emailem již existuje" };
   }
 
+  // Validate departmentId exists if provided
+  if (departmentId) {
+    const dept = await prisma.department.findUnique({ where: { id: departmentId } });
+    if (!dept) {
+      return { error: "Vybrané oddělení neexistuje" };
+    }
+  }
+
   const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const newUser = await prisma.user.create({
@@ -86,42 +136,48 @@ export async function createUser(formData: FormData) {
       name,
       password: hashedPassword,
       role: role as "ADMIN" | "MANAGER" | "EMPLOYEE",
-      position,
+      position: position ?? null,
+      phone: phone ?? null,
       departmentId: departmentId || null,
+      hireDate: hireDate ?? new Date(),
     },
   });
 
-  const session = await auth();
   await logAudit({
     action: "USER_CREATED",
     entityType: "User",
     entityId: newUser.id,
-    performedBy: session!.user!.id!,
-    details: { email, name, role },
+    performedBy: session.user!.id!,
+    details: { email, name, role, position, departmentId },
   });
 
-  return { success: true };
+  return { success: true, userName: newUser.name };
 }
 
 // ─── Update User ─────────────────────────────────────────────────────────────
 
 export async function updateUser(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = updateUserSchema.safeParse({
     userId: formData.get("userId"),
     name: formData.get("name") || undefined,
     email: formData.get("email") || undefined,
     role: formData.get("role") || undefined,
-    position: formData.get("position") || undefined,
-    departmentId: (formData.get("departmentId") && formData.get("departmentId") !== "" && formData.get("departmentId") !== "null") 
-      ? formData.get("departmentId") 
-      : null,
-    isActive: formData.get("isActive") === "true"
-      ? true
-      : formData.get("isActive") === "false"
-        ? false
-        : undefined,
+    position: formData.get("position") !== null ? (formData.get("position") as string) : undefined,
+    phone: formData.get("phone") !== null ? (formData.get("phone") as string) : undefined,
+    departmentId:
+      formData.get("departmentId") &&
+      formData.get("departmentId") !== "" &&
+      formData.get("departmentId") !== "null"
+        ? formData.get("departmentId")
+        : null,
+    isActive:
+      formData.get("isActive") === "true"
+        ? true
+        : formData.get("isActive") === "false"
+          ? false
+          : undefined,
   });
 
   if (!parsed.success) {
@@ -129,6 +185,33 @@ export async function updateUser(formData: FormData) {
   }
 
   const { userId, ...data } = parsed.data;
+
+  // Verify target user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, role: true },
+  });
+  if (!targetUser) {
+    return { error: "Uživatel nenalezen" };
+  }
+
+  // Prevent admin from demoting themselves
+  if (userId === session.user!.id && data.role && data.role !== "ADMIN") {
+    return { error: "Nemůžete změnit svou vlastní roli" };
+  }
+
+  // Prevent admin from deactivating themselves
+  if (userId === session.user!.id && data.isActive === false) {
+    return { error: "Nemůžete deaktivovat svůj vlastní účet" };
+  }
+
+  // If demoting/changing role of another admin, check admin count
+  if (targetUser.role === "ADMIN" && data.role && data.role !== "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      return { error: "Nelze odebrat roli poslednímu administrátorovi" };
+    }
+  }
 
   // Remove undefined values
   const updateData: Record<string, unknown> = {};
@@ -151,17 +234,26 @@ export async function updateUser(formData: FormData) {
     }
   }
 
+  // Validate departmentId if changing
+  if (updateData.departmentId && updateData.departmentId !== null) {
+    const dept = await prisma.department.findUnique({
+      where: { id: updateData.departmentId as string },
+    });
+    if (!dept) {
+      return { error: "Vybrané oddělení neexistuje" };
+    }
+  }
+
   await prisma.user.update({
     where: { id: userId },
     data: updateData,
   });
 
-  const session = await auth();
   await logAudit({
     action: "USER_UPDATED",
     entityType: "User",
     entityId: userId,
-    performedBy: session!.user!.id!,
+    performedBy: session.user!.id!,
     details: updateData,
   });
 
@@ -171,7 +263,7 @@ export async function updateUser(formData: FormData) {
 // ─── Reset Password ─────────────────────────────────────────────────────────
 
 export async function resetPassword(formData: FormData) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const parsed = resetPasswordSchema.safeParse({
     userId: formData.get("userId"),
@@ -183,6 +275,15 @@ export async function resetPassword(formData: FormData) {
   }
 
   const { userId, newPassword } = parsed.data;
+
+  // Verify target user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true },
+  });
+  if (!targetUser) {
+    return { error: "Uživatel nenalezen" };
+  }
 
   // Validate password strength
   const strength = validatePasswordStrength(newPassword);
@@ -197,12 +298,121 @@ export async function resetPassword(formData: FormData) {
     data: { password: hashedPassword },
   });
 
-  const session = await auth();
   await logAudit({
     action: "PASSWORD_RESET",
     entityType: "User",
     entityId: userId,
-    performedBy: session!.user!.id!,
+    performedBy: session.user!.id!,
+    details: { targetUser: targetUser.name },
+  });
+
+  return { success: true };
+}
+
+// ─── Delete User ─────────────────────────────────────────────────────────────
+
+const deleteUserSchema = z.object({
+  userId: z.string().min(1),
+  confirmEmail: z.string().email(),
+});
+
+export async function deleteUser(formData: FormData) {
+  const session = await requireAdmin();
+
+  const parsed = deleteUserSchema.safeParse({
+    userId: formData.get("userId"),
+    confirmEmail: formData.get("confirmEmail"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const { userId, confirmEmail } = parsed.data;
+
+  // Cannot delete yourself
+  if (userId === session.user!.id) {
+    return { error: "Nemůžete smazat svůj vlastní účet" };
+  }
+
+  // Verify user exists and email matches (safety check)
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, name: true, role: true },
+  });
+
+  if (!targetUser) {
+    return { error: "Uživatel nenalezen" };
+  }
+
+  if (targetUser.email.toLowerCase() !== confirmEmail.toLowerCase()) {
+    return { error: "Email neodpovídá – smazání zrušeno" };
+  }
+
+  // Cannot delete last admin
+  if (targetUser.role === "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      return { error: "Nelze smazat posledního administrátora" };
+    }
+  }
+
+  // Delete the user (cascade will handle related records)
+  await prisma.user.delete({ where: { id: userId } });
+
+  await logAudit({
+    action: "USER_DELETED",
+    entityType: "User",
+    entityId: userId,
+    performedBy: session.user!.id!,
+    details: {
+      deletedEmail: targetUser.email,
+      deletedName: targetUser.name,
+      deletedRole: targetUser.role,
+    },
+  });
+
+  return { success: true, deletedName: targetUser.name };
+}
+
+// ─── Deactivate/Activate User ────────────────────────────────────────────────
+
+export async function toggleUserActive(userId: string, isActive: boolean) {
+  const session = await requireAdmin();
+
+  if (userId === session.user!.id) {
+    return { error: "Nemůžete deaktivovat svůj vlastní účet" };
+  }
+
+  // Verify user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true },
+  });
+  if (!targetUser) {
+    return { error: "Uživatel nenalezen" };
+  }
+
+  // Cannot deactivate the last admin
+  if (!isActive && targetUser.role === "ADMIN") {
+    const adminCount = await prisma.user.count({
+      where: { role: "ADMIN", isActive: true },
+    });
+    if (adminCount <= 1) {
+      return { error: "Nelze deaktivovat posledního aktivního administrátora" };
+    }
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isActive },
+  });
+
+  await logAudit({
+    action: isActive ? "USER_ACTIVATED" : "USER_DEACTIVATED",
+    entityType: "User",
+    entityId: userId,
+    performedBy: session.user!.id!,
   });
 
   return { success: true };
