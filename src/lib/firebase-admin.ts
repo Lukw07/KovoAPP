@@ -17,23 +17,23 @@ function getAdminApp() {
 
   if (serviceAccountJson) {
     try {
-      // Fix common environment variable formatting issues caused by deployment tools
-      serviceAccountJson = serviceAccountJson.trim();
-      
-      // Remove wrapping single quotes if present (e.g. '{"type":...}')
-      if (serviceAccountJson.startsWith("'") && serviceAccountJson.endsWith("'")) {
-        serviceAccountJson = serviceAccountJson.slice(1, -1);
-      }
-      
-      // Remove wrapping double quotes if present (e.g. "{\"type\":...}")
-      if (serviceAccountJson.startsWith('"') && serviceAccountJson.endsWith('"')) {
-        serviceAccountJson = serviceAccountJson.slice(1, -1);
+      // Robust JSON extraction strategies for various environment variable misconfigurations:
+      // 1. Direct match first (finding { and })
+      const firstOpen = serviceAccountJson.indexOf("{");
+      const lastClose = serviceAccountJson.lastIndexOf("}");
+
+      if (firstOpen !== -1 && lastClose !== -1) {
+        serviceAccountJson = serviceAccountJson.substring(firstOpen, lastClose + 1);
       }
 
-      // Handle unescaping of escaped quotes (e.g. {\"type\":...})
-      // This happens if the JSON string was double-encoded or escaped by the shell
+      // 2. Handle escaped double quotes (e.g. {\"type\":...}) often added by Docker/Shell
       if (serviceAccountJson.includes('\\"')) {
         serviceAccountJson = serviceAccountJson.replace(/\\"/g, '"');
+      }
+
+      // 3. Handle double-escaped newlines in private key if present (\\n -> \n)
+      if (serviceAccountJson.includes('\\\\n')) {
+        serviceAccountJson = serviceAccountJson.replace(/\\\\n/g, '\\n');
       }
 
       const serviceAccount = JSON.parse(serviceAccountJson);
