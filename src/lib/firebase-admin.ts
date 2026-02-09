@@ -13,15 +13,35 @@ function getAdminApp() {
   }
 
   // Option 1: JSON string in env
-  const serviceAccountJson = process.env.FIREBASE_ADMIN_SDK_KEY;
+  let serviceAccountJson = process.env.FIREBASE_ADMIN_SDK_KEY;
+
   if (serviceAccountJson) {
     try {
+      // Fix common environment variable formatting issues caused by deployment tools
+      serviceAccountJson = serviceAccountJson.trim();
+      
+      // Remove wrapping single quotes if present (e.g. '{"type":...}')
+      if (serviceAccountJson.startsWith("'") && serviceAccountJson.endsWith("'")) {
+        serviceAccountJson = serviceAccountJson.slice(1, -1);
+      }
+      
+      // Remove wrapping double quotes if present (e.g. "{\"type\":...}")
+      if (serviceAccountJson.startsWith('"') && serviceAccountJson.endsWith('"')) {
+        serviceAccountJson = serviceAccountJson.slice(1, -1);
+      }
+
+      // Handle unescaping of escaped quotes (e.g. {\"type\":...})
+      // This happens if the JSON string was double-encoded or escaped by the shell
+      if (serviceAccountJson.includes('\\"')) {
+        serviceAccountJson = serviceAccountJson.replace(/\\"/g, '"');
+      }
+
       const serviceAccount = JSON.parse(serviceAccountJson);
       return initializeApp({
         credential: cert(serviceAccount),
       });
-    } catch {
-      console.warn("[firebase-admin] Failed to parse FIREBASE_ADMIN_SDK_KEY");
+    } catch (error) {
+      console.warn("[firebase-admin] Failed to parse FIREBASE_ADMIN_SDK_KEY:", error);
     }
   }
 
