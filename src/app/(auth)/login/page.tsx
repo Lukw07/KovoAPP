@@ -86,15 +86,6 @@ export default function LoginPage() {
             )}
           </button>
         </form>
-
-        {/* Demo credentials hint */}
-        <div className="mt-6 rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-          <p className="text-xs text-slate-400">Demo přístup</p>
-          <p className="mt-1 text-sm font-medium text-slate-300">
-            admin@kovo.cz
-          </p>
-          <p className="text-sm text-slate-400">Heslo123!</p>
-        </div>
       </div>
     </div>
   );
