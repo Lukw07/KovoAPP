@@ -85,32 +85,39 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     ]);
 
     const results: SearchResult[] = [
-      ...posts.map((p) => ({
-        id: p.id,
-        type: "post" as const,
-        title: p.title,
-        excerpt: p.excerpt || (p.content.length > 120 ? p.content.slice(0, 120) + "…" : p.content),
-        link: `/news/${p.id}`,
-        createdAt: p.createdAt,
-      })),
-      ...listings.map((l) => ({
-        id: l.id,
-        type: "listing" as const,
-        title: l.title,
-        excerpt: l.description.length > 120 ? l.description.slice(0, 120) + "…" : l.description,
-        link: `/marketplace/${l.id}`,
-        createdAt: l.createdAt,
-      })),
-      ...jobs.map((j) => ({
-        id: j.id,
-        type: "job" as const,
-        title: j.title,
-        excerpt: (j.description ?? "").length > 120
-          ? (j.description ?? "").slice(0, 120) + "…"
-          : j.description ?? "",
-        link: `/jobs/${j.id}`,
-        createdAt: j.createdAt,
-      })),
+      ...posts.map((p) => {
+        const content = p.content || "";
+        return {
+          id: p.id,
+          type: "post" as const,
+          title: p.title,
+          excerpt: p.excerpt || (content.length > 120 ? content.slice(0, 120) + "…" : content),
+          link: `/news/${p.id}`,
+          createdAt: p.createdAt,
+        };
+      }),
+      ...listings.map((l) => {
+        const desc = l.description || "";
+        return {
+          id: l.id,
+          type: "listing" as const,
+          title: l.title,
+          excerpt: desc.length > 120 ? desc.slice(0, 120) + "…" : desc,
+          link: `/marketplace/${l.id}`,
+          createdAt: l.createdAt,
+        };
+      }),
+      ...jobs.map((j) => {
+        const desc = j.description || "";
+        return {
+          id: j.id,
+          type: "job" as const,
+          title: j.title,
+          excerpt: desc.length > 120 ? desc.slice(0, 120) + "…" : desc,
+          link: `/jobs/${j.id}`,
+          createdAt: j.createdAt,
+        };
+      }),
     ];
 
     // Sort by relevance (title match first, then by date)

@@ -84,9 +84,15 @@ export function SearchModal({
 
     debounceRef.current = setTimeout(() => {
       startTransition(async () => {
-        const res = await globalSearch(value);
-        setResults(res);
-        setSearched(true);
+        try {
+          const res = await globalSearch(value);
+          setResults(res || []);
+          setSearched(true);
+        } catch (error) {
+          console.error("Search error:", error);
+          setResults([]);
+          setSearched(true);
+        }
       });
     }, 300);
   }
