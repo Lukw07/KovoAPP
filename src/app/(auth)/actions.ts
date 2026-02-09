@@ -39,15 +39,25 @@ export async function loginAction(
     });
   } catch (error: unknown) {
     // NextAuth redirects throw NEXT_REDIRECT, which we should let through
-    if (
-      error instanceof Error &&
-      "digest" in error &&
-      typeof (error as { digest?: string }).digest === "string" &&
-      (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-    ) {
+    // Checking for NEXT_REDIRECT string is the reliable way in Next.js 14+ / 15+
+    const err = error as Error & { digest?: string };
+    if (err.message && err.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
-    return { error: "Nesprávný email nebo heslo" };
+    // Specific check for CredentialsSignin to return specific error
+    if (err.name === "CredentialsSignin" || err.message?.includes("CredentialsSignin")) {
+      return { error: "Nesprávný email nebo heslo" };
+    }
+
+    // Pass through other expected Next.js errors
+    if (err.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
+    console.error("Login error:", error);
+    return { error: "Došlo k chybě při přihlášení" };
+  }
+}
   }
 }
 
