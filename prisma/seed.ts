@@ -32,41 +32,49 @@ async function hashPassword(password: string): Promise<string> {
 async function main() {
   console.log("🗑️  Cleaning database...");
 
+  // Helper: delete if table exists (handles missing tables gracefully)
+  async function safeDelete(fn: () => Promise<unknown>) {
+    try { await fn(); } catch (e: any) {
+      if (e?.code === "P2021") return; // Table does not exist — skip
+      throw e;
+    }
+  }
+
   // Break circular dependency (department.managerId → user)
-  await prisma.department.updateMany({ data: { managerId: null } });
+  await safeDelete(() => prisma.department.updateMany({ data: { managerId: null } }));
 
   // Delete all data — order matters (foreign keys)
-  await prisma.securityEvent.deleteMany();
-  await prisma.auditLog.deleteMany();
-  await prisma.notification.deleteMany();
-  await prisma.fcmToken.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.marketplaceImage.deleteMany();
-  await prisma.marketplaceListing.deleteMany();
-  await prisma.referral.deleteMany();
-  await prisma.jobPosting.deleteMany();
-  await prisma.rewardClaim.deleteMany();
-  await prisma.reward.deleteMany();
-  await prisma.pointTransaction.deleteMany();
-  await prisma.pollVote.deleteMany();
-  await prisma.poll.deleteMany();
-  await prisma.comment.deleteMany();
-  await prisma.postTag.deleteMany();
-  await prisma.tag.deleteMany();
-  await prisma.post.deleteMany();
-  await prisma.reservation.deleteMany();
-  await prisma.resource.deleteMany();
-  await prisma.hrRequest.deleteMany();
-  await prisma.vacationEntitlement.deleteMany();
-  await prisma.employeeDocument.deleteMany();
-  await prisma.medicalExamination.deleteMany();
-  await prisma.employeeContract.deleteMany();
-  await prisma.calendarEvent.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.verificationToken.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.department.deleteMany();
+  await safeDelete(() => prisma.securityEvent.deleteMany());
+  await safeDelete(() => prisma.auditLog.deleteMany());
+  await safeDelete(() => prisma.notification.deleteMany());
+  await safeDelete(() => prisma.fcmToken.deleteMany());
+  await safeDelete(() => prisma.message.deleteMany());
+  await safeDelete(() => prisma.marketplaceImage.deleteMany());
+  await safeDelete(() => prisma.marketplaceListing.deleteMany());
+  await safeDelete(() => prisma.referral.deleteMany());
+  await safeDelete(() => prisma.jobPosting.deleteMany());
+  await safeDelete(() => prisma.rewardClaim.deleteMany());
+  await safeDelete(() => prisma.reward.deleteMany());
+  await safeDelete(() => prisma.pointTransaction.deleteMany());
+  await safeDelete(() => prisma.pollVote.deleteMany());
+  await safeDelete(() => prisma.poll.deleteMany());
+  await safeDelete(() => prisma.comment.deleteMany());
+  await safeDelete(() => prisma.postTag.deleteMany());
+  await safeDelete(() => prisma.tag.deleteMany());
+  await safeDelete(() => prisma.post.deleteMany());
+  await safeDelete(() => prisma.reservation.deleteMany());
+  await safeDelete(() => prisma.resource.deleteMany());
+  await safeDelete(() => prisma.hrRequest.deleteMany());
+  await safeDelete(() => prisma.vacationEntitlement.deleteMany());
+  await safeDelete(() => prisma.employeeDocument.deleteMany());
+  await safeDelete(() => prisma.medicalExamination.deleteMany());
+  await safeDelete(() => prisma.employeeContract.deleteMany());
+  await safeDelete(() => prisma.calendarEvent.deleteMany());
+  await safeDelete(() => prisma.session.deleteMany());
+  await safeDelete(() => prisma.account.deleteMany());
+  await safeDelete(() => prisma.verificationToken.deleteMany());
+  await safeDelete(() => prisma.user.deleteMany());
+  await safeDelete(() => prisma.department.deleteMany());
 
   console.log("✅ Database cleaned\n");
 
