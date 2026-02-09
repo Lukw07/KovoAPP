@@ -5,7 +5,7 @@
 
 # ── Stage 1: Install dependencies ───────────────────────────────────────────
 FROM node:22-alpine AS deps
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -53,9 +53,11 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
-# Install Prisma CLI + tsx + pg so `prisma db push` and `db:seed` work inside the container
-RUN npm install --no-save prisma @prisma/adapter-pg tsx pg
+# Copy full node_modules from deps stage so seed/migrations have all transitive
+# dependencies available (standalone output only includes server runtime deps).
+COPY --from=deps /app/node_modules ./node_modules
 
 # Ensure runtime user can write generated Prisma client
 RUN chown -R nextjs:nodejs /app/src/generated

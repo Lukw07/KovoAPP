@@ -3,7 +3,9 @@
 // Creates: 2 Departments, 1 Admin, 2 Managers, 3 Employees + sample data
 // ============================================================================
 
-import "dotenv/config";
+// Load .env file (only available in local dev, not in Docker)
+try { require("dotenv/config"); } catch {}
+
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
