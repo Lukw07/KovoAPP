@@ -50,8 +50,9 @@ function getDerivedKeys(): DerivedKey[] {
   const keys: string[] = [currentKey];
 
   // Previous keys for decryption during rotation
-  const previousKeys = process.env.ENCRYPTION_KEYS_PREVIOUS;
-  if (previousKeys) {
+  // Safe for empty/undefined: filter(Boolean) strips empty segments after split
+  const previousKeys = process.env.ENCRYPTION_KEYS_PREVIOUS?.trim();
+  if (previousKeys && previousKeys.length > 0) {
     keys.push(
       ...previousKeys
         .split(",")
@@ -60,9 +61,15 @@ function getDerivedKeys(): DerivedKey[] {
     );
   }
 
+  // IMPORTANT: Salt must be FIXED (not position-dependent) so that the same
+  // raw key always derives the same encryption key regardless of its position
+  // in the array. When keys rotate (current → previous), their index changes
+  // but the derived key must remain identical to decrypt old data.
+  const DERIVATION_SALT = "kovo-app-encryption-salt-v1";
+
   derivedKeysCache = keys.map((rawKey, index) => ({
     version: index, // 0 = current, 1+ = previous versions
-    key: crypto.scryptSync(rawKey, `kovo-app-key-v${index}`, KEY_LENGTH),
+    key: crypto.scryptSync(rawKey, DERIVATION_SALT, KEY_LENGTH),
   }));
 
   return derivedKeysCache;

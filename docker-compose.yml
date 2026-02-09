@@ -32,7 +32,8 @@ services:
       redis-server
       --maxmemory 128mb
       --maxmemory-policy allkeys-lru
-      --appendonly no
+      --save 60 1
+      --loglevel warning
       --requirepass ${REDIS_PASSWORD:-changeme}
     ports:
       - "127.0.0.1:6379:6379"
