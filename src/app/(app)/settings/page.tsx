@@ -2,6 +2,7 @@ import { ThemeToggle } from "@/components/settings/theme-toggle";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { SecuritySettings } from "@/components/settings/security-settings";
 import { HelpSection } from "@/components/settings/help-section";
+import { LogoutButton } from "@/components/settings/logout-button";
 
 export const metadata = { title: "Nastavení" };
 
@@ -23,6 +24,9 @@ export default function SettingsPage() {
 
       {/* Help & FAQ */}
       <HelpSection />
+
+      {/* Logout */}
+      <LogoutButton />
     </div>
   );
 }

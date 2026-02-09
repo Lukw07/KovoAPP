@@ -92,7 +92,9 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
           type: "post" as const,
           title: p.title,
           excerpt: p.excerpt || (content.length > 120 ? content.slice(0, 120) + "…" : content),
-          link: `/news/${p.id}`,
+          // TODO: Implement detail pages /news/[id]
+          // Currently avoiding 404 by redirecting to main list
+          link: `/news`,
           createdAt: p.createdAt,
         };
       }),
@@ -103,7 +105,8 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
           type: "listing" as const,
           title: l.title,
           excerpt: desc.length > 120 ? desc.slice(0, 120) + "…" : desc,
-          link: `/marketplace/${l.id}`,
+          // TODO: Implement detail pages /marketplace/[id]
+          link: `/marketplace`,
           createdAt: l.createdAt,
         };
       }),
@@ -114,7 +117,8 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
           type: "job" as const,
           title: j.title,
           excerpt: desc.length > 120 ? desc.slice(0, 120) + "…" : desc,
-          link: `/jobs/${j.id}`,
+          // TODO: Implement detail pages /jobs/[id]
+          link: `/jobs`,
           createdAt: j.createdAt,
         };
       }),

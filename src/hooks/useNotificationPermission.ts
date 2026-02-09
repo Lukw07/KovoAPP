@@ -66,7 +66,13 @@ export function useNotificationPermission(): NotificationPermissionResult {
     setIsSupported(hasNotificationAPI && hasServiceWorker);
 
     if (hasNotificationAPI) {
-      setPermission(Notification.permission as PermissionState);
+      // Respect manual unsubscribe
+      const unsubscribed = localStorage.getItem("fcm-unsubscribed");
+      if (unsubscribed === "true" && Notification.permission === "granted") {
+        setPermission("default");
+      } else {
+        setPermission(Notification.permission as PermissionState);
+      }
     } else {
       setPermission("unsupported");
     }
@@ -93,6 +99,9 @@ export function useNotificationPermission(): NotificationPermissionResult {
 
     try {
       const result = await Notification.requestPermission();
+      if (result === "granted") {
+        localStorage.removeItem("fcm-unsubscribed");
+      }
       setPermission(result as PermissionState);
 
       if (result !== "granted") {

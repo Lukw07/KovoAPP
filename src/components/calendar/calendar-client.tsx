@@ -435,8 +435,8 @@ export function CalendarClient({
               >
                 <span
                   className={cn(
-                    "text-xs font-medium",
-                    isToday && "flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white",
+                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                    isToday && "bg-accent text-white",
                     hasHoliday && !isToday && "font-bold",
                   )}
                 >
