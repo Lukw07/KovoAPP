@@ -58,8 +58,6 @@ export async function loginAction(
     return { error: "Došlo k chybě při přihlášení" };
   }
 }
-  }
-}
 
 export async function logoutAction() {
   await signOut({ redirectTo: "/login" });
