@@ -5,13 +5,17 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { logAudit } from "@/lib/audit";
+import { validatePasswordStrength } from "@/lib/security";
+
+// Bcrypt work factor — 12 rounds for strong security
+const BCRYPT_ROUNDS = 12;
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const createUserSchema = z.object({
   email: z.string().email("Neplatný email"),
   name: z.string().min(2, "Jméno musí mít alespoň 2 znaky"),
-  password: z.string().min(6, "Heslo musí mít alespoň 6 znaků"),
+  password: z.string().min(8, "Heslo musí mít alespoň 8 znaků"),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   position: z.string().optional(),
   departmentId: z.string().optional(),
@@ -29,7 +33,7 @@ const updateUserSchema = z.object({
 
 const resetPasswordSchema = z.object({
   userId: z.string().min(1),
-  newPassword: z.string().min(6, "Heslo musí mít alespoň 6 znaků"),
+  newPassword: z.string().min(8, "Heslo musí mít alespoň 8 znaků"),
 });
 
 // ─── Auth guard ──────────────────────────────────────────────────────────────
@@ -62,13 +66,19 @@ export async function createUser(formData: FormData) {
 
   const { email, name, password, role, position, departmentId } = parsed.data;
 
+  // Validate password strength
+  const strength = validatePasswordStrength(password);
+  if (!strength.isStrong) {
+    return { error: strength.errors[0] };
+  }
+
   // Check duplicate email
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return { error: "Uživatel s tímto emailem již existuje" };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const newUser = await prisma.user.create({
     data: {
@@ -171,7 +181,14 @@ export async function resetPassword(formData: FormData) {
   }
 
   const { userId, newPassword } = parsed.data;
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  // Validate password strength
+  const strength = validatePasswordStrength(newPassword);
+  if (!strength.isStrong) {
+    return { error: strength.errors[0] };
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
 
   await prisma.user.update({
     where: { id: userId },

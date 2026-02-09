@@ -48,6 +48,10 @@ export async function GET(
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=31536000, immutable",
         "Content-Length": buffer.length.toString(),
+        "X-Content-Type-Options": "nosniff",
+        "Content-Disposition": "inline",
+        // Prevent uploaded images from running scripts
+        "Content-Security-Policy": "default-src 'none'; img-src 'self'; style-src 'none'; script-src 'none'",
       },
     });
   } catch {

@@ -12,7 +12,8 @@ export const authConfig = {
   trustHost: true,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 8 * 60 * 60, // 8 hours — reduced from 30 days for security
+    updateAge: 15 * 60, // Refresh token every 15 minutes
   },
   pages: {
     signIn: "/login",

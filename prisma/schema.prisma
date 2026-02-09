@@ -694,7 +694,32 @@ model AuditLog {
   @@index([performedBy])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([action])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// SECURITY EVENT LOG — tracks login attempts, suspicious activity, etc.
+// ============================================================================
+
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  type      String   // LOGIN_FAILED, LOGIN_SUCCESS, ACCOUNT_LOCKED, SUSPICIOUS_INPUT, BRUTE_FORCE
+  severity  String   @default("INFO") // INFO, WARNING, CRITICAL
+  ipAddress String?
+  userAgent String?
+  userId    String?  // May be null for anonymous events
+  email     String?  // For tracking login attempts by email
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([userId])
+  @@index([email])
+  @@index([ipAddress])
+  @@index([createdAt])
+  @@index([severity])
+  @@map("security_events")
 }
 
 // ============================================================================

@@ -2,7 +2,7 @@
 
 import { signIn, signOut } from "@/lib/auth";
 import { z } from "zod";
-import { checkRateLimit, LOGIN_LIMITER } from "@/lib/rate-limit";
+import { checkRateLimitAsync, LOGIN_LIMITER } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
   email: z.string().email("Neplatný email"),
@@ -23,8 +23,8 @@ export async function loginAction(
       return { error: "Neplatné přihlašovací údaje" };
     }
 
-    // Rate limit by email to prevent brute-force
-    const rateCheck = checkRateLimit(LOGIN_LIMITER, parsed.data.email.toLowerCase());
+    // Rate limit by email to prevent brute-force (Redis-backed for cross-instance)
+    const rateCheck = await checkRateLimitAsync(LOGIN_LIMITER, parsed.data.email.toLowerCase());
     if (!rateCheck.allowed) {
       const minutes = Math.ceil(rateCheck.resetInMs / 60_000);
       return {

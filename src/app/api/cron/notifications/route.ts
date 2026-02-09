@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToAll, sendPushToUser } from "@/lib/notifications";
+import crypto from "crypto";
 
 /**
  * Scheduled notifications cron endpoint.
@@ -15,10 +16,21 @@ import { sendPushToAll, sendPushToUser } from "@/lib/notifications";
  *   3. Auto-close expired polls + notify all
  */
 export async function GET(request: NextRequest) {
-  // API key guard — fail-closed (rejects if CRON_SECRET is not set)
+  // API key guard — timing-safe comparison to prevent timing attacks
   const key = request.nextUrl.searchParams.get("key") ?? request.headers.get("authorization")?.replace("Bearer ", "");
   const expectedKey = process.env.CRON_SECRET;
-  if (!expectedKey || key !== expectedKey) {
+
+  if (!expectedKey || !key) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Use constant-time comparison to prevent timing attacks
+  const keyBuffer = Buffer.from(key);
+  const expectedBuffer = Buffer.from(expectedKey);
+  if (
+    keyBuffer.length !== expectedBuffer.length ||
+    !crypto.timingSafeEqual(keyBuffer, expectedBuffer)
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

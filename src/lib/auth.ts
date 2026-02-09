@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
+import { logAudit } from "@/lib/audit";
 
 // ---------------------------------------------------------------------------
 // Zod schema for login validation
@@ -57,7 +58,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           parsed.data.password,
           user.password,
         );
-        if (!passwordMatch) return null;
+        if (!passwordMatch) {
+          // Log failed login attempt for security audit
+          logAudit({
+            action: "LOGIN_FAILED",
+            entityType: "User",
+            entityId: user.id,
+            performedBy: "system",
+            details: { email: parsed.data.email, reason: "invalid_password" },
+          });
+          return null;
+        }
+
+        // Log successful login
+        logAudit({
+          action: "LOGIN_SUCCESS",
+          entityType: "User",
+          entityId: user.id,
+          performedBy: user.id,
+          details: { email: user.email },
+        });
 
         return {
           id: user.id,

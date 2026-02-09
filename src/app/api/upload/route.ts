@@ -11,6 +11,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import sharp from "sharp";
+import { checkRateLimitAsync, UPLOAD_LIMITER } from "@/lib/rate-limit";
 
 // Max size: 10 MB (we'll compress it down)
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -28,35 +29,25 @@ const ALLOWED_TYPES = new Set([
   "image/avif",
 ]);
 
-// ── Simple in-memory rate limiter ──────────────────────────────────────────
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 10; // max 10 uploads per minute per user
+// ── Magic bytes validation — verify file content matches claimed type ───
+const MAGIC_BYTES: Record<string, number[][]> = {
+  "image/jpeg": [[0xff, 0xd8, 0xff]],
+  "image/png": [[0x89, 0x50, 0x4e, 0x47]],
+  "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF
+  "image/gif": [
+    [0x47, 0x49, 0x46, 0x38, 0x37], // GIF87a
+    [0x47, 0x49, 0x46, 0x38, 0x39], // GIF89a
+  ],
+  "image/avif": [], // AVIF uses ftyp box, complex — trust sharp validation
+};
 
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(userId);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
+function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
+  const signatures = MAGIC_BYTES[mimeType];
+  if (!signatures || signatures.length === 0) return true; // No signature check
+  return signatures.some((sig) =>
+    sig.every((byte, i) => buffer[i] === byte),
+  );
 }
-
-// Clean up stale entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitMap) {
-    if (now > entry.resetAt) rateLimitMap.delete(key);
-  }
-}, 5 * 60_000);
 
 function getUploadDir(): string {
   return process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
@@ -69,8 +60,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nepřihlášen" }, { status: 401 });
   }
 
-  // Rate limit check
-  if (!checkRateLimit(session.user.id)) {
+  // Rate limit check (Redis-backed for cross-instance)
+  const rateCheck = await checkRateLimitAsync(UPLOAD_LIMITER, session.user.id);
+  if (!rateCheck.allowed) {
     return NextResponse.json(
       { error: "Příliš mnoho nahrávání. Zkuste to za minutu." },
       { status: 429 },
@@ -110,6 +102,14 @@ export async function POST(req: NextRequest) {
 
     const uniqueId = `${Date.now()}-${crypto.randomBytes(8).toString("hex")}`;
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate magic bytes — prevent MIME spoofing attacks
+    if (!validateMagicBytes(buffer, file.type)) {
+      return NextResponse.json(
+        { error: "Obsah souboru neodpovídá deklarovanému formátu" },
+        { status: 400 },
+      );
+    }
 
     // ── Optimize with sharp ──────────────────────────────────────────────
     const isGif = file.type === "image/gif";

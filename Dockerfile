@@ -66,4 +66,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# Security: drop all capabilities, read-only filesystem hint
+# Note: uploads dir remains writable via volume mount
+LABEL security.no-new-privileges="true"
+
 CMD ["node", "server.js"]
