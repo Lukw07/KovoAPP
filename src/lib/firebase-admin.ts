@@ -14,16 +14,6 @@ function getAdminApp() {
 
   // Option 1: JSON string in env
   const serviceAccountJson = process.env.FIREBASE_ADMIN_SDK_KEY;
-  
-  // DEBUG LOGGING
-  console.log("[firebase-admin] Debugging Credentials:");
-  console.log(`- FIREBASE_ADMIN_SDK_KEY present: ${!!serviceAccountJson}`);
-  console.log(`- Type: ${typeof serviceAccountJson}`);
-  console.log(`- Length: ${serviceAccountJson ? serviceAccountJson.length : 0}`);
-  if (serviceAccountJson) {
-    console.log(`- First 20 chars: ${serviceAccountJson.substring(0, 20)}...`);
-  }
-
   if (serviceAccountJson) {
     try {
       const serviceAccount = JSON.parse(serviceAccountJson);
