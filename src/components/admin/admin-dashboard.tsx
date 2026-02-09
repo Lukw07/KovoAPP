@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Clock,
   Gift,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AbsenceChart } from "@/components/admin/absence-chart";
@@ -22,7 +23,7 @@ import { AdminPanel } from "@/components/admin/admin-panel";
 import { RewardClaimsManager } from "@/components/admin/reward-claims-manager";
 import type { Role } from "@/generated/prisma/enums";
 
-type AdminSection = "dashboard" | "users" | "create" | "rewards" | "export";
+type AdminSection = "dashboard" | "users" | "create" | "rewards" | "export" | "logs";
 
 interface OverviewStats {
   totalUsers: number;
@@ -112,6 +113,12 @@ const ALL_SECTIONS: {
     key: "export",
     label: "Export",
     icon: <Download className="h-4 w-4" />,
+    roles: ["ADMIN"],
+  },
+  {
+    key: "logs",
+    label: "Logy",
+    icon: <ShieldAlert className="h-4 w-4" />,
     roles: ["ADMIN"],
   },
 ];
@@ -273,6 +280,29 @@ export function AdminDashboard({
             UTF-8 kódování.
           </p>
           <CsvExport />
+        </div>
+      )}
+
+      {/* ─── Logs (redirect to dedicated page) ────────────────────────────────── */}
+      {section === "logs" && (
+        <div className="rounded-xl border border-border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-red-600" />
+            <h3 className="font-semibold text-foreground">
+              Systémové logy
+            </h3>
+          </div>
+          <p className="text-sm text-foreground-secondary">
+            Kompletní přehled audit logů, bezpečnostních událostí, správa
+            uživatelů s možností mazání a deaktivace.
+          </p>
+          <a
+            href="/admin/logs"
+            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+          >
+            <ShieldAlert className="h-4 w-4" />
+            Otevřít logy
+          </a>
         </div>
       )}
     </div>

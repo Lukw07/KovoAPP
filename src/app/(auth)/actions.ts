@@ -39,19 +39,25 @@ export async function loginAction(
     });
   } catch (error: unknown) {
     // NextAuth redirects throw NEXT_REDIRECT, which we should let through
-    // Checking for NEXT_REDIRECT string is the reliable way in Next.js 14+ / 15+
-    const err = error as Error & { digest?: string };
-    if (err.message && err.message.includes("NEXT_REDIRECT")) {
+    const err = error as Error & { digest?: string; type?: string; code?: string };
+
+    // Pass through Next.js redirect errors (must re-throw)
+    if (
+      err.digest?.startsWith("NEXT_REDIRECT") ||
+      err.message?.includes("NEXT_REDIRECT")
+    ) {
       throw error;
-    }
-    // Specific check for CredentialsSignin to return specific error
-    if (err.name === "CredentialsSignin" || err.message?.includes("CredentialsSignin")) {
-      return { error: "Nesprávný email nebo heslo" };
     }
 
-    // Pass through other expected Next.js errors
-    if (err.digest?.startsWith("NEXT_REDIRECT")) {
-      throw error;
+    // CredentialsSignin — in production the class name is minified,
+    // so check the `type` / `code` properties and case-insensitive message.
+    if (
+      err.type === "CredentialsSignin" ||
+      err.code === "credentials" ||
+      err.name === "CredentialsSignin" ||
+      err.message?.toLowerCase().includes("credentialssignin")
+    ) {
+      return { error: "Nesprávný email nebo heslo" };
     }
 
     console.error("Login error:", error);
