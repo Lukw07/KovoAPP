@@ -55,7 +55,7 @@ export function PointsChart({ data }: { data: PointsStatsData }) {
             <h4 className="mb-2 text-sm font-medium text-foreground-secondary">
               Dle kategorie
             </h4>
-            <div className="h-56 w-full min-w-0">
+            <div className="h-56 w-full min-w-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -89,7 +89,7 @@ export function PointsChart({ data }: { data: PointsStatsData }) {
             <h4 className="mb-2 text-sm font-medium text-foreground-secondary">
               Dle dnů
             </h4>
-            <div className="h-56 w-full min-w-0">
+            <div className="h-56 w-full min-w-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data.dailyData}

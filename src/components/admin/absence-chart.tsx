@@ -38,7 +38,7 @@ export function AbsenceChart({ data }: { data: AbsenceStat[] }) {
   }
 
   return (
-    <div className="h-64 w-full min-w-0">
+    <div className="h-64 w-full min-w-[200px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />

@@ -114,7 +114,9 @@ export async function updateUser(formData: FormData) {
     email: formData.get("email") || undefined,
     role: formData.get("role") || undefined,
     position: formData.get("position") || undefined,
-    departmentId: formData.get("departmentId"),
+    departmentId: (formData.get("departmentId") && formData.get("departmentId") !== "" && formData.get("departmentId") !== "null") 
+      ? formData.get("departmentId") 
+      : null,
     isActive: formData.get("isActive") === "true"
       ? true
       : formData.get("isActive") === "false"
