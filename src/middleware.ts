@@ -2,7 +2,7 @@ import { authMiddleware } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 
 // Routes that don't require auth
-const PUBLIC_ROUTES = ["/login", "/api/auth", "/api/upload/", "/api/cron/"];
+const PUBLIC_ROUTES = ["/login", "/api/auth", "/api/upload/", "/api/cron/", "/manifest.json", "/firebase-messaging-sw.js"];
 
 // Routes requiring ADMIN or MANAGER role (management panel)
 const MANAGEMENT_ROUTES = ["/admin"];
@@ -45,7 +45,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.kovo.cz https://lh3.googleusercontent.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://fcm.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com",
+      "connect-src 'self' https://fcm.googleapis.com https://fcmregistrations.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",

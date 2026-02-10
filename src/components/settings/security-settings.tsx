@@ -64,6 +64,15 @@ export function SecuritySettings() {
 
       {/* Password change form */}
       <form id="password-form" action={handleSubmit} className="space-y-3">
+        {/* Hidden username field for accessibility (browser autofill) */}
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
         <PasswordField
           name="currentPassword"
           label="Současné heslo"

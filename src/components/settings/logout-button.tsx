@@ -12,6 +12,7 @@ export function LogoutButton() {
   const handleLogout = () => {
     startTransition(async () => {
       try {
+        
         await logoutAction();
       } catch (error) {
         toast.error("Nepodařilo se odhlásit");
