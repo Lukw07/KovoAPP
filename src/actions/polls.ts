@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendPushToAll } from "@/lib/notifications";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -81,6 +82,12 @@ export async function createPoll(formData: FormData) {
       "/polls",
     );
 
+    // Realtime activity event for dashboard feed
+    emitRealtimeEvent("poll:created", "all", {
+      title: parsed.data.question,
+      link: "/polls",
+    }).catch(() => {});
+
     revalidatePath("/polls");
     revalidatePath("/admin");
     return { success: true };
@@ -149,6 +156,12 @@ export async function voteInPoll(pollId: string, optionIndex: number) {
         optionIndex,
       },
     });
+
+    // Realtime vote update for live poll results
+    emitRealtimeEvent("poll:voted", "all", {
+      pollId,
+      optionIndex,
+    }).catch(() => {});
 
     revalidatePath("/polls");
     return { success: true };

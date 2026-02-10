@@ -12,6 +12,7 @@ import {
   markAllNotificationsRead,
 } from "@/actions/notifications";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSocket } from "@/hooks/useSocket";
 
 interface Notification {
   id: string;
@@ -28,8 +29,9 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { on, isConnected } = useSocket();
 
-  // Fetch unread count on mount and periodically
+  // Fetch unread count on mount and periodically (fallback if socket disconnects)
   const fetchUnread = useCallback(async () => {
     try {
       const count = await getUnreadNotificationCount();
@@ -41,9 +43,36 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30_000);
+    // Fallback polling only when Socket.IO is not connected – 60s instead of 30s
+    const interval = setInterval(() => {
+      if (!isConnected) fetchUnread();
+    }, 60_000);
     return () => clearInterval(interval);
-  }, [fetchUnread]);
+  }, [fetchUnread, isConnected]);
+
+  // Real-time: listen for new notifications via Socket.IO
+  useEffect(() => {
+    const unsub = on("notification:new", (data: { title?: string; body?: string }) => {
+      // Increment badge count immediately
+      setUnreadCount((c) => c + 1);
+      // If panel is open, prepend the new notification
+      if (data?.title) {
+        setNotifications((prev) => [
+          {
+            id: `rt-${Date.now()}`,
+            type: "GENERAL",
+            title: data.title ?? "",
+            body: data.body ?? "",
+            link: null,
+            isRead: false,
+            createdAt: new Date(),
+          },
+          ...prev,
+        ]);
+      }
+    });
+    return unsub;
+  }, [on]);
 
   // Fetch full list when panel opens
   useEffect(() => {

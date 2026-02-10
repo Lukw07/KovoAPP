@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendPushToAll } from "@/lib/notifications";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -94,6 +95,12 @@ export async function createPost(formData: FormData) {
       postData.title,
       "/news",
     );
+
+    // Realtime activity event for dashboard feed
+    emitRealtimeEvent("news:published", "all", {
+      title: postData.title,
+      link: "/news",
+    }).catch(() => {});
 
     revalidatePath("/news");
     revalidatePath("/admin");

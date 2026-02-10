@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { FcmProvider } from "@/components/providers/fcm-provider";
 import { Toaster } from "@/components/providers/toaster";
 import "./globals.css";
 
@@ -52,7 +53,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ThemeProvider>
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <FcmProvider>{children}</FcmProvider>
+          </SessionProvider>
           <Toaster />
         </ThemeProvider>
       </body>

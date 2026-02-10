@@ -64,8 +64,9 @@ RUN chown -R nextjs:nodejs /app/src/generated
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3000 3001
 ENV PORT=3000
+ENV SOCKET_PORT=3001
 ENV HOSTNAME="0.0.0.0"
 
 # Security: drop all capabilities, read-only filesystem hint

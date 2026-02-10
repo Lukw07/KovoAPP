@@ -33,7 +33,7 @@ export async function registerFcmToken(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   // Upsert — if the token already exists, just update ownership/active flag
-  await prisma.fcmToken.upsert({
+  const result = await prisma.fcmToken.upsert({
     where: { token: parsed.data.token },
     update: {
       userId: session.user.id,
@@ -49,6 +49,10 @@ export async function registerFcmToken(
       deviceName: parsed.data.deviceName ?? null,
     },
   });
+
+  console.log(
+    `[FCM:STATUS] ✔ Token registrován | user=${session.user.id} | device=${parsed.data.deviceType} | name="${parsed.data.deviceName ?? "??"}" | tokenId=${result.id} | token=...${parsed.data.token.slice(-8)}`,
+  );
 
   return { success: true };
 }
@@ -66,13 +70,16 @@ export async function deactivateFcmToken(token: string) {
 
   try {
     // Only deactivate tokens owned by the current user
-    await prisma.fcmToken.updateMany({
+    const updated = await prisma.fcmToken.updateMany({
       where: {
         token: parsed.data.token,
         userId: session.user.id,
       },
       data: { isActive: false },
     });
+    console.log(
+      `[FCM:STATUS] 🗑 Token deaktivován | user=${session.user.id} | count=${updated.count} | token=...${parsed.data.token.slice(-8)}`,
+    );
   } catch {
     // Token may not exist — ignore
   }

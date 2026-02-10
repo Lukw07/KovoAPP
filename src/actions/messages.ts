@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { sendNotification } from "@/lib/notifications";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -64,6 +65,13 @@ export async function sendMessage(formData: FormData) {
         : parsed.data.content,
       link: "/messages",
     });
+
+    // Instant realtime event for message UI update
+    emitRealtimeEvent("message:new", parsed.data.receiverId, {
+      senderId: session.user.id,
+      senderName: senderUser?.name,
+      preview: parsed.data.content.slice(0, 80),
+    }).catch(() => {});
 
     revalidatePath("/messages");
     return { success: true };

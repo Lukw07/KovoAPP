@@ -15,6 +15,7 @@ import {
   ShieldAlert,
   Loader2,
   Briefcase,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AbsenceChart } from "@/components/admin/absence-chart";
@@ -23,6 +24,7 @@ import { UserManagementTable } from "@/components/admin/user-management-table";
 import { CsvExport } from "@/components/admin/csv-export";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { RewardClaimsManager } from "@/components/admin/reward-claims-manager";
+import { PointsManager } from "@/components/admin/points-manager";
 import { AdminLogsClient } from "@/components/admin/admin-logs";
 import { EmployeeTable } from "@/components/admin/employee-table";
 import {
@@ -36,7 +38,7 @@ import { getAllUsers as fetchAllUsers } from "@/actions/admin-queries";
 import { getEmployeeList } from "@/actions/employee-management";
 import type { Role } from "@/generated/prisma/enums";
 
-type AdminSection = "dashboard" | "users" | "employees" | "create" | "rewards" | "export" | "logs";
+type AdminSection = "dashboard" | "users" | "employees" | "create" | "points" | "rewards" | "export" | "logs";
 
 interface OverviewStats {
   totalUsers: number;
@@ -121,6 +123,12 @@ const ALL_SECTIONS: {
     key: "create",
     label: "Vytvořit",
     icon: <PenTool className="h-4 w-4" />,
+    roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    key: "points",
+    label: "Body",
+    icon: <Star className="h-4 w-4" />,
     roles: ["ADMIN", "MANAGER"],
   },
   {
@@ -277,6 +285,9 @@ export function AdminDashboard({
 
       {/* ─── Create (existing AdminPanel) ────────────────────────────── */}
       {section === "create" && <AdminPanel />}
+
+      {/* ─── Points Manager ──────────────────────────────────────────── */}
+      {section === "points" && <PointsManager />}
 
       {/* ─── Employees (lazy-loaded) ──────────────────────────────────── */}
       {section === "employees" && <LazyEmployees />}

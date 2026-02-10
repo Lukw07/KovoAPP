@@ -53,6 +53,7 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3000}:3000"
+      - "${SOCKET_PORT:-3001}:3001"
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-kovo}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-kovo_app}?schema=public"
       REDIS_URL: "redis://:${REDIS_PASSWORD:-changeme}@redis:6379"
@@ -71,6 +72,8 @@ services:
       FIREBASE_ADMIN_SDK_KEY: ${FIREBASE_ADMIN_SDK_KEY:-}
       CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET in .env}
       UPLOAD_DIR: /app/uploads
+      SOCKET_PORT: "3001"
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-}
     volumes:
       - uploads_data:/app/uploads
     depends_on:

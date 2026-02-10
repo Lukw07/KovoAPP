@@ -37,18 +37,19 @@ function getAdminApp() {
       }
 
       const serviceAccount = JSON.parse(serviceAccountJson);
+      console.log(`[FCM:STATUS] ✔ Firebase Admin inicializován | project=${serviceAccount.project_id}`);
       return initializeApp({
         credential: cert(serviceAccount),
       });
     } catch (error) {
-      console.warn("[firebase-admin] Failed to parse FIREBASE_ADMIN_SDK_KEY:", error);
+      console.warn("[FCM:STATUS] ✖ Nepodařilo se parsovat FIREBASE_ADMIN_SDK_KEY:", error);
     }
   }
 
   // Option 2: GOOGLE_APPLICATION_CREDENTIALS file path (auto-detected)
   // Option 3: No credentials — graceful fallback
   console.warn(
-    "[firebase-admin] No credentials found. Push notifications will be logged only.",
+    "[FCM:STATUS] ⚠ Firebase Admin credentials nenalezeny — push notifikace budou pouze logovány",
   );
   return null;
 }

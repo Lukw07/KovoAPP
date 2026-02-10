@@ -1,10 +1,11 @@
 import { auth } from "@/lib/auth";
 import { getMyApprovedVacations, getPendingForManager } from "@/actions/hr-queries";
-import { getLatestNews } from "@/actions/news-queries";
 import { getUnreadMessageCount } from "@/actions/messages";
+import { getDashboardActivity, getDashboardStats } from "@/actions/dashboard-queries";
 import VacationCalendar from "@/components/hr/vacation-calendar";
 import TeamStatus from "@/components/hr/team-status";
 import DashboardHero from "@/components/dashboard/dashboard-hero";
+import { OnboardingTutorial } from "@/components/dashboard/onboarding-tutorial";
 import Link from "next/link";
 import {
   CalendarDots,
@@ -25,22 +26,27 @@ export default async function DashboardPage() {
     user?.role === "ADMIN" || user?.role === "MANAGER";
 
   const currentYear = new Date().getFullYear();
-  const [vacations, pendingRequests, latestNews, unreadMessages] = await Promise.all([
+  const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats] = await Promise.all([
     getMyApprovedVacations(currentYear),
     isManagement ? getPendingForManager() : Promise.resolve([]),
-    getLatestNews(3),
     getUnreadMessageCount().catch(() => 0),
+    getDashboardActivity(8),
+    getDashboardStats(),
   ]);
 
   return (
     <DashboardAnimations>
-      {/* ── Welcome hero — animated gradient with stats ────── */}
+      {/* ── Onboarding tutorial for new users ─────────────── */}
+      <OnboardingTutorial />
+
+      {/* ── Welcome hero — animated gradient with activity feed ── */}
       <DashboardHero
         userName={user?.name ?? ""}
         avatarUrl={user?.avatarUrl ?? null}
         pointsBalance={user?.pointsBalance ?? 0}
-        latestNews={latestNews}
         unreadMessages={typeof unreadMessages === "number" ? unreadMessages : 0}
+        initialActivity={activityFeed}
+        stats={dashboardStats}
       />
 
       {/* ── Pending requests alert — premium amber card ─────── */}
@@ -74,31 +80,35 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3" data-bento>
         <QuickAction
           href="/requests"
-          icon={<CalendarDots className="h-6 w-6 text-blue-600 dark:text-blue-400" weight="duotone" />}
+          icon={<CalendarDots className="h-6 w-6 text-blue-50" weight="duotone" />}
           label="Nová žádost"
           sublabel="Dovolená / Sick day"
-          accentColor="blue"
+          gradient="from-blue-600 to-indigo-700 dark:from-blue-600 dark:to-indigo-800"
+          glowColor="blue"
         />
         <QuickAction
           href="/reservations"
-          icon={<Car className="h-6 w-6 text-emerald-600 dark:text-emerald-400" weight="duotone" />}
+          icon={<Car className="h-6 w-6 text-emerald-50" weight="duotone" />}
           label="Rezervovat"
           sublabel="Auto / Místnost"
-          accentColor="emerald"
+          gradient="from-emerald-600 to-teal-700 dark:from-emerald-600 dark:to-teal-800"
+          glowColor="emerald"
         />
         <QuickAction
           href="/news"
-          icon={<Newspaper className="h-6 w-6 text-blue-600 dark:text-blue-400" weight="duotone" />}
+          icon={<Newspaper className="h-6 w-6 text-sky-50" weight="duotone" />}
           label="Novinky"
           sublabel="Firemní zprávy"
-          accentColor="blue"
+          gradient="from-sky-600 to-blue-700 dark:from-sky-600 dark:to-blue-800"
+          glowColor="sky"
         />
         <QuickAction
           href="/rewards"
-          icon={<Gift className="h-6 w-6 text-amber-600 dark:text-amber-400" weight="duotone" />}
+          icon={<Gift className="h-6 w-6 text-amber-50" weight="duotone" />}
           label="Odměny"
           sublabel="Vyměnit body"
-          accentColor="amber"
+          gradient="from-amber-500 to-orange-600 dark:from-amber-500 dark:to-orange-700"
+          glowColor="amber"
         />
       </div>
 
@@ -117,10 +127,11 @@ export default async function DashboardPage() {
 }
 
 /* Bento-style quick action tile */
-const ACCENT_BG: Record<string, string> = {
-  blue: "bg-blue-50 dark:bg-blue-950/30",
-  emerald: "bg-emerald-50 dark:bg-emerald-950/30",
-  amber: "bg-amber-50 dark:bg-amber-950/30",
+const GLOW_SHADOW: Record<string, string> = {
+  blue: "hover:shadow-blue-500/20 dark:hover:shadow-blue-500/30",
+  emerald: "hover:shadow-emerald-500/20 dark:hover:shadow-emerald-500/30",
+  sky: "hover:shadow-sky-500/20 dark:hover:shadow-sky-500/30",
+  amber: "hover:shadow-amber-500/20 dark:hover:shadow-amber-500/30",
 };
 
 function QuickAction({
@@ -128,23 +139,29 @@ function QuickAction({
   icon,
   label,
   sublabel,
-  accentColor,
+  gradient,
+  glowColor,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   sublabel: string;
-  accentColor: string;
+  gradient: string;
+  glowColor: string;
 }) {
   return (
     <Link
       href={href}
-      className={`${ACCENT_BG[accentColor] ?? ""} relative flex flex-col gap-2 rounded-2xl border border-border p-4 btn-press active:scale-[0.97] card-hover inner-glow overflow-hidden`}
+      className={`relative flex flex-col gap-3 rounded-2xl bg-gradient-to-br ${gradient} p-4 btn-press active:scale-[0.97] overflow-hidden transition-all duration-250 hover:shadow-xl ${GLOW_SHADOW[glowColor] ?? ""} hover:-translate-y-0.5`}
     >
-      {icon}
-      <div>
-        <p className="text-sm font-semibold tracking-tight text-foreground">{label}</p>
-        <p className="text-xs text-foreground-muted">{sublabel}</p>
+      {/* Subtle shine overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/10 pointer-events-none" />
+      <div className="relative z-10">
+        {icon}
+      </div>
+      <div className="relative z-10">
+        <p className="text-sm font-semibold tracking-tight text-white">{label}</p>
+        <p className="text-xs text-white/70">{sublabel}</p>
       </div>
     </Link>
   );

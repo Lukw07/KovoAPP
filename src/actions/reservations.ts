@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -118,6 +119,12 @@ export async function bookResource(
     body: `${resource.name} je rezervován/a pro vás.`,
     link: "/reservations",
   });
+
+  // Realtime event so other users see calendar updates
+  emitRealtimeEvent("reservation:update", "all", {
+    action: "created",
+    resourceName: resource.name,
+  }).catch(() => {});
 
   revalidatePath("/reservations");
   revalidatePath("/dashboard");

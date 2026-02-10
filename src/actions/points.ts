@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications";
 import { logAudit } from "@/lib/audit";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -93,6 +94,13 @@ export async function givePoints(formData: FormData) {
       link: "/rewards",
     });
 
+    // Realtime points balance update
+    emitRealtimeEvent("points:updated", userId, {
+      amount,
+      reason,
+      newAction: "award",
+    }).catch(() => {});
+
     revalidatePath("/rewards");
     revalidatePath("/dashboard");
     revalidatePath("/admin");
@@ -168,4 +176,59 @@ export async function deductPoints(formData: FormData) {
     console.error("deductPoints error:", err);
     return { error: "Nepodařilo se odečíst body" };
   }
+}
+
+// ---------------------------------------------------------------------------
+// getRecentTransactions — Recent point transactions for management view
+// ---------------------------------------------------------------------------
+
+export async function getRecentTransactions(limit = 20) {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
+    return [];
+  }
+
+  return prisma.pointTransaction.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: {
+      id: true,
+      amount: true,
+      reason: true,
+      category: true,
+      createdAt: true,
+      user: {
+        select: { id: true, name: true, avatarUrl: true, position: true },
+      },
+      admin: {
+        select: { id: true, name: true },
+      },
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// getActiveUsersForPoints — Simple user list for autocomplete
+// ---------------------------------------------------------------------------
+
+export async function getActiveUsersForPoints() {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
+    return [];
+  }
+
+  return prisma.user.findMany({
+    where: { isActive: true, id: { not: session.user.id } },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      avatarUrl: true,
+      position: true,
+      pointsBalance: true,
+      department: { select: { name: true } },
+    },
+  });
 }

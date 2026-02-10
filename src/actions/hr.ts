@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNotification } from "@/lib/notifications";
 import { logAudit } from "@/lib/audit";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 import {
   differenceInBusinessDays,
   eachDayOfInterval,
@@ -149,6 +150,13 @@ export async function createRequest(
       body: `${user.name} žádá o ${typeLabels[type] ?? type}`,
       link: "/requests",
     });
+
+    // Realtime event for manager's dashboard
+    emitRealtimeEvent("hr:request_update", user.department.manager.id, {
+      action: "created",
+      requesterName: user.name,
+      type,
+    }).catch(() => {});
   }
 
   revalidatePath("/requests");
