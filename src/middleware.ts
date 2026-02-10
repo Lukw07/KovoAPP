@@ -78,8 +78,8 @@ const edgeRateLimitMap = new Map<
   { count: number; resetAt: number; blocked: boolean }
 >();
 const EDGE_WINDOW_MS = 10_000; // 10 seconds
-const EDGE_MAX_REQUESTS = 50; // 50 requests per 10s per IP
-const BLOCK_DURATION_MS = 60_000; // Block for 1 minute if exceeded
+const EDGE_MAX_REQUESTS = 200; // 200 requests per 10s per IP
+const BLOCK_DURATION_MS = 30_000; // Block for 30 seconds if exceeded
 
 function getEdgeClientIp(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -139,12 +139,14 @@ export default authMiddleware((req) => {
   const { pathname } = req.nextUrl;
 
   // ── Edge-level rate limiting (DDoS / abuse protection) ───────────────
+  // Skip rate limiting for auth endpoints (session checks must always work)
+  const isAuthRoute = pathname.startsWith("/api/auth");
   const clientIp = getEdgeClientIp(req);
-  if (!checkEdgeRateLimit(clientIp)) {
+  if (!isAuthRoute && !checkEdgeRateLimit(clientIp)) {
     return new NextResponse("Too Many Requests", {
       status: 429,
       headers: {
-        "Retry-After": "60",
+        "Retry-After": "30",
         "Content-Type": "text/plain",
       },
     });

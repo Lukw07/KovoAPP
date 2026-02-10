@@ -339,7 +339,7 @@ export const MESSAGE_LIMITER: RateLimitConfig = {
 
 export const ACTION_LIMITER: RateLimitConfig = {
   name: "actions",
-  maxAttempts: 20,
+  maxAttempts: 60,
   windowMs: 60 * 1000,
 };
 

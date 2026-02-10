@@ -69,7 +69,7 @@ export function BottomNav({ userRole: _userRole }: BottomNavProps) {
       mounted = false;
       clearInterval(interval);
     };
-  }, [pathname]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t glass-nav pb-[env(safe-area-inset-bottom,0px)]" aria-label="Hlavní navigace">
