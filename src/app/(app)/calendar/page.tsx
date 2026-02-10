@@ -39,6 +39,7 @@ export default async function CalendarPage() {
         initialEvents={JSON.parse(JSON.stringify(events))}
         holidays={JSON.parse(JSON.stringify(holidays))}
         canManage={canManage}
+        currentUserId={session.user.id}
         initialYear={year}
         initialMonth={month}
       />

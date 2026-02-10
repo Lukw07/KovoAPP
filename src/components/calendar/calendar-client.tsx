@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,6 +9,8 @@ import {
   X,
   Star,
   CalendarDays,
+  Globe,
+  Lock,
 } from "lucide-react";
 import {
   getCalendarEvents,
@@ -52,6 +54,10 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+function stripTime(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
 }
@@ -68,12 +74,17 @@ function getFirstDayOfWeek(year: number, month: number): number {
 function CreateEventForm({
   onClose,
   selectedDate,
+  canManage,
 }: {
   onClose: () => void;
   selectedDate?: Date;
+  canManage: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [color, setColor] = useState(EVENT_COLORS[0].value);
+  const [visibility, setVisibility] = useState<"GLOBAL" | "PRIVATE">(
+    canManage ? "GLOBAL" : "PRIVATE"
+  );
 
   const defaultDate = selectedDate
     ? selectedDate.toISOString().split("T")[0]
@@ -83,6 +94,7 @@ function CreateEventForm({
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     fd.set("color", color);
+    fd.set("visibility", visibility);
 
     startTransition(async () => {
       const result = await createCalendarEvent(fd);
@@ -96,7 +108,7 @@ function CreateEventForm({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-foreground">Nová událost</h3>
         <button onClick={onClose} className="text-foreground-muted hover:text-foreground">
@@ -162,6 +174,41 @@ function CreateEventForm({
           </div>
         </div>
 
+        {/* Visibility toggle — only for managers/admins */}
+        {canManage && (
+          <div>
+            <label className="text-xs text-foreground-muted mb-1.5 block">Viditelnost</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setVisibility("GLOBAL")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition-all",
+                  visibility === "GLOBAL"
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border text-foreground-secondary hover:bg-background-secondary"
+                )}
+              >
+                <Globe className="h-3.5 w-3.5" />
+                Pro všechny
+              </button>
+              <button
+                type="button"
+                onClick={() => setVisibility("PRIVATE")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium transition-all",
+                  visibility === "PRIVATE"
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border text-foreground-secondary hover:bg-background-secondary"
+                )}
+              >
+                <Lock className="h-3.5 w-3.5" />
+                Jen já
+              </button>
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isPending}
@@ -184,6 +231,7 @@ function DayDetail({
   events,
   holidays,
   canManage,
+  currentUserId,
   onClose,
   onDelete,
 }: {
@@ -191,11 +239,17 @@ function DayDetail({
   events: CalendarEventData[];
   holidays: HolidayData[];
   canManage: boolean;
+  currentUserId: string;
   onClose: () => void;
   onDelete: (id: string) => void;
 }) {
   const dayHolidays = holidays.filter((h) => isSameDay(new Date(h.date), date));
-  const dayEvents = events.filter((e) => isSameDay(new Date(e.date), date));
+  // Find events that cover this day (single-day or multi-day range)
+  const dayEvents = events.filter((e) => {
+    const start = new Date(e.date);
+    const end = e.endDate ? new Date(e.endDate) : start;
+    return date >= stripTime(start) && date <= stripTime(end);
+  });
 
   const dayStr = date.toLocaleDateString("cs-CZ", {
     weekday: "long",
@@ -204,7 +258,7 @@ function DayDetail({
   });
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-foreground capitalize">{dayStr}</h3>
         <button onClick={onClose} className="text-foreground-muted hover:text-foreground">
@@ -232,33 +286,55 @@ function DayDetail({
         </p>
       )}
 
-      {dayEvents.map((event) => (
-        <div
-          key={event.id}
-          className="flex items-start gap-2 rounded-xl p-3 border border-border"
-          style={{ borderLeftColor: event.color || "#3B82F6", borderLeftWidth: "3px" }}
-        >
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground">{event.title}</p>
-            {event.description && (
-              <p className="text-xs text-foreground-muted mt-0.5 line-clamp-2">
-                {event.description}
-              </p>
+      {dayEvents.map((event) => {
+        const isOwn = event.creator.id === currentUserId;
+        const canDelete = isOwn || canManage;
+        const hasRange = event.endDate !== null;
+
+        return (
+          <div
+            key={event.id}
+            className="flex items-start gap-2 rounded-xl p-3 border border-border bg-background-secondary/50"
+            style={{ borderLeftColor: event.color || "#3B82F6", borderLeftWidth: "3px" }}
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-foreground">{event.title}</p>
+                {event.visibility === "GLOBAL" ? (
+                  <Globe className="h-3 w-3 text-blue-500 shrink-0" />
+                ) : (
+                  <Lock className="h-3 w-3 text-foreground-muted shrink-0" />
+                )}
+              </div>
+              {event.description && (
+                <p className="text-xs text-foreground-muted mt-0.5 line-clamp-2">
+                  {event.description}
+                </p>
+              )}
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[10px] text-foreground-muted">
+                  {event.creator.name}
+                </p>
+                {hasRange && (
+                  <span className="text-[10px] text-foreground-muted">
+                    {new Date(event.date).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })}
+                    {" → "}
+                    {new Date(event.endDate!).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })}
+                  </span>
+                )}
+              </div>
+            </div>
+            {canDelete && (
+              <button
+                onClick={() => onDelete(event.id)}
+                className="text-foreground-muted hover:text-red-500 transition-colors flex-shrink-0"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             )}
-            <p className="text-[10px] text-foreground-muted mt-1">
-              {event.creator.name}
-            </p>
           </div>
-          {canManage && (
-            <button
-              onClick={() => onDelete(event.id)}
-              className="text-foreground-muted hover:text-red-500 transition-colors flex-shrink-0"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -271,6 +347,7 @@ interface CalendarClientProps {
   initialEvents: CalendarEventData[];
   holidays: HolidayData[];
   canManage: boolean;
+  currentUserId: string;
   initialYear: number;
   initialMonth: number;
 }
@@ -279,6 +356,7 @@ export function CalendarClient({
   initialEvents,
   holidays: initialHolidays,
   canManage,
+  currentUserId,
   initialYear,
   initialMonth,
 }: CalendarClientProps) {
@@ -347,11 +425,17 @@ export function CalendarClient({
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  // Helper to check if a day has events/holidays
+  // Helper to check if a day has events/holidays (supports multi-day ranges)
   const getDayInfo = (day: number) => {
     const date = new Date(year, month - 1, day);
+    const dateStripped = stripTime(date);
     const hasHoliday = holidays.some((h) => isSameDay(new Date(h.date), date));
-    const dayEvents = events.filter((e) => isSameDay(new Date(e.date), date));
+    // For multi-day events: check if the day falls within the event's range
+    const dayEvents = events.filter((e) => {
+      const start = stripTime(new Date(e.date));
+      const end = e.endDate ? stripTime(new Date(e.endDate)) : start;
+      return dateStripped >= start && dateStripped <= end;
+    });
     const isToday = isSameDay(date, today);
     const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
@@ -381,8 +465,8 @@ export function CalendarClient({
         </button>
       </div>
 
-      {/* Add event button (managers/admins) */}
-      {canManage && !showCreate && (
+      {/* Add event button — available to everyone */}
+      {!showCreate && (
         <button
           onClick={() => setShowCreate(true)}
           className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm font-medium text-foreground-muted hover:text-accent hover:border-accent/50 transition-colors"
@@ -394,7 +478,11 @@ export function CalendarClient({
 
       {/* Create event form */}
       {showCreate && (
-        <CreateEventForm onClose={handleCreateClose} selectedDate={selectedDate || undefined} />
+        <CreateEventForm
+          onClose={handleCreateClose}
+          selectedDate={selectedDate || undefined}
+          canManage={canManage}
+        />
       )}
 
       {/* Calendar grid */}
@@ -471,6 +559,7 @@ export function CalendarClient({
           events={events}
           holidays={holidays}
           canManage={canManage}
+          currentUserId={currentUserId}
           onClose={() => setSelectedDate(null)}
           onDelete={handleDelete}
         />

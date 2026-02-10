@@ -11,7 +11,7 @@ const MANAGEMENT_ROUTES = ["/admin"];
 // Security Headers — defense-in-depth against XSS, clickjacking, MIME sniffing
 // ============================================================================
 
-function addSecurityHeaders(response: NextResponse): NextResponse {
+function addSecurityHeaders(response: NextResponse, req?: Request): NextResponse {
   // Strict Transport Security — enforce HTTPS for 2 years + subdomains
   response.headers.set(
     "Strict-Transport-Security",
@@ -38,7 +38,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 
   // Content Security Policy — strict but functional
   // Dynamically allow WebSocket connections for Socket.IO on the same domain
-  const host = request.headers.get("host")?.split(":")[0] ?? "localhost";
+  const host = req?.headers.get("host")?.split(":")[0] ?? "localhost";
   const socketConnectSrc = `https://${host}:* wss://${host}:* http://${host}:* ws://${host}:*`;
 
   response.headers.set(
@@ -179,7 +179,7 @@ export default authMiddleware((req) => {
   // ── Allow public routes ──────────────────────────────────────────────
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
     const response = NextResponse.next();
-    return addSecurityHeaders(response);
+    return addSecurityHeaders(response, req);
   }
 
   const isLoggedIn = !!req.auth?.user;
@@ -190,7 +190,7 @@ export default authMiddleware((req) => {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     const response = NextResponse.redirect(loginUrl);
-    return addSecurityHeaders(response);
+    return addSecurityHeaders(response, req);
   }
 
   // Management routes — accessible to ADMIN and MANAGER only
@@ -199,7 +199,7 @@ export default authMiddleware((req) => {
       const response = NextResponse.redirect(
         new URL("/dashboard", req.nextUrl.origin),
       );
-      return addSecurityHeaders(response);
+      return addSecurityHeaders(response, req);
     }
   }
 
@@ -208,7 +208,7 @@ export default authMiddleware((req) => {
     const response = NextResponse.redirect(
       new URL("/dashboard", req.nextUrl.origin),
     );
-    return addSecurityHeaders(response);
+    return addSecurityHeaders(response, req);
   }
 
   const response = NextResponse.next();
@@ -216,7 +216,7 @@ export default authMiddleware((req) => {
   // Add request ID for traceability
   response.headers.set("X-Request-Id", crypto.randomUUID());
 
-  return addSecurityHeaders(response);
+  return addSecurityHeaders(response, req);
 });
 
 export const config = {

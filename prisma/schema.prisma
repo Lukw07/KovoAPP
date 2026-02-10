@@ -828,8 +828,13 @@ model EmployeeDocument {
 }
 
 // ============================================================================
-// CALENDAR EVENTS (custom events by managers / admins)
+// CALENDAR EVENTS (shared & personal events)
 // ============================================================================
+
+enum CalendarEventVisibility {
+  GLOBAL   // Visible to all employees
+  PRIVATE  // Visible only to the creator
+}
 
 model CalendarEvent {
   id          String   @id @default(cuid())
@@ -838,15 +843,17 @@ model CalendarEvent {
   date        DateTime
   endDate     DateTime? // optional end date for multi-day events
   color       String?   // hex color for UI display
+  visibility  CalendarEventVisibility @default(PRIVATE)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Creator (manager or admin)
+  // Creator (any user — employees for personal, managers/admins for global)
   creatorId String
   creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@index([date])
   @@index([creatorId])
+  @@index([visibility])
   @@map("calendar_events")
 }
 

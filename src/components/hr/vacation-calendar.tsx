@@ -5,11 +5,10 @@
 // ============================================================================
 
 import { useMemo, useState } from "react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { cs } from "date-fns/locale";
 import { getCzechHolidays } from "@/lib/holidays";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import "react-day-picker/style.css";
 
@@ -84,26 +83,14 @@ export default function VacationCalendar({
     }));
   }, [vacations]);
 
-  // Build a map of date → type for the day cell renderer
-  const dayTypeMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const v of vacations) {
-      const start = new Date(v.startDate);
-      const end = new Date(v.endDate);
-      const d = new Date(start);
-      while (d <= end) {
-        map.set(d.toDateString(), v.type);
-        d.setDate(d.getDate() + 1);
-      }
-    }
-    return map;
-  }, [vacations]);
-
   // Unique types used in legend
   const usedTypes = useMemo(() => {
     const set = new Set(vacations.map((v) => v.type));
     return Array.from(set);
   }, [vacations]);
+
+  // Merge default rdp class names with Tailwind overrides (v9 requirement)
+  const defaults = getDefaultClassNames();
 
   return (
     <div className={cn("rounded-2xl border border-border bg-card p-3 sm:p-4 overflow-hidden", className)}>
@@ -116,36 +103,28 @@ export default function VacationCalendar({
           holiday: holidays,
         }}
         modifiersClassNames={{
-          vacation: "!bg-blue-100 dark:!bg-blue-900/40 !text-blue-700 dark:!text-blue-300 !font-semibold !rounded-lg",
-          holiday: "!bg-red-50 dark:!bg-red-900/30 !text-red-600 dark:!text-red-400 !font-semibold !rounded-lg",
+          vacation: "rdp-vacation",
+          holiday: "rdp-holiday",
+          today: "rdp-today-custom",
         }}
         classNames={{
-          root: "w-full",
-          months: "w-full",
-          month: "w-full",
-          month_grid: "w-full border-collapse",
-          month_caption: "text-sm sm:text-base font-semibold text-foreground capitalize",
-          nav: "flex gap-1",
-          button_previous:
-            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
-          button_next:
-            "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
-          weekdays: "text-[10px] sm:text-xs font-medium text-foreground-muted uppercase",
-          weekday: "text-center py-1",
-          week: "w-full",
-          day: "h-8 w-full sm:h-9 text-xs sm:text-sm rounded-lg transition-colors text-foreground text-center p-1",
-          day_button: "w-full h-full rounded-lg flex items-center justify-center",
-          today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
-          selected: "!bg-blue-600 !text-white",
-          outside: "text-foreground-muted/40",
-        }}
-        components={{
-          Chevron: ({ orientation }) =>
-            orientation === "left" ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            ),
+          root: `${defaults.root} w-full`,
+          months: `${defaults.months} w-full`,
+          month: `${defaults.month} w-full`,
+          month_grid: `${defaults.month_grid} w-full border-collapse`,
+          month_caption: `${defaults.month_caption} text-sm sm:text-base font-semibold text-foreground capitalize`,
+          nav: `${defaults.nav} flex gap-1`,
+          button_previous: `${defaults.button_previous} hover:bg-background-secondary active:scale-95 text-foreground-secondary`,
+          button_next: `${defaults.button_next} hover:bg-background-secondary active:scale-95 text-foreground-secondary`,
+          weekdays: `${defaults.weekdays} text-[10px] sm:text-xs font-medium text-foreground-muted uppercase`,
+          weekday: `${defaults.weekday} text-center py-1`,
+          week: `${defaults.week} w-full`,
+          day: `${defaults.day} text-xs sm:text-sm rounded-lg transition-colors text-foreground text-center`,
+          day_button: `${defaults.day_button} rounded-lg`,
+          today: `${defaults.today} bg-blue-600 text-white rounded-lg font-bold`,
+          selected: `${defaults.selected} bg-blue-600 text-white`,
+          outside: `${defaults.outside} text-foreground-muted/40`,
+          chevron: `${defaults.chevron} fill-foreground-secondary`,
         }}
         disabled={false}
         hideNavigation={false}

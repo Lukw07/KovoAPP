@@ -16,6 +16,7 @@ import {
   Loader2,
   Briefcase,
   Star,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AbsenceChart } from "@/components/admin/absence-chart";
@@ -27,6 +28,7 @@ import { RewardClaimsManager } from "@/components/admin/reward-claims-manager";
 import { PointsManager } from "@/components/admin/points-manager";
 import { AdminLogsClient } from "@/components/admin/admin-logs";
 import { EmployeeTable } from "@/components/admin/employee-table";
+import { ResourceManager } from "@/components/admin/resource-manager";
 import {
   getAuditLogs,
   getSecurityEvents,
@@ -38,7 +40,7 @@ import { getAllUsers as fetchAllUsers } from "@/actions/admin-queries";
 import { getEmployeeList } from "@/actions/employee-management";
 import type { Role } from "@/generated/prisma/enums";
 
-type AdminSection = "dashboard" | "users" | "employees" | "create" | "points" | "rewards" | "export" | "logs";
+type AdminSection = "dashboard" | "users" | "employees" | "create" | "points" | "rewards" | "resources" | "export" | "logs";
 
 interface OverviewStats {
   totalUsers: number;
@@ -136,6 +138,12 @@ const ALL_SECTIONS: {
     label: "Odměny",
     icon: <Gift className="h-4 w-4" />,
     roles: ["ADMIN", "MANAGER"],
+  },
+  {
+    key: "resources",
+    label: "Zdroje",
+    icon: <Package className="h-4 w-4" />,
+    roles: ["ADMIN"],
   },
   {
     key: "export",
@@ -298,6 +306,9 @@ export function AdminDashboard({
           <RewardClaimsManager claims={rewardClaims} />
         </div>
       )}
+
+      {/* ─── Resources ──────────────────────────────────────────────── */}
+      {section === "resources" && <ResourceManager />}
 
       {/* ─── Export ───────────────────────────────────────────────────────────── */}
       {section === "export" && (

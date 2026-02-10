@@ -114,10 +114,10 @@ export default async function DashboardPage() {
 
       {/* ── Vacation calendar ──────────────────────────────── */}
       <div>
-        <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+        <h2 className="mb-3 text-sm font-semibold tracking-tight text-foreground-secondary uppercase">
           Můj kalendář
         </h2>
-        <VacationCalendar vacations={vacations} />
+        <VacationCalendar vacations={vacations} className="shadow-sm" />
       </div>
 
       {/* ── Who is absent today ────────────────────────────── */}

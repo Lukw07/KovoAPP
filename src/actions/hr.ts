@@ -117,6 +117,24 @@ export async function createRequest(
     isHalfDayEnd,
   );
 
+  // ── Check vacation balance (if entitlement exists) ──────────────────
+  const deductibleTypes: string[] = ["VACATION", "PERSONAL_DAY"];
+  if (deductibleTypes.includes(type)) {
+    const requestYear = startDate.getFullYear();
+    const entitlement = await prisma.vacationEntitlement.findUnique({
+      where: { userId_year: { userId: session.user.id, year: requestYear } },
+    });
+    if (entitlement) {
+      const remaining = entitlement.totalDays + entitlement.carriedOver - entitlement.usedDays;
+      if (totalDays > remaining) {
+        return {
+          error: `Nemáte dostatek dnů dovolené. Zbývá ${remaining} dní, požadujete ${totalDays}.`,
+        };
+      }
+    }
+    // If no entitlement exists, allow the request (tracking not configured)
+  }
+
   await prisma.hrRequest.create({
     data: {
       type,
@@ -197,6 +215,23 @@ export async function approveRequest(
       note: note ?? null,
     },
   });
+
+  // ── Deduct vacation days if entitlement exists ──────────────────────
+  // Only deduct for types that consume vacation/personal days
+  const deductibleTypes: string[] = ["VACATION", "PERSONAL_DAY"];
+  if (deductibleTypes.includes(request.type)) {
+    const requestYear = request.startDate.getFullYear();
+    const entitlement = await prisma.vacationEntitlement.findUnique({
+      where: { userId_year: { userId: request.userId, year: requestYear } },
+    });
+    if (entitlement) {
+      await prisma.vacationEntitlement.update({
+        where: { id: entitlement.id },
+        data: { usedDays: { increment: request.totalDays } },
+      });
+    }
+    // If no entitlement is set for this user/year, skip deduction silently
+  }
 
   await logAudit({
     action: "HR_REQUEST_APPROVED",

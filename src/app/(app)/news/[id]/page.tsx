@@ -17,11 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  try {
-    const post = await getPostDetail(id);
-    if (!post) return notFound();
-    return <PostDetailPage post={post} />;
-  } catch {
-    return notFound();
-  }
+  const post = await getPostDetail(id);
+  if (!post) return notFound();
+
+  // Serialize dates for client component
+  const serialized = JSON.parse(JSON.stringify(post));
+  return <PostDetailPage post={serialized} />;
 }

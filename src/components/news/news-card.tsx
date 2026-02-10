@@ -61,8 +61,8 @@ export function NewsCard({ post }: NewsCardProps) {
       className={cn(
         "rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md card-hover",
         post.isPinned
-          ? "border-blue-200 dark:border-blue-700/40 bg-blue-50/30 dark:bg-blue-900/10"
-          : "border-border"
+          ? "border-blue-200 dark:border-blue-700/40 bg-blue-50/50 dark:bg-blue-900/10 ring-1 ring-blue-100 dark:ring-blue-800/20"
+          : "border-border/60 dark:border-border"
       )}
     >
       {/* Image banner */}

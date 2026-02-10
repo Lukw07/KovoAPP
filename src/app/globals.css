@@ -9,11 +9,11 @@
 
 :root {
   /* ── Surface palette (Light) ─────────────────────────────────── */
-  --background: #ffffff;
-  --background-secondary: #f7f8f8;
-  --background-tertiary: #eef0f3;
+  --background: #f4f5f7;
+  --background-secondary: #edf0f3;
+  --background-tertiary: #e4e7ec;
   --foreground: #111827;
-  --foreground-secondary: #6b7280;
+  --foreground-secondary: #4b5563;
   --foreground-muted: #9ca3af;
 
   /* ── Brand accent — KOVO Děčín Blue ─────────────────────────── */
@@ -30,7 +30,7 @@
 
   /* ── Cards / surfaces ───────────────────────────────────────── */
   --card: #ffffff;
-  --card-hover: #fafbfc;
+  --card-hover: #f9fafb;
   --ring: #2563eb;
 
   /* ── Blue scale (sémantické mapování) ───────────────────────── */
@@ -768,13 +768,18 @@ select {
   transition: 
     transform 0.25s cubic-bezier(0.4, 0.14, 0.3, 1),
     box-shadow 0.25s cubic-bezier(0.4, 0.14, 0.3, 1);
+  /* Light mode: subtle resting shadow for white cards on gray bg */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+}
+.dark .card-hover {
+  box-shadow: none;
 }
 
 .card-hover:hover {
   transform: translateY(-2px);
   box-shadow: 
     0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 8px 25px -8px rgba(0, 0, 0, 0.1);
+    0 8px 25px -8px rgba(0, 0, 0, 0.12);
 }
 
 .dark .card-hover:hover {
@@ -1138,3 +1143,58 @@ select {
   );
   background-size: 200% 100%;
 }
+
+/* ============================================================================
+   react-day-picker v9 — modifier & theme overrides
+   ============================================================================ */
+
+/* Vacation days (blue) */
+.rdp-vacation .rdp-day_button {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-vacation .rdp-day_button {
+  background-color: rgba(30, 64, 175, 0.35);
+  color: #93c5fd;
+}
+
+/* Holidays (red) */
+.rdp-holiday .rdp-day_button {
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-holiday .rdp-day_button {
+  background-color: rgba(153, 27, 27, 0.25);
+  color: #fca5a5;
+}
+
+/* Today highlight (custom — override vacation if overlapping) */
+.rdp-today-custom .rdp-day_button {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 0.5rem;
+}
+.dark .rdp-today-custom .rdp-day_button {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* Make the calendar fit its container */
+.rdp-root {
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  width: 100%;
+  max-width: 100%;
+}
+@media (min-width: 640px) {
+  .rdp-root {
+    --rdp-day-height: 2.5rem;
+    --rdp-day-width: 2.5rem;
+  }
+}
+

@@ -41,12 +41,12 @@ export default function BookingForm({
   }, [state?.success, onSuccess]);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <input type="hidden" name="resourceId" value={resourceId} />
 
       {/* Success */}
       {state?.success && (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 text-sm font-medium text-emerald-700 dark:text-emerald-400">
           <Check className="h-4 w-4" />
           Rezervace potvrzena!
         </div>
@@ -54,67 +54,64 @@ export default function BookingForm({
 
       {/* Error */}
       {state?.error && (
-        <div className="flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm font-medium text-red-700 dark:text-red-400">
+        <div className="flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-900/30 px-4 py-2.5 text-sm font-medium text-red-700 dark:text-red-400">
           <X className="h-4 w-4" />
           {state.error}
         </div>
       )}
 
-      <p className="text-sm font-medium text-foreground">
-        Rezervovat: <span className="font-semibold">{resourceName}</span>
-      </p>
+      {/* Date row — side by side */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label
+            htmlFor="startTime"
+            className="mb-1 block text-xs font-medium text-foreground-secondary"
+          >
+            Od
+          </label>
+          <input
+            type="datetime-local"
+            id="startTime"
+            name="startTime"
+            min={minDateTime}
+            required
+            className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
+          {state?.fieldErrors?.startTime && (
+            <p className="mt-1 text-xs text-red-500">
+              {state.fieldErrors.startTime[0]}
+            </p>
+          )}
+        </div>
 
-      {/* Start time */}
-      <div>
-        <label
-          htmlFor="startTime"
-          className="mb-1.5 block text-sm font-medium text-foreground"
-        >
-          Od
-        </label>
-        <input
-          type="datetime-local"
-          id="startTime"
-          name="startTime"
-          min={minDateTime}
-          required
-          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        />
-        {state?.fieldErrors?.startTime && (
-          <p className="mt-1 text-xs text-red-500">
-            {state.fieldErrors.startTime[0]}
-          </p>
-        )}
-      </div>
-
-      {/* End time */}
-      <div>
-        <label
-          htmlFor="endTime"
-          className="mb-1.5 block text-sm font-medium text-foreground"
-        >
-          Do
-        </label>
-        <input
-          type="datetime-local"
-          id="endTime"
-          name="endTime"
-          min={minDateTime}
-          required
-          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        />
-        {state?.fieldErrors?.endTime && (
-          <p className="mt-1 text-xs text-red-500">
-            {state.fieldErrors.endTime[0]}
-          </p>
-        )}
+        <div>
+          <label
+            htmlFor="endTime"
+            className="mb-1 block text-xs font-medium text-foreground-secondary"
+          >
+            Do
+          </label>
+          <input
+            type="datetime-local"
+            id="endTime"
+            name="endTime"
+            min={minDateTime}
+            required
+            className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
+          {state?.fieldErrors?.endTime && (
+            <p className="mt-1 text-xs text-red-500">
+              {state.fieldErrors.endTime[0]}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Purpose */}
       <div>
         <label
           htmlFor="purpose"
-          className="mb-1.5 block text-sm font-medium text-foreground"
+          className="mb-1 block text-xs font-medium text-foreground-secondary"
         >
           Účel{" "}
           <span className="font-normal text-foreground-muted">(nepovinný)</span>
@@ -125,7 +122,7 @@ export default function BookingForm({
           name="purpose"
           maxLength={500}
           placeholder="Např. služební cesta do Brna"
-          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
@@ -134,7 +131,7 @@ export default function BookingForm({
         type="submit"
         disabled={isPending}
         className={cn(
-          "w-full rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]",
+          "w-full rounded-xl py-3 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]",
           isPending
             ? "bg-border text-foreground-muted cursor-not-allowed"
             : "bg-accent text-white shadow-accent glow-blue hover:bg-accent-hover",
