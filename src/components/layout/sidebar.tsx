@@ -19,6 +19,7 @@ import {
   ChatCircle,
   Storefront,
   CalendarDots,
+  Car,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -38,6 +39,7 @@ const MENU_SECTIONS = [
     title: "Rychlý přístup",
     items: [
       { label: "Kalendář", href: "/calendar", icon: CalendarDots },
+      { label: "Rezervace", href: "/reservations", icon: Car },
       { label: "Novinky", href: "/news", icon: Newspaper },
       { label: "Odměny", href: "/rewards", icon: Gift },
     ],

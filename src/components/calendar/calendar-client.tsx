@@ -404,7 +404,7 @@ export function CalendarClient({
           {DAY_NAMES.map((name) => (
             <div
               key={name}
-              className="py-2 text-center text-[11px] font-semibold text-foreground-muted"
+              className="min-w-0 py-2 text-center text-[11px] font-semibold text-foreground-muted"
             >
               {name}
             </div>
@@ -415,7 +415,7 @@ export function CalendarClient({
         <div className="grid grid-cols-7">
           {cells.map((day, idx) => {
             if (day === null) {
-              return <div key={`empty-${idx}`} className="h-12 border-b border-r border-border/50" />;
+              return <div key={`empty-${idx}`} className="min-w-0 h-12 border-b border-r border-border/50" />;
             }
 
             const { hasHoliday, dayEvents, isToday, isSelected, isWeekend } = getDayInfo(day);
@@ -425,7 +425,7 @@ export function CalendarClient({
                 key={day}
                 onClick={() => setSelectedDate(new Date(year, month - 1, day))}
                 className={cn(
-                  "relative h-12 flex flex-col items-center justify-center border-b border-r border-border/50 transition-colors",
+                  "relative min-w-0 h-12 flex flex-col items-center justify-center border-b border-r border-border/50 transition-colors",
                   "hover:bg-background-secondary",
                   isSelected && "bg-accent/10 ring-1 ring-accent ring-inset",
                   isToday && !isSelected && "bg-blue-50 dark:bg-blue-900/20",

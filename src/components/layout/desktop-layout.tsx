@@ -24,6 +24,7 @@ import {
   CaretRight,
   Users,
   Calendar,
+  Car,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -44,6 +45,7 @@ const NAV_SECTIONS = [
     items: [
       { label: "Přehled", href: "/dashboard", icon: SquaresFour },
       { label: "Žádosti", href: "/requests", icon: CalendarDots },
+      { label: "Rezervace", href: "/reservations", icon: Car },
       { label: "Kalendář", href: "/calendar", icon: Calendar },
       { label: "Zprávy", href: "/messages", icon: ChatCircle },
     ],

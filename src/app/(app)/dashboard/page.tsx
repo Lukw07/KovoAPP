@@ -7,7 +7,6 @@ import {
   CalendarDots,
   Car,
   Star,
-  ShieldCheck,
   WarningCircle,
   CaretRight,
   Newspaper,
@@ -42,15 +41,7 @@ export default async function DashboardPage() {
               {user?.pointsBalance} bodů
             </span>
           </div>
-          {isManagement && (
-            <Link
-              href="/admin"
-              className="flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 border border-white/15 hover:bg-white/25 transition-all duration-150 btn-press active:scale-[0.97]"
-            >
-              <ShieldCheck className="h-4 w-4" weight="bold" />
-              <span className="text-sm font-semibold">Správa</span>
-            </Link>
-          )}
+
         </div>
       </div>
 

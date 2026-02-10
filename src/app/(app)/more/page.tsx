@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ClipboardList,
   CalendarDays,
+  Car,
 } from "lucide-react";
 import { getUnreadMessageCount } from "@/actions/messages";
 import { auth } from "@/lib/auth";
@@ -66,6 +67,14 @@ const SECTIONS = [
   {
     title: "Služby",
     items: [
+      {
+        label: "Rezervace",
+        href: "/reservations",
+        icon: Car,
+        description: "Zasedačky, auta, vybavení",
+        color: "text-emerald-600 dark:text-emerald-400",
+        bg: "bg-emerald-50 dark:bg-emerald-900/30",
+      },
       {
         label: "Odměny",
         href: "/rewards",
