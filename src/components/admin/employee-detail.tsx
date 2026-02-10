@@ -32,8 +32,8 @@ import {
   upsertVacationEntitlement,
   createDocument,
   deleteDocument,
+  updateEmployeeContact,
 } from "@/actions/employee-management";
-import { updateUser } from "@/actions/admin-users";
 
 // ============================================================================
 // Employee Detail — tabbed view with overview, contracts, exams, documents, PTO
@@ -229,14 +229,84 @@ function OverviewTab({ employee }: { employee: Employee }) {
           </h3>
           <div className="space-y-2 text-sm">
             <InfoRow
+              icon={User}
+              label="Jméno"
+              value={employee.name}
+              editable
+              editType="text"
+              editValue={employee.name}
+              onSave={async (val) => {
+                const res = await updateEmployeeContact({
+                  userId: employee.id,
+                  name: val,
+                });
+                if (res?.error) {
+                  toast.error(res.error);
+                } else {
+                  toast.success("Jméno uloženo");
+                  router.refresh();
+                }
+              }}
+            />
+            <InfoRow
               icon={EnvelopeSimple}
               label="E-mail"
               value={employee.email}
+              editable
+              editType="text"
+              editValue={employee.email}
+              onSave={async (val) => {
+                const res = await updateEmployeeContact({
+                  userId: employee.id,
+                  email: val,
+                });
+                if (res?.error) {
+                  toast.error(res.error);
+                } else {
+                  toast.success("E-mail uložen");
+                  router.refresh();
+                }
+              }}
             />
             <InfoRow
               icon={Phone}
               label="Telefon"
               value={employee.phone ?? "—"}
+              editable
+              editType="text"
+              editValue={employee.phone ?? ""}
+              onSave={async (val) => {
+                const res = await updateEmployeeContact({
+                  userId: employee.id,
+                  phone: val || null,
+                });
+                if (res?.error) {
+                  toast.error(res.error);
+                } else {
+                  toast.success("Telefon uložen");
+                  router.refresh();
+                }
+              }}
+            />
+            <InfoRow
+              icon={Briefcase}
+              label="Pozice"
+              value={employee.position ?? "—"}
+              editable
+              editType="text"
+              editValue={employee.position ?? ""}
+              onSave={async (val) => {
+                const res = await updateEmployeeContact({
+                  userId: employee.id,
+                  position: val || null,
+                });
+                if (res?.error) {
+                  toast.error(res.error);
+                } else {
+                  toast.success("Pozice uložena");
+                  router.refresh();
+                }
+              }}
             />
             <InfoRow
               icon={CalendarDots}
@@ -248,10 +318,10 @@ function OverviewTab({ employee }: { employee: Employee }) {
               editType="date"
               editValue={format(new Date(employee.hireDate), "yyyy-MM-dd")}
               onSave={async (val) => {
-                const fd = new FormData();
-                fd.set("userId", employee.id);
-                fd.set("hireDate", val);
-                const res = await updateUser(fd);
+                const res = await updateEmployeeContact({
+                  userId: employee.id,
+                  hireDate: val,
+                });
                 if (res?.error) {
                   toast.error(res.error);
                 } else {

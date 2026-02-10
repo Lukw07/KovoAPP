@@ -87,17 +87,15 @@ export function FcmProvider({ children }: { children: React.ReactNode }) {
       if (!messaging) return;
 
       onMessage(messaging, (payload) => {
-        console.log("[FCM:KLIENT] ✔ Foreground zpráva přijata:", {
-          title: payload.notification?.title,
-          body: payload.notification?.body,
-          data: payload.data,
-        });
-
-        const title = payload.notification?.title || "KOVO Apka";
-        const body = payload.notification?.body || "";
+        // Data-only FCM messages put everything in `data`, not `notification`
+        const title = payload.data?.title || payload.notification?.title || "KOVO Apka";
+        const body = payload.data?.body || payload.notification?.body || "";
         const link = payload.data?.link || "/dashboard";
 
-        // Show in-app toast notification
+        console.log("[FCM:KLIENT] ✔ Foreground zpráva přijata:", { title, body, link });
+
+        // Show in-app toast notification (only this — no native Notification
+        // to avoid duplicates; foreground = toast is enough)
         toast(title, {
           description: body,
           duration: 6000,
@@ -110,27 +108,6 @@ export function FcmProvider({ children }: { children: React.ReactNode }) {
               }
             : undefined,
         });
-
-        // ALWAYS show native web notification (user requested all notifs as
-        // native browser notifications, not just when tab is hidden)
-        if (Notification.permission === "granted") {
-          try {
-            const notification = new Notification(title, {
-              body,
-              icon: "/icons/icon-192x192.png",
-              badge: "/icons/icon-72x72.png",
-              tag: payload.data?.tag || `kovo-fg-${Date.now()}`,
-              vibrate: [200, 100, 200],
-            } as NotificationOptions);
-            notification.onclick = () => {
-              window.focus();
-              if (link) window.location.href = link;
-              notification.close();
-            };
-          } catch {
-            // Native Notification constructor not available (e.g. mobile webview)
-          }
-        }
       });
 
       listenerSetUp.current = true;

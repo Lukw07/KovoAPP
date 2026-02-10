@@ -38,7 +38,10 @@ export async function sendNotification({
   console.log(`[FCM:STATUS] ✔ Notifikace uložena do DB | id=${notification.id}`);
 
   // 2. Send push via FCM to all active tokens
-  await sendPushToUser(userId, title, body, link);
+  // Pass notification.id as tag — ensures identical pushes (e.g. delivered to
+  // multiple tokens of the same device) collapse into ONE notification on the
+  // device, while different notifications each get their own slot.
+  await sendPushToUser(userId, title, body, link, notification.id);
 
   // 3. Emit realtime event for Socket.IO clients (instant badge update)
   emitRealtimeEvent("notification:new", userId, { title, body, link, type }).catch(
@@ -56,6 +59,7 @@ export async function sendPushToUser(
   title: string,
   body: string,
   link?: string,
+  notificationTag?: string,
 ) {
   const messaging = getAdminMessaging();
   if (!messaging) {
@@ -78,17 +82,20 @@ export async function sendPushToUser(
   const tokenStrings = tokens.map((t) => t.token);
 
   try {
+    // Data-only message — no `notification` field!
+    // This ensures onMessage (foreground) and onBackgroundMessage (background)
+    // are ALWAYS called, giving us full control. With a `notification` field,
+    // the browser auto-displays a native notification AND our handlers fire,
+    // causing duplicates.
     const response = await messaging.sendEachForMulticast({
       tokens: tokenStrings,
-      notification: { title, body },
-      data: { link: link ?? "/dashboard", tag: "kovo-app" },
-      webpush: {
-        fcmOptions: { link: link ?? "/dashboard" },
-        notification: {
-          icon: "/icons/icon-192x192.png",
-          badge: "/icons/icon-72x72.png",
-          vibrate: [200, 100, 200],
-        },
+      data: {
+        title,
+        body,
+        link: link ?? "/dashboard",
+        tag: notificationTag ?? `kovo-${Date.now()}`,
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-72x72.png",
       },
     });
 
@@ -173,15 +180,13 @@ export async function sendPushToAll(
     try {
       const response = await messaging.sendEachForMulticast({
         tokens: tokenStrings,
-        notification: { title, body },
-        data: { link: link ?? "/dashboard", tag: "kovo-broadcast" },
-        webpush: {
-          fcmOptions: { link: link ?? "/dashboard" },
-          notification: {
-            icon: "/icons/icon-192x192.png",
-            badge: "/icons/icon-72x72.png",
-            vibrate: [200, 100, 200],
-          },
+        data: {
+          title,
+          body,
+          link: link ?? "/dashboard",
+          tag: `kovo-broadcast-${Date.now()}`,
+          icon: "/icons/icon-192x192.png",
+          badge: "/icons/icon-72x72.png",
         },
       });
 

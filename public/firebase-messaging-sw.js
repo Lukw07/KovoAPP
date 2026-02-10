@@ -21,26 +21,27 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// Handle background messages (data-only — no auto-display by browser)
 messaging.onBackgroundMessage((payload) => {
   console.log("[firebase-messaging-sw] Background message:", payload);
 
-  const notificationTitle = payload.notification?.title || "KOVO Apka";
+  // Data-only messages: title/body are in payload.data, not payload.notification
+  const title = payload.data?.title || payload.notification?.title || "KOVO Apka";
+  const body = payload.data?.body || payload.notification?.body || "";
+
   const notificationOptions = {
-    body: payload.notification?.body || "",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-72x72.png",
+    body,
+    icon: payload.data?.icon || "/icons/icon-192x192.png",
+    badge: payload.data?.badge || "/icons/icon-72x72.png",
     tag: payload.data?.tag || "default",
     data: {
       url: payload.data?.link || "/dashboard",
     },
-    // Vibrate pattern for manufacturing environment (stronger vibration)
     vibrate: [200, 100, 200],
-    // Renotify if same tag
     renotify: true,
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(title, notificationOptions);
 });
 
 // Handle notification click — navigate to the deep link

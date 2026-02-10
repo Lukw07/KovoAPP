@@ -61,7 +61,7 @@ export async function givePoints(formData: FormData) {
 
   try {
     // Create transaction + update balance atomically
-    await prisma.$transaction([
+    const [, updatedUser] = await prisma.$transaction([
       prisma.pointTransaction.create({
         data: {
           amount,
@@ -74,6 +74,7 @@ export async function givePoints(formData: FormData) {
       prisma.user.update({
         where: { id: userId },
         data: { pointsBalance: { increment: amount } },
+        select: { pointsBalance: true },
       }),
     ]);
 
@@ -96,6 +97,7 @@ export async function givePoints(formData: FormData) {
 
     // Realtime points balance update
     emitRealtimeEvent("points:updated", userId, {
+      balance: updatedUser.pointsBalance,
       amount,
       reason,
       newAction: "award",
@@ -152,6 +154,12 @@ export async function deductPoints(formData: FormData) {
       }),
     ]);
 
+    // Read current balance for realtime update
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { pointsBalance: true },
+    });
+
     await logAudit({
       action: "POINTS_DEDUCTED",
       entityType: "PointTransaction",
@@ -167,6 +175,14 @@ export async function deductPoints(formData: FormData) {
       body: reason,
       link: "/rewards",
     });
+
+    // Realtime points balance update
+    emitRealtimeEvent("points:updated", userId, {
+      balance: updatedUser?.pointsBalance ?? 0,
+      amount: -amount,
+      reason,
+      newAction: "deduct",
+    }).catch(() => {});
 
     revalidatePath("/rewards");
     revalidatePath("/dashboard");

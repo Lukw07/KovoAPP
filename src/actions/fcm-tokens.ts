@@ -20,6 +20,13 @@ const deactivateTokenSchema = z.object({
 
 /**
  * Register or update an FCM token for the current user.
+ *
+ * IMPORTANT: Before upserting the new token we deactivate ALL other active
+ * tokens for the same user + deviceType combination. On iOS (and sometimes on
+ * web) FCM tokens rotate silently — the old token stays in the DB as active
+ * even though it now points to the same physical device as the new token.
+ * If the backend then sends a push to both the old AND new token, the device
+ * receives the notification **twice**. Deactivating stale tokens prevents this.
  */
 export async function registerFcmToken(
   token: string,
@@ -31,6 +38,25 @@ export async function registerFcmToken(
 
   const parsed = registerTokenSchema.safeParse({ token, deviceType, deviceName });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  // Deactivate all OTHER active tokens for the same user + deviceType.
+  // This prevents duplicate pushes caused by token rotation on iOS/web
+  // where the old token still belongs to the same physical device.
+  const deactivated = await prisma.fcmToken.updateMany({
+    where: {
+      userId: session.user.id,
+      deviceType: parsed.data.deviceType,
+      isActive: true,
+      token: { not: parsed.data.token },
+    },
+    data: { isActive: false },
+  });
+
+  if (deactivated.count > 0) {
+    console.log(
+      `[FCM:STATUS] 🗑 Deaktivováno ${deactivated.count} starých tokenů pro ${parsed.data.deviceType} | user=${session.user.id}`,
+    );
+  }
 
   // Upsert — if the token already exists, just update ownership/active flag
   const result = await prisma.fcmToken.upsert({

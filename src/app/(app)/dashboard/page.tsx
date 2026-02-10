@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { getMyApprovedVacations, getPendingForManager } from "@/actions/hr-queries";
 import { getUnreadMessageCount } from "@/actions/messages";
 import { getDashboardActivity, getDashboardStats } from "@/actions/dashboard-queries";
@@ -26,12 +27,16 @@ export default async function DashboardPage() {
     user?.role === "ADMIN" || user?.role === "MANAGER";
 
   const currentYear = new Date().getFullYear();
-  const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats] = await Promise.all([
+  const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats, freshUser] = await Promise.all([
     getMyApprovedVacations(currentYear),
     isManagement ? getPendingForManager() : Promise.resolve([]),
     getUnreadMessageCount().catch(() => 0),
     getDashboardActivity(8),
     getDashboardStats(),
+    prisma.user.findUnique({
+      where: { id: user!.id },
+      select: { pointsBalance: true },
+    }),
   ]);
 
   return (
@@ -43,7 +48,7 @@ export default async function DashboardPage() {
       <DashboardHero
         userName={user?.name ?? ""}
         avatarUrl={user?.avatarUrl ?? null}
-        pointsBalance={user?.pointsBalance ?? 0}
+        pointsBalance={freshUser?.pointsBalance ?? user?.pointsBalance ?? 0}
         unreadMessages={typeof unreadMessages === "number" ? unreadMessages : 0}
         initialActivity={activityFeed}
         stats={dashboardStats}

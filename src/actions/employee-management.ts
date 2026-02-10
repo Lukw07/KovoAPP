@@ -3,6 +3,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { sendNotification } from "@/lib/notifications";
+import { logAudit } from "@/lib/audit";
 
 // ============================================================================
 // Employee Management Queries — for MANAGER / ADMIN roles
@@ -263,6 +265,94 @@ export async function getEmployeeDetail(userId: string) {
   };
 }
 
+// ── Update employee contact details (MANAGER/ADMIN) ────────────────────────
+
+const updateContactSchema = z.object({
+  userId: z.string().cuid(),
+  name: z
+    .string()
+    .min(2, "Jméno musí mít alespoň 2 znaky")
+    .max(100)
+    .trim()
+    .optional(),
+  email: z
+    .string()
+    .email("Neplatný email")
+    .transform((e) => e.toLowerCase().trim())
+    .optional(),
+  phone: z
+    .string()
+    .max(20, "Telefon je příliš dlouhý")
+    .transform((v) => v?.trim() || null)
+    .nullish(),
+  position: z
+    .string()
+    .max(100)
+    .transform((v) => v?.trim() || null)
+    .nullish(),
+  hireDate: z
+    .string()
+    .transform((v) => (v ? new Date(v) : undefined))
+    .optional(),
+});
+
+export async function updateEmployeeContact(
+  data: z.input<typeof updateContactSchema>,
+) {
+  const actor = await requireManagement();
+  const parsed = updateContactSchema.parse(data);
+  const { userId, ...fields } = parsed;
+
+  // Remove undefined values
+  const updateData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) {
+      updateData[key] = value;
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return { error: "Žádná data k aktualizaci" };
+  }
+
+  // Verify user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+  if (!targetUser) {
+    return { error: "Uživatel nenalezen" };
+  }
+
+  // Check email uniqueness if changing
+  if (updateData.email && updateData.email !== targetUser.email) {
+    const existing = await prisma.user.findFirst({
+      where: {
+        email: updateData.email as string,
+        id: { not: userId },
+      },
+    });
+    if (existing) {
+      return { error: "Tento email je již používán jiným uživatelem" };
+    }
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  await logAudit({
+    action: "USER_UPDATED",
+    entityType: "User",
+    entityId: userId,
+    performedBy: actor.id!,
+    details: { ...updateData, updatedBy: "management" },
+  });
+
+  return { success: true };
+}
+
 // ── Mutations ───────────────────────────────────────────────────────────────
 
 const contractSchema = z.object({
@@ -317,6 +407,35 @@ export async function createMedicalExam(
       note: parsed.note,
     },
   });
+
+  // Send notification to the employee
+  const examTypeLabels: Record<string, string> = {
+    VSTUPNI: "Vstupní",
+    PERIODICKY: "Periodická",
+    MIMORADNA: "Mimořádná",
+    VYSTUPNI: "Výstupní",
+    NASLEDNA: "Následná",
+  };
+  const typeLabel = examTypeLabels[parsed.type] ?? parsed.type;
+  const dateStr = new Date(parsed.scheduledAt).toLocaleDateString("cs-CZ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const doctorInfo = parsed.doctorName ? ` u lékaře ${parsed.doctorName}` : "";
+
+  try {
+    await sendNotification({
+      userId: parsed.userId,
+      type: "MEDICAL_EXAM",
+      title: "🩺 Naplánovaná prohlídka",
+      body: `${typeLabel} prohlídka${doctorInfo} dne ${dateStr}.${parsed.note ? " Poznámka: " + parsed.note : ""}`,
+      link: "/requests",
+    });
+  } catch (err) {
+    console.error("[MEDICAL_EXAM] Failed to send notification:", err);
+  }
 
   return { success: true, id: exam.id };
 }

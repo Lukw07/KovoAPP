@@ -106,6 +106,39 @@ export async function getAbsentToday() {
 }
 
 // ---------------------------------------------------------------------------
+// Get user's requests for calendar view (given month, all non-cancelled)
+// ---------------------------------------------------------------------------
+
+export async function getRequestsForCalendar(year: number, month: number) {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const startOfMonth = new Date(year, month - 1, 1);
+  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+
+  return prisma.hrRequest.findMany({
+    where: {
+      userId: session.user.id,
+      status: { in: ["PENDING", "APPROVED", "REJECTED"] },
+      startDate: { lte: endOfMonth },
+      endDate: { gte: startOfMonth },
+    },
+    orderBy: { startDate: "asc" },
+    select: {
+      id: true,
+      type: true,
+      status: true,
+      startDate: true,
+      endDate: true,
+      totalDays: true,
+      reason: true,
+      isHalfDayStart: true,
+      isHalfDayEnd: true,
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Get pending requests for managers (their department)
 // ---------------------------------------------------------------------------
 

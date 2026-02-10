@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { getActiveRewards, getMyRewardClaims } from "@/actions/reward-queries";
 import { RewardsShop } from "@/components/rewards/rewards-shop";
 
@@ -8,9 +9,13 @@ export default async function RewardsPage() {
   const session = await auth();
   const user = session?.user;
 
-  const [rewards, claims] = await Promise.all([
+  const [rewards, claims, freshUser] = await Promise.all([
     getActiveRewards(),
     getMyRewardClaims(),
+    prisma.user.findUnique({
+      where: { id: user!.id },
+      select: { pointsBalance: true },
+    }),
   ]);
 
   return (
@@ -19,7 +24,7 @@ export default async function RewardsPage() {
       <RewardsShop
         rewards={rewards}
         claims={claims}
-        userBalance={user?.pointsBalance ?? 0}
+        userBalance={freshUser?.pointsBalance ?? user?.pointsBalance ?? 0}
         userName={user?.name ?? ""}
       />
     </div>
