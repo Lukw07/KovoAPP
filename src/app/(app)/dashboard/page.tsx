@@ -1,12 +1,14 @@
 import { auth } from "@/lib/auth";
 import { getMyApprovedVacations, getPendingForManager } from "@/actions/hr-queries";
+import { getLatestNews } from "@/actions/news-queries";
+import { getUnreadMessageCount } from "@/actions/messages";
 import VacationCalendar from "@/components/hr/vacation-calendar";
 import TeamStatus from "@/components/hr/team-status";
+import DashboardHero from "@/components/dashboard/dashboard-hero";
 import Link from "next/link";
 import {
   CalendarDots,
   Car,
-  Star,
   WarningCircle,
   CaretRight,
   Newspaper,
@@ -23,27 +25,23 @@ export default async function DashboardPage() {
     user?.role === "ADMIN" || user?.role === "MANAGER";
 
   const currentYear = new Date().getFullYear();
-  const [vacations, pendingRequests] = await Promise.all([
+  const [vacations, pendingRequests, latestNews, unreadMessages] = await Promise.all([
     getMyApprovedVacations(currentYear),
     isManagement ? getPendingForManager() : Promise.resolve([]),
+    getLatestNews(3),
+    getUnreadMessageCount().catch(() => 0),
   ]);
 
   return (
     <DashboardAnimations>
-      {/* ── Welcome hero — solid blue brand card ────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 text-white shadow-[0_4px_24px_rgba(37,99,235,0.3)]" data-hero>
-        <p className="relative text-sm font-medium text-blue-200">Vítejte zpět,</p>
-        <h1 className="relative mt-1 text-2xl font-bold tracking-tight">{user?.name}</h1>
-        <div className="relative mt-4 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 border border-white/15">
-            <Star className="h-4 w-4 text-yellow-300" weight="fill" />
-            <span className="text-sm font-semibold tabular-nums" data-points>
-              {user?.pointsBalance} bodů
-            </span>
-          </div>
-
-        </div>
-      </div>
+      {/* ── Welcome hero — animated gradient with stats ────── */}
+      <DashboardHero
+        userName={user?.name ?? ""}
+        avatarUrl={user?.avatarUrl ?? null}
+        pointsBalance={user?.pointsBalance ?? 0}
+        latestNews={latestNews}
+        unreadMessages={typeof unreadMessages === "number" ? unreadMessages : 0}
+      />
 
       {/* ── Pending requests alert — premium amber card ─────── */}
       {isManagement && pendingRequests.length > 0 && (
