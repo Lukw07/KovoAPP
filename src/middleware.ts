@@ -37,6 +37,10 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   );
 
   // Content Security Policy — strict but functional
+  // Dynamically allow WebSocket connections for Socket.IO on the same domain
+  const host = request.headers.get("host")?.split(":")[0] ?? "localhost";
+  const socketConnectSrc = `https://${host}:* wss://${host}:* http://${host}:* ws://${host}:*`;
+
   response.headers.set(
     "Content-Security-Policy",
     [
@@ -45,7 +49,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.kovo.cz https://lh3.googleusercontent.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://fcm.googleapis.com https://fcmregistrations.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com",
+      `connect-src 'self' ${socketConnectSrc} https://fcm.googleapis.com https://fcmregistrations.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com`,
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
