@@ -30,7 +30,10 @@ import {
   createMedicalExam,
   completeMedicalExam,
   upsertVacationEntitlement,
+  createDocument,
+  deleteDocument,
 } from "@/actions/employee-management";
+import { updateUser } from "@/actions/admin-users";
 
 // ============================================================================
 // Employee Detail — tabbed view with overview, contracts, exams, documents, PTO
@@ -153,6 +156,7 @@ export function EmployeeDetail({ employee }: EmployeeDetailProps) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function OverviewTab({ employee }: { employee: Employee }) {
+  const router = useRouter();
   const currentVacation = employee.vacationEntitlements[0];
   const activeContract = employee.contracts.find(
     (c) => c.status === "ACTIVE",
@@ -240,6 +244,21 @@ function OverviewTab({ employee }: { employee: Employee }) {
               value={format(new Date(employee.hireDate), "d. MMMM yyyy", {
                 locale: cs,
               })}
+              editable
+              editType="date"
+              editValue={format(new Date(employee.hireDate), "yyyy-MM-dd")}
+              onSave={async (val) => {
+                const fd = new FormData();
+                fd.set("userId", employee.id);
+                fd.set("hireDate", val);
+                const res = await updateUser(fd);
+                if (res?.error) {
+                  toast.error(res.error);
+                } else {
+                  toast.success("Datum nástupu uloženo");
+                  router.refresh();
+                }
+              }}
             />
             <InfoRow
               icon={User}
@@ -893,11 +912,140 @@ function ExamsTab({ employee }: { employee: Employee }) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function DocumentsTab({ employee }: { employee: Employee }) {
+  const [showForm, setShowForm] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [uploading, setUploading] = useState(false);
+  const [fileUrl, setFileUrl] = useState("");
+  const router = useRouter();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Soubor je příliš velký (max 10 MB)");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        toast.error(data.error || "Chyba při nahrávání");
+      } else {
+        setFileUrl(data.url);
+        toast.success("Soubor nahrán");
+      }
+    } catch {
+      toast.error("Chyba při nahrávání");
+    }
+    setUploading(false);
+  };
+
+  const handleCreate = (formData: FormData) => {
+    if (!fileUrl) { toast.error("Nejprve nahrajte soubor"); return; }
+    startTransition(async () => {
+      try {
+        const expiresAt = formData.get("expiresAt") as string;
+        await createDocument({
+          userId: employee.id,
+          title: formData.get("title") as string,
+          category: formData.get("category") as "CONTRACT" | "MEDICAL" | "TRAINING" | "CERTIFICATION" | "ID_CARD" | "OTHER",
+          description: (formData.get("description") as string) || undefined,
+          fileUrl,
+          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+        });
+        toast.success("Dokument přidán");
+        setShowForm(false);
+        setFileUrl("");
+        router.refresh();
+      } catch {
+        toast.error("Chyba při ukládání");
+      }
+    });
+  };
+
+  const handleDelete = (docId: string, docTitle: string) => {
+    if (!confirm(`Smazat dokument "${docTitle}"?`)) return;
+    startTransition(async () => {
+      try {
+        await deleteDocument(docId);
+        toast.success("Dokument smazán");
+        router.refresh();
+      } catch {
+        toast.error("Chyba při mazání");
+      }
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-foreground">
-        Dokumenty ({employee.documents.length})
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">
+          Dokumenty ({employee.documents.length})
+        </h3>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className={cn(
+            "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+            showForm
+              ? "bg-red-50 dark:bg-red-900/30 text-red-600"
+              : "bg-accent/10 text-accent-text hover:bg-accent/20",
+          )}
+        >
+          {showForm ? <XCircle className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          {showForm ? "Zrušit" : "Přidat dokument"}
+        </button>
+      </div>
+
+      {showForm && (
+        <form action={handleCreate} className="rounded-xl border border-border bg-card p-4 space-y-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-foreground-secondary">Název *</label>
+            <input name="title" required
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-foreground-secondary">Kategorie *</label>
+              <select name="category" required
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none">
+                <option value="CONTRACT">Smlouva</option>
+                <option value="MEDICAL">Lékařské</option>
+                <option value="TRAINING">Školení</option>
+                <option value="CERTIFICATION">Certifikát</option>
+                <option value="ID_CARD">Průkaz</option>
+                <option value="OTHER">Ostatní</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-foreground-secondary">Platnost do</label>
+              <input name="expiresAt" type="date"
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-foreground-secondary">Poznámka</label>
+            <textarea name="description" rows={2}
+              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none resize-none" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-foreground-secondary">Soubor *</label>
+            <div className="flex items-center gap-3">
+              <input type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onChange={handleFileUpload}
+                className="text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-accent/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-accent-text file:cursor-pointer" />
+              {uploading && <span className="text-xs text-foreground-muted animate-pulse">Nahrávání...</span>}
+              {fileUrl && <CheckCircle className="h-4 w-4 text-emerald-500" />}
+            </div>
+          </div>
+          <button type="submit" disabled={pending || !fileUrl}
+            className={cn("w-full rounded-lg py-2 text-sm font-semibold transition-all",
+              "bg-accent text-white hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed")}>
+            {pending ? "Ukládám..." : "Uložit dokument"}
+          </button>
+        </form>
+      )}
 
       {employee.documents.length === 0 ? (
         <p className="py-8 text-center text-sm text-foreground-muted">
@@ -948,14 +1096,23 @@ function DocumentsTab({ employee }: { employee: Employee }) {
                 </div>
               </div>
               {doc.fileUrl && (
-                <a
-                  href={doc.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 text-xs text-accent-text hover:underline ml-2"
-                >
-                  Stáhnout
-                </a>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <a
+                    href={doc.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-accent-text hover:underline"
+                  >
+                    Stáhnout
+                  </a>
+                  <button
+                    onClick={() => handleDelete(doc.id, doc.title)}
+                    disabled={pending}
+                    className="text-xs text-red-500 hover:text-red-700 hover:underline disabled:opacity-50"
+                  >
+                    Smazat
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -1202,16 +1359,70 @@ function InfoRow({
   icon: Icon,
   label,
   value,
+  editable,
+  editType,
+  editValue,
+  onSave,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
+  editable?: boolean;
+  editType?: "text" | "date";
+  editValue?: string;
+  onSave?: (val: string) => Promise<void>;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [inputVal, setInputVal] = useState(editValue ?? value);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    setSaving(true);
+    try {
+      await onSave(inputVal);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Icon className="h-4 w-4 text-foreground-muted shrink-0" />
       <span className="text-foreground-muted w-20 shrink-0">{label}</span>
-      <span className="text-foreground truncate">{value}</span>
+      {editing ? (
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <input
+            type={editType || "text"}
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            className="flex-1 min-w-0 rounded-lg border border-border px-2 py-1 text-sm bg-card text-foreground focus:border-accent focus:outline-none"
+            autoFocus
+          />
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+          >
+            {saving ? "..." : "✓"}
+          </button>
+          <button
+            onClick={() => { setEditing(false); setInputVal(editValue ?? value); }}
+            className="rounded-lg bg-background-secondary px-2 py-1 text-xs font-medium text-foreground-secondary hover:bg-background-secondary/80"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <span
+          className={cn("text-foreground truncate", editable && "cursor-pointer hover:text-accent transition-colors")}
+          onClick={() => editable && setEditing(true)}
+        >
+          {value}
+          {editable && <span className="ml-1 text-foreground-muted text-xs">✎</span>}
+        </span>
+      )}
     </div>
   );
 }

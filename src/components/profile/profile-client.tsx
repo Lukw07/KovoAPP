@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useCallback } from "react";
 import {
   User,
   Camera,
@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import { updateAvatar, updateProfile } from "@/actions/profile";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { cs } from "date-fns/locale";
+import { AvatarCropModal } from "./avatar-crop-modal";
 
 interface ProfileUser {
   id: string;
@@ -37,6 +38,7 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
   const [isPending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -48,7 +50,7 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
   const [phone, setPhone] = useState(user.phone || "");
   const [position, setPosition] = useState(user.position || "");
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -61,12 +63,19 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
       return;
     }
 
+    setMessage(null);
+    setCropFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropped = useCallback(async (croppedBlob: Blob) => {
+    setCropFile(null);
     setAvatarUploading(true);
     setMessage(null);
 
     try {
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", new File([croppedBlob], "avatar.webp", { type: "image/webp" }));
 
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
@@ -87,8 +96,11 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
       setMessage({ type: "error", text: "Něco se pokazilo" });
     }
     setAvatarUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  }, []);
+
+  const handleCropCancel = useCallback(() => {
+    setCropFile(null);
+  }, []);
 
   const handleSaveProfile = () => {
     setMessage(null);
@@ -116,6 +128,10 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
       .slice(0, 2) || "?";
 
   const tenure = formatDistanceToNow(new Date(user.hireDate), {
+    locale: cs,
+  });
+
+  const hireDateFormatted = format(new Date(user.hireDate), "d. MMMM yyyy", {
     locale: cs,
   });
 
@@ -165,9 +181,18 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleAvatarUpload}
+              onChange={handleFileSelect}
             />
           </div>
+
+          {/* Avatar crop modal */}
+          {cropFile && (
+            <AvatarCropModal
+              file={cropFile}
+              onCropped={handleCropped}
+              onCancel={handleCropCancel}
+            />
+          )}
 
           <div className="flex-1 min-w-0">
             <p className="text-lg font-bold text-foreground truncate">
@@ -325,6 +350,11 @@ export function ProfileClient({ user }: { user: ProfileUser }) {
             value={user.department.name}
           />
         )}
+        <InfoRow
+          icon={<Calendar className="h-4 w-4" />}
+          label="Nástup"
+          value={hireDateFormatted}
+        />
         <InfoRow
           icon={<Calendar className="h-4 w-4" />}
           label="Ve firmě"

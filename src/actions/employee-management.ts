@@ -375,3 +375,42 @@ export async function upsertVacationEntitlement(
 
   return { success: true };
 }
+
+// ── Document management ─────────────────────────────────────────────────────
+
+const documentSchema = z.object({
+  userId: z.string().cuid(),
+  title: z.string().min(1, "Název je povinný").max(200),
+  category: z.enum(["CONTRACT", "MEDICAL", "TRAINING", "CERTIFICATION", "ID_CARD", "OTHER"]),
+  description: z.string().max(2000).optional(),
+  fileUrl: z.string().min(1, "Soubor je povinný"),
+  expiresAt: z.string().datetime().optional(),
+});
+
+export async function createDocument(data: z.infer<typeof documentSchema>) {
+  await requireManagement();
+  const parsed = documentSchema.parse(data);
+
+  const doc = await prisma.employeeDocument.create({
+    data: {
+      userId: parsed.userId,
+      title: parsed.title,
+      category: parsed.category,
+      description: parsed.description || null,
+      fileUrl: parsed.fileUrl,
+      expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : null,
+    },
+  });
+
+  return { success: true, id: doc.id };
+}
+
+export async function deleteDocument(documentId: string) {
+  await requireManagement();
+
+  await prisma.employeeDocument.delete({
+    where: { id: documentId },
+  });
+
+  return { success: true };
+}

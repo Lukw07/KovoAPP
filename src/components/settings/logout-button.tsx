@@ -12,9 +12,16 @@ export function LogoutButton() {
   const handleLogout = () => {
     startTransition(async () => {
       try {
-        
         await logoutAction();
-      } catch (error) {
+      } catch (error: unknown) {
+        // signOut throws NEXT_REDIRECT internally — that's expected, not an error
+        const err = error as Error & { digest?: string };
+        if (
+          err?.digest?.startsWith("NEXT_REDIRECT") ||
+          err?.message?.includes("NEXT_REDIRECT")
+        ) {
+          throw error;
+        }
         toast.error("Nepodařilo se odhlásit");
       }
     });

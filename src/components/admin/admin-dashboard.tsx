@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -13,6 +13,8 @@ import {
   Clock,
   Gift,
   ShieldAlert,
+  Loader2,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AbsenceChart } from "@/components/admin/absence-chart";
@@ -21,9 +23,20 @@ import { UserManagementTable } from "@/components/admin/user-management-table";
 import { CsvExport } from "@/components/admin/csv-export";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { RewardClaimsManager } from "@/components/admin/reward-claims-manager";
+import { AdminLogsClient } from "@/components/admin/admin-logs";
+import { EmployeeTable } from "@/components/admin/employee-table";
+import {
+  getAuditLogs,
+  getSecurityEvents,
+  getAuditLogFilterOptions,
+  getSecurityEventFilterOptions,
+  getAuditStats,
+} from "@/actions/admin-logs";
+import { getAllUsers as fetchAllUsers } from "@/actions/admin-queries";
+import { getEmployeeList } from "@/actions/employee-management";
 import type { Role } from "@/generated/prisma/enums";
 
-type AdminSection = "dashboard" | "users" | "create" | "rewards" | "export" | "logs";
+type AdminSection = "dashboard" | "users" | "employees" | "create" | "rewards" | "export" | "logs";
 
 interface OverviewStats {
   totalUsers: number;
@@ -97,6 +110,12 @@ const ALL_SECTIONS: {
     label: "Uživatelé",
     icon: <Users className="h-4 w-4" />,
     roles: ["ADMIN"],
+  },
+  {
+    key: "employees",
+    label: "Zaměstnanci",
+    icon: <Briefcase className="h-4 w-4" />,
+    roles: ["ADMIN", "MANAGER"],
   },
   {
     key: "create",
@@ -259,6 +278,9 @@ export function AdminDashboard({
       {/* ─── Create (existing AdminPanel) ────────────────────────────── */}
       {section === "create" && <AdminPanel />}
 
+      {/* ─── Employees (lazy-loaded) ──────────────────────────────────── */}
+      {section === "employees" && <LazyEmployees />}
+
       {/* ─── Reward Claims ───────────────────────────────────────────── */}
       {section === "rewards" && (
         <div className="rounded-xl border border-border bg-card p-4">
@@ -284,29 +306,130 @@ export function AdminDashboard({
         </div>
       )}
 
-      {/* ─── Logs (redirect to dedicated page) ────────────────────────────────── */}
-      {section === "logs" && (
-        <div className="rounded-xl border border-border bg-card p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-red-600" />
-            <h3 className="font-semibold text-foreground">
-              Systémové logy
-            </h3>
-          </div>
-          <p className="text-sm text-foreground-secondary">
-            Kompletní přehled audit logů, bezpečnostních událostí, správa
-            uživatelů s možností mazání a deaktivace.
-          </p>
-          <a
-            href="/admin/logs"
-            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition-colors"
-          >
-            <ShieldAlert className="h-4 w-4" />
-            Otevřít logy
-          </a>
-        </div>
-      )}
+      {/* ─── Logs (inline, lazy-loaded) ─────────────────────────────────────── */}
+      {section === "logs" && <LazyAdminLogs />}
     </div>
+  );
+}
+
+// ─── Lazy-loaded Employees ──────────────────────────────────────────────────
+
+function LazyEmployees() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [employees, setEmployees] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getEmployeeList();
+      setEmployees(data);
+    } catch {
+      setError("Nepodařilo se načíst zaměstnance");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-foreground-muted" />
+        <p className="mt-3 text-sm text-foreground-secondary">Načítání zaměstnanců…</p>
+      </div>
+    );
+  }
+
+  if (error || !employees) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 space-y-3">
+        <Briefcase className="h-8 w-8 text-red-500" />
+        <p className="text-sm text-foreground-secondary">{error}</p>
+        <button
+          onClick={loadData}
+          className="rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
+        >
+          Zkusit znovu
+        </button>
+      </div>
+    );
+  }
+
+  return <EmployeeTable employees={employees} />;
+}
+
+// ─── Lazy-loaded Admin Logs ─────────────────────────────────────────────────
+
+function LazyAdminLogs() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [auditData, securityData, auditFilterOptions, securityFilterOptions, stats, users] =
+        await Promise.all([
+          getAuditLogs({ perPage: 25 }),
+          getSecurityEvents({ perPage: 25 }),
+          getAuditLogFilterOptions(),
+          getSecurityEventFilterOptions(),
+          getAuditStats(),
+          fetchAllUsers(),
+        ]);
+      setData({ auditData, securityData, auditFilterOptions, securityFilterOptions, stats, users });
+    } catch {
+      setError("Nepodařilo se načíst logy");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-foreground-muted" />
+        <p className="mt-3 text-sm text-foreground-secondary">Načítání logů…</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-16 space-y-3">
+        <ShieldAlert className="h-8 w-8 text-red-500" />
+        <p className="text-sm text-foreground-secondary">{error}</p>
+        <button
+          onClick={loadData}
+          className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+        >
+          Zkusit znovu
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <AdminLogsClient
+      initialAuditData={data.auditData}
+      initialSecurityData={data.securityData}
+      auditFilterOptions={data.auditFilterOptions}
+      securityFilterOptions={data.securityFilterOptions}
+      stats={data.stats}
+      users={data.users}
+    />
   );
 }
 

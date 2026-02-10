@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -42,10 +43,9 @@ export interface NewsPost {
 
 interface NewsCardProps {
   post: NewsPost;
-  onOpenDetail?: (postId: string) => void;
 }
 
-export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
+export function NewsCard({ post }: NewsCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const timeAgo = formatDistanceToNow(new Date(post.publishedAt), {
@@ -103,12 +103,14 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
         </div>
 
         {/* Title */}
-        <h2
-          className="text-lg font-bold text-foreground leading-snug cursor-pointer hover:text-accent transition-colors"
-          onClick={() => onOpenDetail?.(post.id)}
+        <Link
+          href={`/news/${post.id}`}
+          className="block"
         >
-          {post.title}
-        </h2>
+          <h2 className="text-lg font-bold text-foreground leading-snug hover:text-accent transition-colors">
+            {post.title}
+          </h2>
+        </Link>
 
         {/* Content */}
         <div
@@ -172,13 +174,13 @@ export function NewsCard({ post, onOpenDetail }: NewsCardProps) {
           </div>
 
           {post.allowComments && (
-            <button
-              onClick={() => onOpenDetail?.(post.id)}
+            <Link
+              href={`/news/${post.id}`}
               className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-foreground-secondary hover:bg-background-secondary active:scale-95 transition-all"
             >
               <MessageSquare className="h-3.5 w-3.5" />
               {post._count.comments}
-            </button>
+            </Link>
           )}
         </div>
       </div>

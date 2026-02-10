@@ -19,79 +19,99 @@ import { MorePageAnimations } from "./more-animations";
 
 export const metadata = { title: "Více" };
 
-const ITEMS = [
+const SECTIONS = [
   {
-    label: "Zprávy",
-    href: "/messages",
-    icon: MessageCircle,
-    description: "Soukromé zprávy",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/30",
-    hasBadge: true,
+    title: "Komunikace",
+    items: [
+      {
+        label: "Zprávy",
+        href: "/messages",
+        icon: MessageCircle,
+        description: "Soukromé zprávy",
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/30",
+        hasBadge: true,
+      },
+    ],
   },
   {
-    label: "Kalendář",
-    href: "/calendar",
-    icon: CalendarDays,
-    description: "Svátky a firemní události",
-    color: "text-indigo-600 dark:text-indigo-400",
-    bg: "bg-indigo-50 dark:bg-indigo-900/30",
+    title: "Firma",
+    items: [
+      {
+        label: "Kalendář",
+        href: "/calendar",
+        icon: CalendarDays,
+        description: "Svátky a firemní události",
+        color: "text-indigo-600 dark:text-indigo-400",
+        bg: "bg-indigo-50 dark:bg-indigo-900/30",
+      },
+      {
+        label: "Novinky",
+        href: "/news",
+        icon: Newspaper,
+        description: "Firemní zprávy a oznámení",
+        color: "text-purple-600 dark:text-purple-400",
+        bg: "bg-purple-50 dark:bg-purple-900/30",
+      },
+      {
+        label: "Ankety",
+        href: "/polls",
+        icon: BarChart3,
+        description: "Hlasujte v anketách",
+        color: "text-teal-600 dark:text-teal-400",
+        bg: "bg-teal-50 dark:bg-teal-900/30",
+      },
+    ],
   },
   {
-    label: "Novinky",
-    href: "/news",
-    icon: Newspaper,
-    description: "Firemní zprávy a oznámení",
-    color: "text-purple-600 dark:text-purple-400",
-    bg: "bg-purple-50 dark:bg-purple-900/30",
+    title: "Služby",
+    items: [
+      {
+        label: "Odměny",
+        href: "/rewards",
+        icon: Gift,
+        description: "Vyměňte body za odměny",
+        color: "text-amber-600 dark:text-amber-400",
+        bg: "bg-amber-50 dark:bg-amber-900/30",
+      },
+      {
+        label: "Volné pozice",
+        href: "/jobs",
+        icon: Briefcase,
+        description: "Doporučte známého",
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/30",
+      },
+      {
+        label: "Tržiště",
+        href: "/marketplace",
+        icon: Store,
+        description: "Prodám / Koupím / Hledám",
+        color: "text-orange-600 dark:text-orange-400",
+        bg: "bg-orange-50 dark:bg-orange-900/30",
+      },
+    ],
   },
   {
-    label: "Ankety",
-    href: "/polls",
-    icon: BarChart3,
-    description: "Hlasujte v anketách",
-    color: "text-teal-600 dark:text-teal-400",
-    bg: "bg-teal-50 dark:bg-teal-900/30",
-  },
-  {
-    label: "Odměny",
-    href: "/rewards",
-    icon: Gift,
-    description: "Vyměňte body za odměny",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-900/30",
-  },
-  {
-    label: "Volné pozice",
-    href: "/jobs",
-    icon: Briefcase,
-    description: "Doporučte známého",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/30",
-  },
-  {
-    label: "Tržiště",
-    href: "/marketplace",
-    icon: Store,
-    description: "Prodám / Koupím / Hledám",
-    color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-900/30",
-  },
-  {
-    label: "Profil",
-    href: "/profile",
-    icon: User,
-    description: "Vaše údaje a nastavení",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/30",
-  },
-  {
-    label: "Nastavení",
-    href: "/settings",
-    icon: Settings,
-    description: "Notifikace, jazyk, vzhled",
-    color: "text-foreground-secondary",
-    bg: "bg-background-secondary",
+    title: "Osobní",
+    items: [
+      {
+        label: "Profil",
+        href: "/profile",
+        icon: User,
+        description: "Vaše údaje a nastavení",
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/30",
+      },
+      {
+        label: "Nastavení",
+        href: "/settings",
+        icon: Settings,
+        description: "Notifikace, jazyk, vzhled",
+        color: "text-foreground-secondary",
+        bg: "bg-background-secondary",
+      },
+    ],
   },
 ] as const;
 
@@ -134,36 +154,45 @@ export default async function MorePage() {
         </Link>
       )}
 
-      <div className="space-y-2">
-        {ITEMS.map((item) => {
-          const Icon = item.icon;
-          const badge = 'hasBadge' in item && item.hasBadge ? unreadCount : 0;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-sm border border-border transition-transform active:scale-[0.98]"
-            >
-              <div
-                className={`${item.bg} relative flex h-11 w-11 items-center justify-center rounded-xl`}
-              >
-                <Icon className={`h-5 w-5 ${item.color}`} />
-                {badge > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
-                    {badge > 99 ? "99+" : badge}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">
-                  {item.label}
-                </p>
-                <p className="text-xs text-foreground-secondary">{item.description}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-foreground-muted" />
-            </Link>
-          );
-        })}
+      <div className="space-y-6">
+        {SECTIONS.map((section) => (
+          <div key={section.title}>
+            <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-foreground-muted">
+              {section.title}
+            </h2>
+            <div className="space-y-2">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const badge = 'hasBadge' in item && item.hasBadge ? unreadCount : 0;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-sm border border-border transition-transform active:scale-[0.98]"
+                  >
+                    <div
+                      className={`${item.bg} relative flex h-11 w-11 items-center justify-center rounded-xl`}
+                    >
+                      <Icon className={`h-5 w-5 ${item.color}`} />
+                      {badge > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                          {badge > 99 ? "99+" : badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        {item.label}
+                      </p>
+                      <p className="text-xs text-foreground-secondary">{item.description}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-foreground-muted" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </MorePageAnimations>
   );

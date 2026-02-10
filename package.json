@@ -39,6 +39,7 @@
     "react": "19.2.3",
     "react-day-picker": "^9.13.1",
     "react-dom": "19.2.3",
+    "react-image-crop": "^11.0.10",
     "react-markdown": "^10.1.0",
     "recharts": "^3.7.0",
     "remark-gfm": "^4.0.1",

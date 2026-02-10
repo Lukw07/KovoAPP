@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Newspaper, RefreshCw } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { getNewsFeed, getPostDetail } from "@/actions/news-queries";
+import { motion } from "framer-motion";
+import { getNewsFeed } from "@/actions/news-queries";
 import { NewsCard, type NewsPost } from "@/components/news/news-card";
-import { PostDetail } from "@/components/news/post-detail";
 import { cn } from "@/lib/utils";
 
 const listVariants = {
@@ -44,9 +43,6 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [postDetail, setPostDetail] = useState<any>(null);
 
   const pageSize = 20;
   const hasMore = posts.length < total;
@@ -78,29 +74,6 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
       setLoading(false);
     }
   };
-
-  const openDetail = useCallback(async (postId: string) => {
-    setSelectedPostId(postId);
-    const detail = await getPostDetail(postId);
-    setPostDetail(detail);
-  }, []);
-
-  const closeDetail = useCallback(() => {
-    setSelectedPostId(null);
-    setPostDetail(null);
-    // Refresh to pick up new comments
-    refresh();
-  }, [refresh]);
-
-  // Pull-to-refresh placeholder
-  useEffect(() => {
-    // Could implement pull-to-refresh gesture here
-  }, []);
-
-  // Detail view
-  if (selectedPostId && postDetail) {
-    return <PostDetail post={postDetail} onBack={closeDetail} />;
-  }
 
   return (
     <div className="space-y-4">
@@ -142,7 +115,6 @@ export function NewsFeed({ initialPosts, initialTotal }: NewsFeedProps) {
             <motion.div key={post.id} variants={cardVariants}>
               <NewsCard
                 post={post}
-                onOpenDetail={openDetail}
               />
             </motion.div>
           ))}

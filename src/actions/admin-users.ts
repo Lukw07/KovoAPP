@@ -68,6 +68,10 @@ const updateUserSchema = z.object({
     .transform((v) => (v !== undefined ? (v?.trim() || null) : undefined)),
   departmentId: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
+  hireDate: z
+    .string()
+    .optional()
+    .transform((v) => (v ? new Date(v) : undefined)),
 });
 
 const resetPasswordSchema = z.object({
@@ -178,6 +182,7 @@ export async function updateUser(formData: FormData) {
         : formData.get("isActive") === "false"
           ? false
           : undefined,
+    hireDate: formData.get("hireDate") || undefined,
   });
 
   if (!parsed.success) {
