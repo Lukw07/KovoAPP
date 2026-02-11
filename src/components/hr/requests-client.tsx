@@ -33,6 +33,8 @@ type RequestItem = {
   startDate: Date | string;
   endDate: Date | string;
   totalDays: number;
+  totalHours: number;
+  isOverLimit: boolean;
   reason: string | null;
   note: string | null;
   approver?: { name: string | null } | null;
@@ -174,12 +176,7 @@ export function RequestsClient({
                               new Date(req.endDate).getTime() &&
                               ` — ${format(new Date(req.endDate), "d. MMM yyyy", { locale: cs })}`}
                             <span className="ml-1.5 text-foreground-muted">
-                              ({req.totalDays}{" "}
-                              {req.totalDays === 1
-                                ? "den"
-                                : req.totalDays < 5
-                                  ? "dny"
-                                  : "dní"})
+                              ({req.totalHours}h)
                             </span>
                           </p>
                           {req.reason && (

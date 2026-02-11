@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import RequestForm from "@/components/hr/request-form";
 import Link from "next/link";
+import { getMyVacationInfo } from "@/actions/hr-queries";
+
+type VacationInfo = Awaited<ReturnType<typeof getMyVacationInfo>>;
 
 export default function NewRequestPage() {
   const router = useRouter();
   const [done, setDone] = useState(false);
+  const [vacationInfo, setVacationInfo] = useState<VacationInfo>(null);
+
+  useEffect(() => {
+    getMyVacationInfo().then(setVacationInfo);
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -36,6 +44,7 @@ export default function NewRequestPage() {
       ) : (
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <RequestForm
+            vacationInfo={vacationInfo}
             onSuccess={() => {
               setDone(true);
               setTimeout(() => router.push("/requests"), 1500);

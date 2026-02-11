@@ -99,14 +99,14 @@ export async function bookResource(
     };
   }
 
-  // Create reservation (auto-confirmed for now)
-  await prisma.reservation.create({
+  // Create reservation (pending approval by manager/admin)
+  const reservation = await prisma.reservation.create({
     data: {
       resourceId,
       startTime,
       endTime,
       purpose,
-      status: "CONFIRMED",
+      status: "PENDING",
       userId: session.user.id,
     },
   });
@@ -115,10 +115,33 @@ export async function bookResource(
   await sendNotification({
     userId: session.user.id,
     type: "RESERVATION_CONFIRMED",
-    title: "Rezervace potvrzena ✅",
-    body: `${resource.name} je rezervován/a pro vás.`,
+    title: "Rezervace odeslána ⏳",
+    body: `Vaše rezervace ${resource.name} čeká na schválení.`,
     link: "/reservations",
   });
+
+  // Notify all managers and admins about pending reservation
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true },
+  });
+  const managers = await prisma.user.findMany({
+    where: {
+      role: { in: ["MANAGER", "ADMIN"] },
+      isActive: true,
+      id: { not: session.user.id },
+    },
+    select: { id: true },
+  });
+  for (const mgr of managers) {
+    await sendNotification({
+      userId: mgr.id,
+      type: "RESERVATION_CONFIRMED",
+      title: "Nová rezervace ke schválení",
+      body: `${currentUser?.name ?? "Uživatel"} žádá o rezervaci: ${resource.name}`,
+      link: "/reservations",
+    });
+  }
 
   // Realtime event so other users see calendar updates
   emitRealtimeEvent("reservation:update", "all", {
@@ -169,6 +192,116 @@ export async function cancelReservation(
     body: `Rezervace ${reservation.resource.name} byla zrušena.`,
     link: "/reservations",
   });
+
+  emitRealtimeEvent("reservation:update", "all", {
+    action: "cancelled",
+    resourceName: reservation.resource.name,
+  }).catch(() => {});
+
+  revalidatePath("/reservations");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// approveReservation — manager/admin approves a pending reservation
+// ---------------------------------------------------------------------------
+
+export async function approveReservation(
+  reservationId: string,
+): Promise<{ error?: string; success?: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nejste přihlášen/a" };
+
+  // Only managers and admins can approve
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (!currentUser || !["MANAGER", "ADMIN"].includes(currentUser.role)) {
+    return { error: "Nemáte oprávnění schvalovat rezervace" };
+  }
+
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { resource: { select: { name: true } } },
+  });
+
+  if (!reservation) return { error: "Rezervace nenalezena" };
+  if (reservation.status !== "PENDING") {
+    return { error: "Tuto rezervaci nelze schválit" };
+  }
+
+  await prisma.reservation.update({
+    where: { id: reservationId },
+    data: { status: "CONFIRMED" },
+  });
+
+  // Notify the user who requested the reservation
+  await sendNotification({
+    userId: reservation.userId,
+    type: "RESERVATION_CONFIRMED",
+    title: "Rezervace schválena ✅",
+    body: `Vaše rezervace ${reservation.resource.name} byla schválena.`,
+    link: "/reservations",
+  });
+
+  emitRealtimeEvent("reservation:update", "all", {
+    action: "approved",
+    resourceName: reservation.resource.name,
+  }).catch(() => {});
+
+  revalidatePath("/reservations");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// rejectReservation — manager/admin rejects a pending reservation
+// ---------------------------------------------------------------------------
+
+export async function rejectReservation(
+  reservationId: string,
+): Promise<{ error?: string; success?: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nejste přihlášen/a" };
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (!currentUser || !["MANAGER", "ADMIN"].includes(currentUser.role)) {
+    return { error: "Nemáte oprávnění zamítat rezervace" };
+  }
+
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { resource: { select: { name: true } } },
+  });
+
+  if (!reservation) return { error: "Rezervace nenalezena" };
+  if (reservation.status !== "PENDING") {
+    return { error: "Tuto rezervaci nelze zamítnout" };
+  }
+
+  await prisma.reservation.update({
+    where: { id: reservationId },
+    data: { status: "CANCELLED" },
+  });
+
+  // Notify the user who requested the reservation
+  await sendNotification({
+    userId: reservation.userId,
+    type: "RESERVATION_CANCELLED",
+    title: "Rezervace zamítnuta ❌",
+    body: `Vaše rezervace ${reservation.resource.name} byla zamítnuta.`,
+    link: "/reservations",
+  });
+
+  emitRealtimeEvent("reservation:update", "all", {
+    action: "rejected",
+    resourceName: reservation.resource.name,
+  }).catch(() => {});
 
   revalidatePath("/reservations");
   revalidatePath("/dashboard");

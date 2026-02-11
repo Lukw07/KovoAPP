@@ -124,6 +124,12 @@ export async function deletePost(postId: string) {
 
   try {
     await prisma.post.delete({ where: { id: postId } });
+
+    emitRealtimeEvent("news:published", "all", {
+      action: "deleted",
+      postId,
+    }).catch(() => {});
+
     revalidatePath("/news");
     revalidatePath("/admin");
     return { success: true };
@@ -152,6 +158,11 @@ export async function togglePinPost(postId: string) {
       where: { id: postId },
       data: { isPinned: !post.isPinned },
     });
+
+    emitRealtimeEvent("news:published", "all", {
+      action: "pinned",
+      postId,
+    }).catch(() => {});
 
     revalidatePath("/news");
     return { success: true };
@@ -195,6 +206,11 @@ export async function addComment(formData: FormData) {
         parentId: parsed.data.parentId || null,
       },
     });
+
+    emitRealtimeEvent("news:published", "all", {
+      action: "comment",
+      postId: parsed.data.postId,
+    }).catch(() => {});
 
     revalidatePath("/news");
     return { success: true };

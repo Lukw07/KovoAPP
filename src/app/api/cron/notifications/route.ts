@@ -38,6 +38,11 @@ export async function GET(request: NextRequest) {
     expiredReservations: 0,
     vacationReminders: 0,
     closedPolls: 0,
+    retentionCleanup: {
+      oldNotifications: 0,
+      oldSecurityLogs: 0,
+      inactiveFcmTokens: 0,
+    },
   };
 
   // ── 1. Expired reservations ────────────────────────────────────────────
@@ -198,6 +203,44 @@ export async function GET(request: NextRequest) {
   }
 
   console.log("[CRON] Notifications completed:", results);
+
+  // ── 4. Retention policy — auto-delete old data (GDPR) ─────────────────
+  try {
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+    // Delete read notifications older than 90 days
+    const deletedNotifications = await prisma.notification.deleteMany({
+      where: {
+        isRead: true,
+        createdAt: { lt: ninetyDaysAgo },
+      },
+    });
+    results.retentionCleanup.oldNotifications = deletedNotifications.count;
+
+    // Delete audit logs older than 90 days
+    const deletedAuditLogs = await prisma.auditLog.deleteMany({
+      where: {
+        createdAt: { lt: ninetyDaysAgo },
+      },
+    });
+    results.retentionCleanup.oldSecurityLogs = deletedAuditLogs.count;
+
+    // Deactivate FCM tokens not updated in 90 days
+    const deactivatedTokens = await prisma.fcmToken.updateMany({
+      where: {
+        isActive: true,
+        updatedAt: { lt: ninetyDaysAgo },
+      },
+      data: { isActive: false },
+    });
+    results.retentionCleanup.inactiveFcmTokens = deactivatedTokens.count;
+
+    if (deletedNotifications.count || deletedAuditLogs.count || deactivatedTokens.count) {
+      console.log("[CRON] Retention cleanup:", results.retentionCleanup);
+    }
+  } catch (err) {
+    console.error("[CRON] Retention cleanup error:", err);
+  }
 
   return NextResponse.json({
     ok: true,

@@ -16,6 +16,7 @@ import {
   eachDayOfInterval,
   isWeekend,
 } from "date-fns";
+import type { WorkFundType } from "@/generated/prisma/enums";
 
 // ---------------------------------------------------------------------------
 // Zod Schemas
@@ -39,6 +40,19 @@ const createRequestSchema = z
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** Hours per day for each work fund type */
+const FUND_HOURS: Record<WorkFundType, number> = {
+  FULL_8H: 8,
+  STANDARD_7_5H: 7.5,
+  PART_TIME_6H: 6,
+};
+
+export const FUND_TYPE_LABELS: Record<WorkFundType, string> = {
+  FULL_8H: "Plný úvazek (8h/den)",
+  STANDARD_7_5H: "Standardní (7,5h/den)",
+  PART_TIME_6H: "Zkrácený (6h/den)",
+};
+
 /** Count working days between two dates, optionally with half-days. */
 function calcWorkingDays(
   start: Date,
@@ -56,6 +70,14 @@ function calcWorkingDays(
   return Math.max(total, 0.5);
 }
 
+/** Calculate working hours based on days and employee's work fund type. */
+function calcWorkingHours(
+  workingDays: number,
+  fundType: WorkFundType,
+): number {
+  return workingDays * FUND_HOURS[fundType];
+}
+
 // Czech holidays are in @/lib/holidays.ts (shared with client components)
 
 // ---------------------------------------------------------------------------
@@ -64,6 +86,7 @@ function calcWorkingDays(
 
 export type CreateRequestState = {
   error?: string;
+  warning?: string;
   fieldErrors?: Record<string, string[]>;
   success?: boolean;
 };
@@ -110,14 +133,24 @@ export async function createRequest(
     };
   }
 
+  // ---------- Fetch user's work fund type ----------
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { workFundType: true },
+  });
+  const fundType = currentUser?.workFundType ?? "FULL_8H";
+
   const totalDays = calcWorkingDays(
     startDate,
     endDate,
     isHalfDayStart,
     isHalfDayEnd,
   );
+  const totalHours = calcWorkingHours(totalDays, fundType);
 
-  // ── Check vacation balance (if entitlement exists) ──────────────────
+  // ── Check vacation balance (allow over-limit but warn) ──────────────
+  let isOverLimit = false;
+  let warningMessage: string | undefined;
   const deductibleTypes: string[] = ["VACATION", "PERSONAL_DAY"];
   if (deductibleTypes.includes(type)) {
     const requestYear = startDate.getFullYear();
@@ -125,11 +158,10 @@ export async function createRequest(
       where: { userId_year: { userId: session.user.id, year: requestYear } },
     });
     if (entitlement) {
-      const remaining = entitlement.totalDays + entitlement.carriedOver - entitlement.usedDays;
-      if (totalDays > remaining) {
-        return {
-          error: `Nemáte dostatek dnů dovolené. Zbývá ${remaining} dní, požadujete ${totalDays}.`,
-        };
+      const remainingHours = entitlement.totalHours + entitlement.carriedOverHours - entitlement.usedHours;
+      if (totalHours > remainingHours) {
+        isOverLimit = true;
+        warningMessage = `Pozor: Požadujete ${totalHours}h, ale zbývá pouze ${remainingHours}h. Žádost bude odeslána, ale bude označena jako přečerpání.`;
       }
     }
     // If no entitlement exists, allow the request (tracking not configured)
@@ -144,6 +176,8 @@ export async function createRequest(
       isHalfDayStart,
       isHalfDayEnd,
       totalDays,
+      totalHours,
+      isOverLimit,
       userId: session.user.id,
     },
   });
@@ -153,21 +187,29 @@ export async function createRequest(
     where: { id: session.user.id },
     include: { department: { include: { manager: true } } },
   });
+
+  const typeLabels: Record<string, string> = {
+    VACATION: "dovolenou",
+    SICK_DAY: "sick day",
+    DOCTOR: "návštěvu lékaře",
+    PERSONAL_DAY: "osobní volno",
+    HOME_OFFICE: "home office",
+  };
+  const notificationBody = `${user?.name ?? "Zaměstnanec"} žádá o ${typeLabels[type] ?? type} (${totalHours}h)`;
+  const overLimitSuffix = isOverLimit ? " ⚠️ PŘEČERPÁNÍ DOVOLENÉ" : "";
+
+  // Track who was already notified to avoid duplicates
+  const notifiedIds = new Set<string>();
+
   if (user?.department?.manager) {
-    const typeLabels: Record<string, string> = {
-      VACATION: "dovolenou",
-      SICK_DAY: "sick day",
-      DOCTOR: "návštěvu lékaře",
-      PERSONAL_DAY: "osobní volno",
-      HOME_OFFICE: "home office",
-    };
     await sendNotification({
       userId: user.department.manager.id,
       type: "HR_REQUEST_CREATED",
-      title: "Nová žádost",
-      body: `${user.name} žádá o ${typeLabels[type] ?? type}`,
+      title: "Nová žádost" + overLimitSuffix,
+      body: notificationBody + (isOverLimit ? " — PŘEKROČEN LIMIT HODIN" : ""),
       link: "/requests",
     });
+    notifiedIds.add(user.department.manager.id);
 
     // Realtime event for manager's dashboard
     emitRealtimeEvent("hr:request_update", user.department.manager.id, {
@@ -177,9 +219,45 @@ export async function createRequest(
     }).catch(() => {});
   }
 
+  // Also notify all admins (who haven't already been notified)
+  const admins = await prisma.user.findMany({
+    where: {
+      role: "ADMIN",
+      isActive: true,
+      id: { notIn: [session.user.id, ...Array.from(notifiedIds)] },
+    },
+    select: { id: true },
+  });
+  for (const admin of admins) {
+    await sendNotification({
+      userId: admin.id,
+      type: "HR_REQUEST_CREATED",
+      title: "Nová žádost" + overLimitSuffix,
+      body: notificationBody + (isOverLimit ? " — PŘEKROČEN LIMIT HODIN" : ""),
+      link: "/requests",
+    });
+
+    emitRealtimeEvent("hr:request_update", admin.id, {
+      action: "created",
+      requesterName: user?.name,
+      type,
+    }).catch(() => {});
+  }
+
+  // Warn requester about over-limit
+  if (isOverLimit) {
+    await sendNotification({
+      userId: session.user.id,
+      type: "VACATION_REMINDER",
+      title: "⚠️ Přečerpání dovolené",
+      body: `Vaše žádost o ${typeLabels[type] ?? type} překračuje dostupný limit hodin. Žádost byla odeslána, ale vyžaduje zvláštní schválení.`,
+      link: "/requests",
+    });
+  }
+
   revalidatePath("/requests");
   revalidatePath("/dashboard");
-  return { success: true };
+  return { success: true, warning: warningMessage };
 }
 
 // ---------------------------------------------------------------------------
@@ -216,7 +294,7 @@ export async function approveRequest(
     },
   });
 
-  // ── Deduct vacation days if entitlement exists ──────────────────────
+  // ── Deduct vacation hours if entitlement exists ─────────────────────
   // Only deduct for types that consume vacation/personal days
   const deductibleTypes: string[] = ["VACATION", "PERSONAL_DAY"];
   if (deductibleTypes.includes(request.type)) {
@@ -227,7 +305,10 @@ export async function approveRequest(
     if (entitlement) {
       await prisma.vacationEntitlement.update({
         where: { id: entitlement.id },
-        data: { usedDays: { increment: request.totalDays } },
+        data: {
+          usedDays: { increment: request.totalDays },
+          usedHours: { increment: request.totalHours },
+        },
       });
     }
     // If no entitlement is set for this user/year, skip deduction silently
@@ -249,6 +330,15 @@ export async function approveRequest(
     body: `Vaše žádost o ${request.type.toLowerCase()} byla schválena.`,
     link: "/requests",
   });
+
+  emitRealtimeEvent("hr:request_update", request.userId, {
+    action: "approved",
+    requestId,
+  }).catch(() => {});
+  emitRealtimeEvent("hr:request_update", session.user.id, {
+    action: "approved",
+    requestId,
+  }).catch(() => {});
 
   revalidatePath("/requests");
   revalidatePath("/dashboard");
@@ -305,6 +395,15 @@ export async function rejectRequest(
     link: "/requests",
   });
 
+  emitRealtimeEvent("hr:request_update", request.userId, {
+    action: "rejected",
+    requestId,
+  }).catch(() => {});
+  emitRealtimeEvent("hr:request_update", session.user.id, {
+    action: "rejected",
+    requestId,
+  }).catch(() => {});
+
   revalidatePath("/requests");
   revalidatePath("/dashboard");
   return { success: true };
@@ -335,6 +434,11 @@ export async function cancelRequest(
     where: { id: requestId },
     data: { status: "CANCELLED" },
   });
+
+  emitRealtimeEvent("hr:request_update", "all", {
+    action: "cancelled",
+    requestId,
+  }).catch(() => {});
 
   revalidatePath("/requests");
   return { success: true };

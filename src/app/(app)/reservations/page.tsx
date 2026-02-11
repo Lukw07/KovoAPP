@@ -1,14 +1,21 @@
-import { getResources, getMyReservations } from "@/actions/reservation-queries";
+import { getResources, getMyReservations, getPendingReservations } from "@/actions/reservation-queries";
+import { auth } from "@/lib/auth";
 import ReservationsClient from "@/components/reservations/reservations-client";
 import MyReservations from "@/components/reservations/my-reservations";
+import PendingApprovals from "@/components/reservations/pending-approvals";
 import { CalendarCheck } from "lucide-react";
 
 export const metadata = { title: "Rezervace" };
 
 export default async function ReservationsPage() {
-  const [resources, myReservations] = await Promise.all([
+  const session = await auth();
+  const isManagement =
+    session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER";
+
+  const [resources, myReservations, pendingReservations] = await Promise.all([
     getResources(),
     getMyReservations(),
+    isManagement ? getPendingReservations() : Promise.resolve([]),
   ]);
 
   return (
@@ -25,6 +32,9 @@ export default async function ReservationsPage() {
           </p>
         </div>
       </div>
+
+      {/* Pending approvals for managers/admins */}
+      {isManagement && <PendingApprovals reservations={pendingReservations} />}
 
       {/* Resource browser + timeline + booking */}
       <ReservationsClient resources={resources} />

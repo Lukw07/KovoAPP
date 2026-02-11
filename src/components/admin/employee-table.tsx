@@ -275,7 +275,7 @@ function EmployeeCard({ employee: e }: { employee: EmployeeListItem }) {
             {e.vacationBalance && (
               <span className="inline-flex items-center gap-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
                 <CalendarDots className="h-3 w-3" weight="bold" />
-                {e.vacationBalance.remaining}d zbývá
+                {e.vacationBalance.remainingHours}h zbývá
               </span>
             )}
             <span className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
@@ -391,13 +391,13 @@ function EmployeeRow({ employee: e }: { employee: EmployeeListItem }) {
                 <div
                   className="h-full rounded-full bg-blue-500 transition-all"
                   style={{
-                    width: `${Math.min(100, (e.vacationBalance.usedDays / e.vacationBalance.totalDays) * 100)}%`,
+                    width: `${Math.min(100, (e.vacationBalance.usedHours / e.vacationBalance.totalHours) * 100)}%`,
                   }}
                 />
               </div>
             </div>
             <span className="text-xs tabular-nums text-foreground-secondary whitespace-nowrap">
-              {e.vacationBalance.remaining}/{e.vacationBalance.totalDays}
+              {e.vacationBalance.remainingHours}h/{e.vacationBalance.totalHours}h
             </span>
           </div>
         ) : (

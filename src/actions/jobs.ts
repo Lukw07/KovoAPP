@@ -4,7 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { sendPushToAll } from "@/lib/notifications";
+import { sendPushToAll, sendNotification } from "@/lib/notifications";
 import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
@@ -26,8 +26,9 @@ const referralSchema = z.object({
   jobPostingId: z.string().min(1),
   candidateName: z.string().min(2, "Jméno musí mít alespoň 2 znaky"),
   candidateEmail: z.string().email("Neplatný email").optional().or(z.literal("")),
-  candidatePhone: z.string().optional(),
+  candidatePhone: z.string().max(20).optional(),
   note: z.string().max(2000).optional(),
+  gdprConsent: z.literal("on", { message: "Souhlas se zpracováním údajů je povinný" }),
 });
 
 // ---------------------------------------------------------------------------
@@ -121,6 +122,13 @@ export async function updateJobStatus(
       },
     });
 
+    emitRealtimeEvent("activity:new", "all", {
+      action: "job_status_changed",
+      title: `Inzerát změněn`,
+      type: "job",
+      link: "/jobs",
+    }).catch(() => {});
+
     revalidatePath("/jobs");
     revalidatePath("/admin");
     return { success: true };
@@ -143,6 +151,14 @@ export async function deleteJobPosting(jobId: string) {
 
   try {
     await prisma.jobPosting.delete({ where: { id: jobId } });
+
+    emitRealtimeEvent("activity:new", "all", {
+      action: "job_deleted",
+      title: "Inzerát smazán",
+      type: "job",
+      link: "/jobs",
+    }).catch(() => {});
+
     revalidatePath("/jobs");
     revalidatePath("/admin");
     return { success: true };
@@ -166,6 +182,7 @@ export async function submitReferral(formData: FormData) {
     candidateEmail: (formData.get("candidateEmail") as string) || undefined,
     candidatePhone: (formData.get("candidatePhone") as string) || undefined,
     note: (formData.get("note") as string) || undefined,
+    gdprConsent: (formData.get("gdprConsent") as string) || undefined,
   };
 
   const parsed = referralSchema.safeParse(raw);
@@ -191,6 +208,36 @@ export async function submitReferral(formData: FormData) {
         jobPostingId: parsed.data.jobPostingId,
       },
     });
+
+    // Notify admins about the new referral
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true },
+    });
+    const admins = await prisma.user.findMany({
+      where: {
+        role: "ADMIN",
+        isActive: true,
+        id: { not: session.user.id },
+      },
+      select: { id: true },
+    });
+    for (const admin of admins) {
+      await sendNotification({
+        userId: admin.id,
+        type: "JOB_REFERRAL",
+        title: "Nové doporučení kandidáta",
+        body: `${currentUser?.name ?? "Zaměstnanec"} doporučil/a kandidáta "${parsed.data.candidateName}" na pozici ${job.title}`,
+        link: "/admin",
+      });
+    }
+
+    emitRealtimeEvent("activity:new", "all", {
+      action: "referral_submitted",
+      title: "Nové doporučení",
+      type: "job",
+      link: "/jobs",
+    }).catch(() => {});
 
     revalidatePath("/jobs");
     return { success: true };

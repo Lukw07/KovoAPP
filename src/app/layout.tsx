@@ -4,6 +4,7 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { FcmProvider } from "@/components/providers/fcm-provider";
 import { Toaster } from "@/components/providers/toaster";
+import { CookieBanner } from "@/components/ui/cookie-banner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -57,6 +58,7 @@ export default function RootLayout({
             <FcmProvider>{children}</FcmProvider>
           </SessionProvider>
           <Toaster />
+          <CookieBanner />
         </ThemeProvider>
       </body>
     </html>

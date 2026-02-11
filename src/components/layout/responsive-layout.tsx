@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { MobileLayout } from "./mobile-layout";
 import { DesktopLayout } from "./desktop-layout";
+import { RealtimeRefreshProvider } from "@/components/providers/realtime-refresh-provider";
 
 const DESKTOP_BREAKPOINT = 1024; // lg
 
@@ -42,8 +43,14 @@ export function ResponsiveLayout({ children }: { children: React.ReactNode }) {
   }
 
   return isDesktop ? (
-    <DesktopLayout>{children}</DesktopLayout>
+    <>
+      <RealtimeRefreshProvider />
+      <DesktopLayout>{children}</DesktopLayout>
+    </>
   ) : (
-    <MobileLayout>{children}</MobileLayout>
+    <>
+      <RealtimeRefreshProvider />
+      <MobileLayout>{children}</MobileLayout>
+    </>
   );
 }

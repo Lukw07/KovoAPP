@@ -46,9 +46,9 @@ export default function BookingForm({
 
       {/* Success */}
       {state?.success && (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+        <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/30 px-4 py-2.5 text-sm font-medium text-amber-700 dark:text-amber-400">
           <Check className="h-4 w-4" />
-          Rezervace potvrzena!
+          Rezervace odeslána ke schválení!
         </div>
       )}
 
@@ -60,8 +60,8 @@ export default function BookingForm({
         </div>
       )}
 
-      {/* Date row — side by side */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Date row — stacked on mobile, side by side on sm+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label
             htmlFor="startTime"

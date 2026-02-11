@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { getUnreadMessageCount } from "@/actions/messages";
+import { useSocket } from "@/hooks/useSocket";
 import type { Role } from "@/generated/prisma/enums";
 
 const NAV_ITEMS = [
@@ -50,26 +51,41 @@ interface BottomNavProps {
 export function BottomNav({ userRole: _userRole }: BottomNavProps) {
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const { on, isConnected } = useSocket();
 
   // Fetch unread message count
-  useEffect(() => {
-    let mounted = true;
-    async function fetchUnread() {
-      try {
-        const count = await getUnreadMessageCount();
-        if (mounted) setUnreadCount(count);
-      } catch {
-        // ignore
-      }
+  const fetchUnread = useCallback(async () => {
+    try {
+      const count = await getUnreadMessageCount();
+      setUnreadCount(count);
+    } catch {
+      // ignore
     }
+  }, []);
+
+  useEffect(() => {
     fetchUnread();
-    // Poll every 30 seconds
+    // Poll every 30 seconds as fallback
     const interval = setInterval(fetchUnread, 30_000);
     return () => {
-      mounted = false;
       clearInterval(interval);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchUnread]);
+
+  // Re-fetch unread count on message:new or any revalidation
+  useEffect(() => {
+    const unsub = on("message:new", () => {
+      fetchUnread();
+    });
+    return unsub;
+  }, [on, fetchUnread]);
+
+  // Also re-fetch when user navigates away from messages (they might have read them)
+  useEffect(() => {
+    if (!pathname.startsWith("/messages")) {
+      fetchUnread();
+    }
+  }, [pathname, fetchUnread]);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t glass-nav pb-[env(safe-area-inset-bottom,0px)]" aria-label="Hlavní navigace">

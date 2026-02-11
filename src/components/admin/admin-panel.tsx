@@ -1,13 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Newspaper, BarChart3, Briefcase } from "lucide-react";
+import {
+  Newspaper,
+  BarChart3,
+  Briefcase,
+  UserPlus,
+  Tag,
+  FolderOpen,
+} from "lucide-react";
 import { CreatePostForm } from "@/components/admin/create-post-form";
 import { CreatePollForm } from "@/components/admin/create-poll-form";
 import { CreateJobForm } from "@/components/admin/create-job-form";
+import { ReferralsList } from "@/components/admin/referrals-list";
+import { CategoryManager } from "@/components/admin/category-manager";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "post" | "poll" | "job";
+type AdminTab =
+  | "post"
+  | "poll"
+  | "job"
+  | "referrals"
+  | "hr-categories"
+  | "resource-categories";
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>("post");
@@ -28,12 +43,27 @@ export function AdminPanel() {
       label: "Nový inzerát",
       icon: <Briefcase className="h-4 w-4" />,
     },
+    {
+      key: "referrals",
+      label: "Doporučení",
+      icon: <UserPlus className="h-4 w-4" />,
+    },
+    {
+      key: "hr-categories",
+      label: "Kategorie žádostí",
+      icon: <Tag className="h-4 w-4" />,
+    },
+    {
+      key: "resource-categories",
+      label: "Kategorie rezervací",
+      icon: <FolderOpen className="h-4 w-4" />,
+    },
   ];
 
   return (
     <div className="space-y-4">
       {/* Tab bar */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -55,6 +85,9 @@ export function AdminPanel() {
       {activeTab === "post" && <CreatePostForm />}
       {activeTab === "poll" && <CreatePollForm />}
       {activeTab === "job" && <CreateJobForm />}
+      {activeTab === "referrals" && <ReferralsList />}
+      {activeTab === "hr-categories" && <CategoryManager type="hrRequest" />}
+      {activeTab === "resource-categories" && <CategoryManager type="resource" />}
     </div>
   );
 }

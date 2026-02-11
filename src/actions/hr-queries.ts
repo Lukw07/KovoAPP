@@ -7,6 +7,55 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { startOfDay, endOfDay } from "date-fns";
+import type { WorkFundType } from "@/generated/prisma/enums";
+
+// ---------------------------------------------------------------------------
+// Get current user's vacation info for the request form
+// ---------------------------------------------------------------------------
+
+export async function getMyVacationInfo() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const currentYear = new Date().getFullYear();
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      workFundType: true,
+      vacationEntitlements: {
+        where: { year: currentYear },
+        take: 1,
+      },
+    },
+  });
+
+  if (!user) return null;
+
+  const entitlement = user.vacationEntitlements[0];
+
+  const FUND_HOURS: Record<WorkFundType, number> = {
+    FULL_8H: 8,
+    STANDARD_7_5H: 7.5,
+    PART_TIME_6H: 6,
+  };
+
+  return {
+    workFundType: user.workFundType,
+    hoursPerDay: FUND_HOURS[user.workFundType],
+    entitlement: entitlement
+      ? {
+          totalHours: entitlement.totalHours,
+          usedHours: entitlement.usedHours,
+          carriedOverHours: entitlement.carriedOverHours,
+          remainingHours:
+            entitlement.totalHours +
+            entitlement.carriedOverHours -
+            entitlement.usedHours,
+        }
+      : null,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Get current user's requests (paginated, newest first)
@@ -57,6 +106,7 @@ export async function getMyApprovedVacations(year: number) {
       startDate: true,
       endDate: true,
       totalDays: true,
+      totalHours: true,
     },
   });
 }
@@ -131,6 +181,8 @@ export async function getRequestsForCalendar(year: number, month: number) {
       startDate: true,
       endDate: true,
       totalDays: true,
+      totalHours: true,
+      isOverLimit: true,
       reason: true,
       isHalfDayStart: true,
       isHalfDayEnd: true,

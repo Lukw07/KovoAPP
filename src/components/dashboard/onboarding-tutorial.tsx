@@ -1,294 +1,527 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// ============================================================================
+// OnboardingTutorial — Unskippable first-run tutorial with platform-specific
+// notification instructions. Saves completion to localStorage.
+// ============================================================================
+
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X,
-  CaretRight,
-  CaretLeft,
-  CalendarDots,
-  Car,
-  Newspaper,
-  Gift,
-  ChatCircle,
-  ChartBar,
-  Bell,
-  Briefcase,
-  Storefront,
-  Checks,
+  HandWaving,
+  BellRinging,
+  DownloadSimple,
+  Gear,
+  CheckCircle,
+  ArrowRight,
+  DeviceMobile,
+  Desktop,
+  AppleLogo,
+  AndroidLogo,
+  LinuxLogo,
+  WindowsLogo,
+  Globe,
+  Info,
 } from "@phosphor-icons/react";
-import { easings } from "@/components/animations/variants";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-/* ── Tutorial steps ────────────────────────────────────────── */
-const STEPS = [
-  {
-    icon: CalendarDots,
-    color: "from-blue-500 to-indigo-600",
-    iconColor: "text-blue-100",
-    title: "Žádosti o volno",
-    description:
-      "Potřebujete dovolenou nebo sick day? V sekci Žádosti jednoduše vytvořte novou žádost. Vedoucí ji schválí a vše se automaticky zapíše do kalendáře.",
-    link: "/requests",
-  },
-  {
-    icon: Car,
-    color: "from-emerald-500 to-teal-600",
-    iconColor: "text-emerald-100",
-    title: "Rezervace",
-    description:
-      "Rezervujte si firemní auto, zasedací místnost nebo jiné vybavení. Stačí vybrat termín a zdroj — systém hlídá kolize za vás.",
-    link: "/reservations",
-  },
-  {
-    icon: Newspaper,
-    color: "from-sky-500 to-blue-600",
-    iconColor: "text-sky-100",
-    title: "Novinky",
-    description:
-      "Firemní zprávy, oznámení nových projektů a důležité informace od vedení. Vše na jednom místě, s možností komentování.",
-    link: "/news",
-  },
-  {
-    icon: ChartBar,
-    color: "from-violet-500 to-purple-600",
-    iconColor: "text-violet-100",
-    title: "Ankety",
-    description:
-      "Hlasujte v anketách a podílejte se na rozhodování. Vedení pravidelně vytváří ankety na důležitá témata.",
-    link: "/polls",
-  },
-  {
-    icon: Gift,
-    color: "from-amber-500 to-orange-600",
-    iconColor: "text-amber-100",
-    title: "Body a odměny",
-    description:
-      "Za dobrou práci sbíráte body, které můžete vyměnit za odměny v našem interním shopu. Body uděluje vedoucí nebo admin.",
-    link: "/rewards",
-  },
-  {
-    icon: ChatCircle,
-    color: "from-pink-500 to-rose-600",
-    iconColor: "text-pink-100",
-    title: "Zprávy",
-    description:
-      "Soukromé zprávy s kolegy. Ideální pro rychlou komunikaci ohledně tržiště nebo pracovních záležitostí.",
-    link: "/messages",
-  },
-  {
-    icon: Storefront,
-    color: "from-cyan-500 to-teal-600",
-    iconColor: "text-cyan-100",
-    title: "Tržiště",
-    description:
-      "Prodávejte, kupujte nebo nabízejte věci kolegům. Interní bazar přímo v aplikaci — bez externích skupin.",
-    link: "/marketplace",
-  },
-  {
-    icon: Bell,
-    color: "from-rose-500 to-red-600",
-    iconColor: "text-rose-100",
-    title: "Notifikace",
-    description:
-      "Povolte push notifikace a nikdy nezmeškáte schválení žádosti, novou anketu nebo zprávu. Funguje i na telefonu!",
-    link: "/settings",
-  },
-];
+// ---------------------------------------------------------------------------
+// Platform detection
+// ---------------------------------------------------------------------------
 
-const STORAGE_KEY = "kovo-onboarding-completed";
+type Platform = "ios" | "android" | "windows" | "macos" | "linux" | "unknown";
 
-/* ── Main component ────────────────────────────────────────── */
+function detectPlatform(): Platform {
+  if (typeof navigator === "undefined") return "unknown";
+  const ua = navigator.userAgent || "";
+  const platform = (navigator as { userAgentData?: { platform?: string } })
+    .userAgentData?.platform || navigator.platform || "";
+
+  // iOS
+  if (
+    /iPad|iPhone|iPod/.test(ua) ||
+    (platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  ) {
+    return "ios";
+  }
+  // Android
+  if (/Android/.test(ua)) return "android";
+  // Windows
+  if (/Win/.test(platform) || /Windows/.test(ua)) return "windows";
+  // macOS (desktop, not iPad)
+  if (/Mac/.test(platform)) return "macos";
+  // Linux
+  if (/Linux/.test(platform) || /Linux/.test(ua)) return "linux";
+
+  return "unknown";
+}
+
+function getPlatformIcon(p: Platform) {
+  switch (p) {
+    case "ios":
+      return <AppleLogo weight="fill" className="h-5 w-5" />;
+    case "android":
+      return <AndroidLogo weight="fill" className="h-5 w-5" />;
+    case "windows":
+      return <WindowsLogo weight="fill" className="h-5 w-5" />;
+    case "macos":
+      return <AppleLogo weight="fill" className="h-5 w-5" />;
+    case "linux":
+      return <LinuxLogo weight="fill" className="h-5 w-5" />;
+    default:
+      return <Globe weight="fill" className="h-5 w-5" />;
+  }
+}
+
+function getPlatformLabel(p: Platform) {
+  switch (p) {
+    case "ios":
+      return "iOS (iPhone / iPad)";
+    case "android":
+      return "Android";
+    case "windows":
+      return "Windows";
+    case "macos":
+      return "macOS";
+    case "linux":
+      return "Linux";
+    default:
+      return "Váš systém";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tutorial steps
+// ---------------------------------------------------------------------------
+
+interface TutorialStep {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  content: React.ReactNode;
+}
+
+function getNotificationSteps(platform: Platform): React.ReactNode {
+  const common = (
+    <div className="space-y-3 text-sm text-foreground-secondary">
+      <p>
+        Pro správné fungování notifikací je potřeba <strong>přidat aplikaci na
+        plochu</strong> a <strong>povolit notifikace</strong>.
+      </p>
+    </div>
+  );
+
+  const instructions: Record<Platform, React.ReactNode> = {
+    ios: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <AppleLogo weight="fill" className="h-4 w-4" /> iOS — krok za krokem
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>
+              Otevřete aplikaci v <strong>Safari</strong> (jiný prohlížeč nepodporuje instalaci na
+              iOS)
+            </li>
+            <li>
+              Klepněte na ikonu <strong>Sdílet</strong> (čtvereček se šipkou
+              nahoru) v dolní liště
+            </li>
+            <li>
+              Vyberte <strong>„Přidat na plochu"</strong> (Add to Home Screen)
+            </li>
+            <li>Potvrďte klepnutím na <strong>„Přidat"</strong></li>
+            <li>
+              Otevřete aplikaci z plochy — automaticky se zobrazí výzva k
+              povolení notifikací
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    android: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <AndroidLogo weight="fill" className="h-4 w-4" /> Android — krok za
+            krokem
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>
+              Otevřete aplikaci v <strong>Chrome</strong> (doporučeno)
+            </li>
+            <li>
+              Klepněte na <strong>⋮</strong> (tři tečky) vpravo nahoře
+            </li>
+            <li>
+              Vyberte <strong>„Přidat na plochu"</strong> nebo{" "}
+              <strong>„Nainstalovat aplikaci"</strong>
+            </li>
+            <li>Potvrďte instalaci</li>
+            <li>
+              Při prvním spuštění povolte notifikace klepnutím na{" "}
+              <strong>„Povolit"</strong>
+            </li>
+            <li>
+              Pokud jste zamítli — <strong>Nastavení → Aplikace → Chrome →
+              Notifikace → Povolit</strong>
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    windows: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <WindowsLogo weight="fill" className="h-4 w-4" /> Windows — krok za
+            krokem
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>
+              Otevřete aplikaci v <strong>Chrome</strong> nebo{" "}
+              <strong>Edge</strong>
+            </li>
+            <li>
+              V adresním řádku se zobrazí ikona <strong>⊕</strong>{" "}
+              (Nainstalovat) — klikněte na ni
+            </li>
+            <li>
+              Alternativně: <strong>⋮ → Nainstalovat KOVO Apku</strong>
+            </li>
+            <li>
+              Při prvním spuštění povolte notifikace kliknutím na{" "}
+              <strong>„Povolit"</strong>
+            </li>
+            <li>
+              Pokud jste zamítli — klikněte na ikonu 🔒 v adresním řádku →{" "}
+              <strong>Notifikace → Povolit</strong>
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    macos: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <AppleLogo weight="fill" className="h-4 w-4" /> macOS — krok za
+            krokem
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>
+              Otevřete aplikaci v <strong>Chrome</strong> nebo{" "}
+              <strong>Safari 17+</strong>
+            </li>
+            <li>
+              <strong>Chrome:</strong> klikněte na ikonu ⊕ v adresním řádku →
+              „Nainstalovat"
+            </li>
+            <li>
+              <strong>Safari:</strong> Soubor → <strong>Přidat do Docku</strong>
+            </li>
+            <li>
+              Povolte notifikace — <strong>Nastavení systému → Oznámení
+              → prohlížeč/aplikace → Povolit</strong>
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    linux: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <LinuxLogo weight="fill" className="h-4 w-4" /> Linux — krok za
+            krokem
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>
+              Otevřete aplikaci v <strong>Chrome</strong> nebo{" "}
+              <strong>Chromium</strong>
+            </li>
+            <li>
+              Klikněte na ikonu <strong>⊕</strong> v adresním řádku →
+              „Nainstalovat"
+            </li>
+            <li>
+              Při prvním spuštění povolte notifikace kliknutím na{" "}
+              <strong>„Povolit"</strong>
+            </li>
+            <li>
+              Pokud jste zamítli — klikněte na 🔒 v adresním řádku →
+              Notifikace → Povolit
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    unknown: (
+      <div className="space-y-3 text-sm">
+        {common}
+        <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+          <p className="font-semibold text-foreground flex items-center gap-2">
+            <Globe weight="fill" className="h-4 w-4" /> Obecný postup
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-foreground-secondary text-xs">
+            <li>Otevřete aplikaci v podporovaném prohlížeči (Chrome, Edge, Safari)</li>
+            <li>Přidejte aplikaci na plochu / nainstalujte ji</li>
+            <li>Povolte notifikace při výzvě</li>
+            <li>
+              Pokud jste zamítli — povolte v nastavení prohlížeče (ikona 🔒
+              v adresním řádku)
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+  };
+
+  return instructions[platform];
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+const LS_KEY = "kovo-tutorial-completed";
+
 export function OnboardingTutorial() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+  const [show, setShow] = useState(false);
+  const [step, setStep] = useState(0);
+  const [platform, setPlatform] = useState<Platform>("unknown");
 
   useEffect(() => {
-    // Check if onboarding was already completed
-    const completed = localStorage.getItem(STORAGE_KEY);
+    const completed = localStorage.getItem(LS_KEY);
     if (!completed) {
-      // Small delay to let the hero animate first
-      const timer = setTimeout(() => setIsVisible(true), 1500);
-      return () => clearTimeout(timer);
+      setShow(true);
     }
+    setPlatform(detectPlatform());
   }, []);
 
-  const completeOnboarding = () => {
-    localStorage.setItem(STORAGE_KEY, new Date().toISOString());
-    setIsVisible(false);
-  };
+  const steps: TutorialStep[] = useMemo(
+    () => [
+      {
+        id: "welcome",
+        title: "Vítejte v KOVO Apce!",
+        icon: (
+          <HandWaving
+            weight="fill"
+            className="h-8 w-8 text-amber-500"
+          />
+        ),
+        content: (
+          <div className="space-y-3 text-sm text-foreground-secondary">
+            <div className="flex items-center gap-2 rounded-xl bg-accent/10 px-3 py-2 text-xs font-medium text-accent">
+              <Info weight="fill" className="h-4 w-4 shrink-0" />
+              Toto je krátký tutoriál — provede vás základními funkcemi
+              aplikace.
+            </div>
+            <p>
+              KOVO Apka je váš centrální portál pro správu dovolených, rezervací,
+              interní komunikaci, bodový systém a mnohem více.
+            </p>
+            <p>
+              Projděte si následující kroky, abyste aplikaci mohli plně
+              využívat.
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: "features",
+        title: "Hlavní funkce",
+        icon: <Gear weight="fill" className="h-8 w-8 text-accent" />,
+        content: (
+          <div className="space-y-2 text-sm text-foreground-secondary">
+            <ul className="space-y-2">
+              {[
+                ["📋", "Žádosti", "Dovolené, sick day, home office — vše na jednom místě"],
+                ["📅", "Rezervace", "Firemní vozidla, zasedačky a vybavení"],
+                ["💬", "Zprávy", "Interní chat s kolegy"],
+                ["🎁", "Odměny", "Sbírejte body a vyměňte za odměny"],
+                ["📰", "Novinky", "Firemní aktuality a ankety"],
+              ].map(([emoji, title, desc]) => (
+                <li
+                  key={title}
+                  className="flex items-start gap-2.5 rounded-xl bg-background p-2.5 border border-border"
+                >
+                  <span className="text-lg">{emoji}</span>
+                  <div>
+                    <span className="text-sm font-medium text-foreground">
+                      {title}
+                    </span>
+                    <p className="text-xs text-foreground-muted">{desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ),
+      },
+      {
+        id: "install",
+        title: "Instalace na plochu",
+        icon: (
+          <DownloadSimple weight="fill" className="h-8 w-8 text-blue-500" />
+        ),
+        content: (
+          <div className="space-y-3 text-sm text-foreground-secondary">
+            <p>
+              Pro nejlepší zážitek <strong>přidejte aplikaci na plochu</strong>.
+              Bude se chovat jako nativní aplikace — rychlejší načtení, bez
+              adresního řádku.
+            </p>
+            <div className="flex items-center gap-2 text-xs rounded-xl bg-background border border-border p-2.5">
+              {getPlatformIcon(platform)}
+              <span className="font-medium text-foreground">
+                Detekován systém: {getPlatformLabel(platform)}
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: "notifications",
+        title: "Nastavení notifikací",
+        icon: (
+          <BellRinging weight="fill" className="h-8 w-8 text-emerald-500" />
+        ),
+        content: getNotificationSteps(platform),
+      },
+      {
+        id: "done",
+        title: "Vše připraveno!",
+        icon: (
+          <CheckCircle weight="fill" className="h-8 w-8 text-emerald-500" />
+        ),
+        content: (
+          <div className="space-y-3 text-sm text-foreground-secondary">
+            <p>
+              Tutoriál je u konce. Nyní můžete začít používat aplikaci naplno.
+            </p>
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-3 text-xs text-amber-700 dark:text-amber-300">
+              <p className="font-semibold mb-1">⚠️ Důležité upozornění</p>
+              <p>
+                Pro správné fungování push notifikací je <strong>nutné
+                přidat aplikaci na plochu</strong> vašeho zařízení a{" "}
+                <strong>povolit notifikace</strong> dle pokynů v předchozím
+                kroku.
+              </p>
+            </div>
+            <p className="text-xs text-foreground-muted">
+              Tutoriál je možné znovu zobrazit v{" "}
+              <strong>Nastavení → Nápověda</strong>.
+            </p>
+          </div>
+        ),
+      },
+    ],
+    [platform],
+  );
 
-  const goNext = () => {
-    if (currentStep < STEPS.length - 1) {
-      setDirection(1);
-      setCurrentStep((s) => s + 1);
+  const isLast = step === steps.length - 1;
+
+  function handleNext() {
+    if (isLast) {
+      localStorage.setItem(LS_KEY, new Date().toISOString());
+      setShow(false);
     } else {
-      completeOnboarding();
+      setStep((s) => s + 1);
     }
-  };
+  }
 
-  const goPrev = () => {
-    if (currentStep > 0) {
-      setDirection(-1);
-      setCurrentStep((s) => s - 1);
-    }
-  };
+  if (!show) return null;
 
-  const skipAll = () => {
-    completeOnboarding();
-  };
-
-  if (!isVisible) return null;
-
-  const step = STEPS[currentStep];
-  const StepIcon = step.icon;
-  const isLast = currentStep === STEPS.length - 1;
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
+  const current = steps[step];
 
   return (
     <AnimatePresence>
-      {isVisible && (
-        <>
-          {/* Backdrop */}
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        >
           <motion.div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={skipAll}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-x-4 top-[15%] z-50 mx-auto max-w-md"
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            key={current.id}
+            initial={{ opacity: 0, y: 20, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: easings.emphasis }}
+            exit={{ opacity: 0, y: -20, scale: 0.97 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
           >
-            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
-              {/* Progress bar */}
-              <div className="h-1 bg-background-tertiary">
-                <motion.div
-                  className="h-full bg-accent"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                />
-              </div>
+            {/* Header badge */}
+            <div className="bg-accent/5 border-b border-border px-5 py-2.5 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-accent">
+                Tutoriál
+              </span>
+              <span className="text-[10px] text-foreground-muted">
+                {step + 1} / {steps.length}
+              </span>
+            </div>
 
-              {/* Close button */}
-              <div className="flex items-center justify-between px-5 pt-4">
-                <span className="text-xs font-medium text-foreground-muted">
-                  {currentStep + 1} / {STEPS.length}
-                </span>
-                <button
-                  onClick={skipAll}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-muted hover:bg-background-secondary transition-colors"
-                  aria-label="Přeskočit"
-                >
-                  <X className="h-4 w-4" weight="bold" />
-                </button>
-              </div>
-
-              {/* Step content — animated */}
-              <div className="relative overflow-hidden px-6 pb-6 pt-2" style={{ minHeight: 280 }}>
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
-                    key={currentStep}
-                    custom={direction}
-                    initial={{ opacity: 0, x: direction * 60 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: direction * -60 }}
-                    transition={{ duration: 0.3, ease: easings.emphasis }}
-                    className="flex flex-col items-center text-center"
-                  >
-                    {/* Icon */}
-                    <div
-                      className={`mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br ${step.color} shadow-lg`}
-                    >
-                      <StepIcon className={`h-10 w-10 ${step.iconColor}`} weight="duotone" />
-                    </div>
-
-                    {/* Title */}
-                    <h2 className="mb-2 text-xl font-bold text-foreground">
-                      {step.title}
-                    </h2>
-
-                    {/* Description */}
-                    <p className="text-sm leading-relaxed text-foreground-secondary">
-                      {step.description}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between border-t border-border px-5 py-4">
-                <button
-                  onClick={goPrev}
-                  disabled={currentStep === 0}
-                  className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-foreground-secondary hover:bg-background-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <CaretLeft className="h-4 w-4" weight="bold" />
-                  Zpět
-                </button>
-
-                <div className="flex items-center gap-3">
-                  {!isLast && (
-                    <button
-                      onClick={skipAll}
-                      className="text-xs font-medium text-foreground-muted hover:text-foreground-secondary transition-colors"
-                    >
-                      Přeskočit vše
-                    </button>
-                  )}
-
-                  <button
-                    onClick={goNext}
-                    className={`flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all active:scale-95 ${
-                      isLast
-                        ? "bg-emerald-600 hover:bg-emerald-500"
-                        : "bg-accent hover:bg-accent-hover"
-                    }`}
-                  >
-                    {isLast ? (
-                      <>
-                        <Checks className="h-4 w-4" weight="bold" />
-                        Hotovo
-                      </>
-                    ) : (
-                      <>
-                        Další
-                        <CaretRight className="h-4 w-4" weight="bold" />
-                      </>
-                    )}
-                  </button>
+            {/* Content */}
+            <div className="p-5 space-y-4">
+              {/* Icon + title */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-background-secondary">
+                  {current.icon}
                 </div>
+                <h2 className="text-lg font-bold text-foreground">
+                  {current.title}
+                </h2>
               </div>
 
-              {/* Dots indicator */}
-              <div className="flex items-center justify-center gap-1.5 pb-4">
-                {STEPS.map((_, i) => (
-                  <button
+              {/* Step content */}
+              <div className="max-h-[50vh] overflow-y-auto pr-1">
+                {current.content}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-border px-5 py-3 flex items-center justify-between">
+              {/* Progress dots */}
+              <div className="flex gap-1.5">
+                {steps.map((_, i) => (
+                  <div
                     key={i}
-                    onClick={() => {
-                      setDirection(i > currentStep ? 1 : -1);
-                      setCurrentStep(i);
-                    }}
-                    className={`h-1.5 rounded-full transition-all duration-200 ${
-                      i === currentStep
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      i === step
                         ? "w-6 bg-accent"
-                        : i < currentStep
+                        : i < step
                           ? "w-1.5 bg-accent/40"
-                          : "w-1.5 bg-foreground-muted/30"
-                    }`}
+                          : "w-1.5 bg-border",
+                    )}
                   />
                 ))}
               </div>
+
+              {/* Next button — no skip */}
+              <Button size="sm" onClick={handleNext}>
+                {isLast ? (
+                  <>
+                    Začít používat
+                    <CheckCircle weight="bold" className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    Pokračovat
+                    <ArrowRight weight="bold" className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

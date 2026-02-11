@@ -29,7 +29,10 @@ export type RealtimeEventType =
   | "news:published"
   | "points:updated"
   | "hr:request_update"
-  | "reservation:update";
+  | "reservation:update"
+  | "marketplace:update"
+  | "calendar:update"
+  | "reward:update";
 
 export interface RealtimeEvent {
   type: RealtimeEventType;

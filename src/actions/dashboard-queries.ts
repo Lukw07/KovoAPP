@@ -200,3 +200,118 @@ export async function getDashboardStats() {
     pendingReservations,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Upcoming items — what awaits the current user
+// ---------------------------------------------------------------------------
+
+export interface UpcomingItem {
+  id: string;
+  type: "reservation" | "hr_request" | "pending_approval";
+  title: string;
+  description: string;
+  link: string;
+  date: Date;
+  status: string;
+}
+
+export async function getUpcomingItems(): Promise<UpcomingItem[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const now = new Date();
+  const isManagement =
+    session.user.role === "ADMIN" || session.user.role === "MANAGER";
+
+  const items: UpcomingItem[] = [];
+
+  // 1. My upcoming confirmed reservations
+  const upcomingReservations = await prisma.reservation.findMany({
+    where: {
+      userId: session.user.id,
+      status: { in: ["PENDING", "CONFIRMED"] },
+      endTime: { gt: now },
+    },
+    include: {
+      resource: { select: { name: true, type: true } },
+    },
+    orderBy: { startTime: "asc" },
+    take: 5,
+  });
+
+  for (const r of upcomingReservations) {
+    const startDate = new Date(r.startTime);
+    const statusLabel = r.status === "PENDING" ? "Čeká na schválení" : "Potvrzeno";
+    items.push({
+      id: `res-${r.id}`,
+      type: "reservation",
+      title: r.resource.name,
+      description: `${statusLabel} • ${startDate.toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })} ${startDate.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" })}`,
+      link: "/reservations",
+      date: startDate,
+      status: r.status,
+    });
+  }
+
+  // 2. My pending HR requests
+  const myPendingRequests = await prisma.hrRequest.findMany({
+    where: {
+      userId: session.user.id,
+      status: "PENDING",
+    },
+    orderBy: { startDate: "asc" },
+    take: 5,
+  });
+
+  const typeLabels: Record<string, string> = {
+    VACATION: "Dovolená",
+    SICK_DAY: "Sick day",
+    DOCTOR: "Návštěva lékaře",
+    PERSONAL_DAY: "Osobní volno",
+    HOME_OFFICE: "Home office",
+  };
+
+  for (const req of myPendingRequests) {
+    items.push({
+      id: `hr-${req.id}`,
+      type: "hr_request",
+      title: typeLabels[req.type] ?? req.type,
+      description: `Čeká na schválení • ${new Date(req.startDate).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })}`,
+      link: "/requests",
+      date: new Date(req.startDate),
+      status: "PENDING",
+    });
+  }
+
+  // 3. For managers: pending requests to approve
+  if (isManagement) {
+    const pendingForApproval = await prisma.hrRequest.findMany({
+      where: {
+        status: "PENDING",
+        userId: { not: session.user.id },
+      },
+      include: {
+        user: { select: { name: true } },
+      },
+      orderBy: { startDate: "asc" },
+      take: 5,
+    });
+
+    for (const req of pendingForApproval) {
+      items.push({
+        id: `approve-${req.id}`,
+        type: "pending_approval",
+        title: `${req.user.name} — ${typeLabels[req.type] ?? req.type}`,
+        description: `Ke schválení • ${new Date(req.startDate).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })}`,
+        link: "/requests",
+        date: new Date(req.startDate),
+        status: "PENDING",
+      });
+    }
+  }
+
+  // Sort by date ascending (soonest first)
+  items.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  return items.slice(0, 10);
+}

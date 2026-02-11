@@ -283,6 +283,20 @@ export function JobCard({ job }: JobCardProps) {
               </p>
             )}
 
+            {/* GDPR consent */}
+            <label className="flex items-start gap-2 rounded-xl border border-border bg-background p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="gdprConsent"
+                required
+                className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
+              />
+              <span className="text-[11px] text-foreground-secondary leading-tight">
+                Potvrzuji, že mám souhlas doporučeného kandidáta se zpracováním
+                jeho osobních údajů za účelem náboru dle GDPR.
+              </span>
+            </label>
+
             <div className="flex gap-2">
               <button
                 type="button"

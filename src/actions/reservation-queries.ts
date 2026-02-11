@@ -68,3 +68,29 @@ export async function getMyReservations() {
     take: 30,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Get all pending reservations (for manager/admin approval)
+// ---------------------------------------------------------------------------
+
+export async function getPendingReservations() {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (!user || !["MANAGER", "ADMIN"].includes(user.role)) return [];
+
+  return prisma.reservation.findMany({
+    where: { status: "PENDING" },
+    include: {
+      resource: {
+        select: { id: true, name: true, type: true, location: true },
+      },
+      user: { select: { id: true, name: true, avatarUrl: true } },
+    },
+    orderBy: { startTime: "asc" },
+  });
+}

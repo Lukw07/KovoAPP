@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCzechHolidays } from "@/lib/holidays";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -156,6 +157,11 @@ export async function createCalendarEvent(formData: FormData) {
       },
     });
 
+    emitRealtimeEvent("calendar:update", "all", {
+      action: "created",
+      visibility,
+    }).catch(() => {});
+
     revalidatePath("/calendar");
     return { success: true };
   } catch (err) {
@@ -185,6 +191,11 @@ export async function deleteCalendarEvent(eventId: string) {
 
   try {
     await prisma.calendarEvent.delete({ where: { id: eventId } });
+
+    emitRealtimeEvent("calendar:update", "all", {
+      action: "deleted",
+    }).catch(() => {});
+
     revalidatePath("/calendar");
     return { success: true };
   } catch (err) {

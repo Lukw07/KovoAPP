@@ -33,6 +33,7 @@ import {
   createDocument,
   deleteDocument,
   updateEmployeeContact,
+  updateWorkFundType,
 } from "@/actions/employee-management";
 
 // ============================================================================
@@ -390,6 +391,14 @@ function OverviewTab({ employee }: { employee: Employee }) {
           )}
         </div>
 
+        {/* Work fund type */}
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">
+            Typ úvazku
+          </h3>
+          <WorkFundTypeSelector employee={employee} />
+        </div>
+
         {/* Vacation balance */}
         <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <h3 className="text-sm font-semibold text-foreground">
@@ -399,13 +408,13 @@ function OverviewTab({ employee }: { employee: Employee }) {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-foreground-secondary">
-                  Čerpáno {currentVacation.usedDays} z{" "}
-                  {currentVacation.totalDays + currentVacation.carriedOver} dnů
+                  Čerpáno {currentVacation.usedHours}h z{" "}
+                  {currentVacation.totalHours + currentVacation.carriedOverHours}h
                 </span>
                 <span className="font-medium text-foreground">
-                  {currentVacation.totalDays +
-                    currentVacation.carriedOver -
-                    currentVacation.usedDays}{" "}
+                  {currentVacation.totalHours +
+                    currentVacation.carriedOverHours -
+                    currentVacation.usedHours}h{" "}
                   zbývá
                 </span>
               </div>
@@ -413,13 +422,13 @@ function OverviewTab({ employee }: { employee: Employee }) {
                 <div
                   className="h-full rounded-full bg-blue-500 transition-all"
                   style={{
-                    width: `${Math.min(100, (currentVacation.usedDays / (currentVacation.totalDays + currentVacation.carriedOver)) * 100)}%`,
+                    width: `${Math.min(100, (currentVacation.usedHours / (currentVacation.totalHours + currentVacation.carriedOverHours)) * 100)}%`,
                   }}
                 />
               </div>
-              {currentVacation.carriedOver > 0 && (
+              {currentVacation.carriedOverHours > 0 && (
                 <p className="mt-1 text-xs text-foreground-muted">
-                  Včetně {currentVacation.carriedOver} převedených dnů
+                  Včetně {currentVacation.carriedOverHours}h převedených
                 </p>
               )}
             </div>
@@ -1208,7 +1217,9 @@ function TimeOffTab({ employee }: { employee: Employee }) {
           userId: employee.id,
           year: Number(formData.get("year")),
           totalDays: Number(formData.get("totalDays")),
+          totalHours: Number(formData.get("totalHours")),
           carriedOver: Number(formData.get("carriedOver") ?? 0),
+          carriedOverHours: Number(formData.get("carriedOverHours") ?? 0),
         });
         toast.success("Nárok na dovolenou uložen");
         setShowForm(false);
@@ -1280,7 +1291,24 @@ function TimeOffTab({ employee }: { employee: Employee }) {
               </div>
               <div>
                 <label className="block text-xs font-medium text-foreground-secondary mb-1">
-                  Převedeno
+                  Celkem hodin *
+                </label>
+                <input
+                  name="totalHours"
+                  type="number"
+                  required
+                  defaultValue={160}
+                  min={0}
+                  max={480}
+                  step={0.5}
+                  className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
+                  Převedeno (dní)
                 </label>
                 <input
                   name="carriedOver"
@@ -1288,6 +1316,20 @@ function TimeOffTab({ employee }: { employee: Employee }) {
                   defaultValue={0}
                   min={0}
                   max={30}
+                  className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground-secondary mb-1">
+                  Převedeno (hodin)
+                </label>
+                <input
+                  name="carriedOverHours"
+                  type="number"
+                  defaultValue={0}
+                  min={0}
+                  max={240}
+                  step={0.5}
                   className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
                 />
               </div>
@@ -1327,24 +1369,24 @@ function TimeOffTab({ employee }: { employee: Employee }) {
                     {v.year}
                   </span>
                   <span className="text-sm tabular-nums text-foreground-secondary">
-                    {v.totalDays + v.carriedOver - v.usedDays} /{" "}
-                    {v.totalDays + v.carriedOver} zbývá
+                    {v.totalHours + v.carriedOverHours - v.usedHours}h /{" "}
+                    {v.totalHours + v.carriedOverHours}h zbývá
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-background-tertiary overflow-hidden">
                   <div
                     className="h-full rounded-full bg-blue-500 transition-all"
                     style={{
-                      width: `${Math.min(100, (v.usedDays / (v.totalDays + v.carriedOver)) * 100)}%`,
+                      width: `${Math.min(100, (v.usedHours / (v.totalHours + v.carriedOverHours)) * 100)}%`,
                     }}
                   />
                 </div>
                 <div className="mt-1.5 flex gap-4 text-xs text-foreground-muted">
-                  <span>Nárok: {v.totalDays}d</span>
-                  {v.carriedOver > 0 && (
-                    <span>Převedeno: {v.carriedOver}d</span>
+                  <span>Nárok: {v.totalHours}h ({v.totalDays}d)</span>
+                  {v.carriedOverHours > 0 && (
+                    <span>Převedeno: {v.carriedOverHours}h</span>
                   )}
-                  <span>Čerpáno: {v.usedDays}d</span>
+                  <span>Čerpáno: {v.usedHours}h</span>
                 </div>
               </div>
             ))
@@ -1379,6 +1421,7 @@ function TimeOffTab({ employee }: { employee: Employee }) {
                       {r.endDate &&
                         ` – ${format(new Date(r.endDate), "d. M.", { locale: cs })}`}
                       {r.totalDays > 0 && ` · ${r.totalDays}d`}
+                      {r.totalHours > 0 && ` (${r.totalHours}h)`}
                     </p>
                   </div>
                 </div>
@@ -1689,4 +1732,55 @@ function roleLabel(role: string): string {
     default:
       return role;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Work Fund Type Selector
+// ═══════════════════════════════════════════════════════════════════════════
+
+const FUND_OPTIONS = [
+  { value: "FULL_8H", label: "Plný úvazek (8h/den)" },
+  { value: "STANDARD_7_5H", label: "Standardní (7,5h/den)" },
+  { value: "PART_TIME_6H", label: "Zkrácený (6h/den)" },
+] as const;
+
+function WorkFundTypeSelector({ employee }: { employee: Employee }) {
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleChange = (value: string) => {
+    startTransition(async () => {
+      try {
+        await updateWorkFundType(
+          employee.id,
+          value as "FULL_8H" | "STANDARD_7_5H" | "PART_TIME_6H",
+        );
+        toast.success("Typ úvazku uložen");
+        router.refresh();
+      } catch {
+        toast.error("Chyba při ukládání");
+      }
+    });
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {FUND_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          disabled={pending}
+          onClick={() => handleChange(opt.value)}
+          className={cn(
+            "rounded-xl px-3.5 py-2 text-sm font-medium transition-all active:scale-95 disabled:opacity-50",
+            employee.workFundType === opt.value
+              ? "bg-accent text-white shadow-accent"
+              : "bg-background-secondary text-foreground-secondary hover:bg-border",
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
 }

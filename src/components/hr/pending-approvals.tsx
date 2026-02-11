@@ -28,6 +28,8 @@ interface PendingRequest {
   startDate: Date;
   endDate: Date;
   totalDays: number;
+  totalHours: number;
+  isOverLimit: boolean;
   reason: string | null;
   createdAt: Date;
   user: {
@@ -210,12 +212,10 @@ function ApprovalCard({
             new Date(request.endDate).getTime() &&
             ` — ${format(new Date(request.endDate), "d. MMMM yyyy", { locale: cs })}`}
           <span className="ml-1.5 font-medium text-foreground-secondary">
-            ({request.totalDays}{" "}
-            {request.totalDays === 1
-              ? "den"
-              : request.totalDays < 5
-                ? "dny"
-                : "dní"})
+            ({request.totalHours}h)
+            {request.isOverLimit && (
+              <span className="ml-1 text-red-500 font-semibold">⚠️ PŘEČERPÁNÍ</span>
+            )}
           </span>
         </p>
         {request.reason && (

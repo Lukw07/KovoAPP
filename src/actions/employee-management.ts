@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { sendNotification } from "@/lib/notifications";
 import { logAudit } from "@/lib/audit";
+import { encrypt, decrypt } from "@/lib/security";
 
 // ============================================================================
 // Employee Management Queries — for MANAGER / ADMIN roles
@@ -51,6 +52,9 @@ export interface EmployeeListItem {
     totalDays: number;
     usedDays: number;
     remaining: number;
+    totalHours: number;
+    usedHours: number;
+    remainingHours: number;
   } | null;
   sickDaysThisYear: number;
 }
@@ -98,7 +102,7 @@ export async function getEmployeeList(): Promise<EmployeeListItem[]> {
       vacationEntitlements: {
         where: { year: currentYear },
         take: 1,
-        select: { totalDays: true, usedDays: true, carriedOver: true },
+        select: { totalDays: true, usedDays: true, carriedOver: true, totalHours: true, usedHours: true, carriedOverHours: true },
       },
       hrRequests: {
         where: {
@@ -138,6 +142,10 @@ export async function getEmployeeList(): Promise<EmployeeListItem[]> {
             usedDays: vacation.usedDays,
             remaining:
               vacation.totalDays + vacation.carriedOver - vacation.usedDays,
+            totalHours: vacation.totalHours + vacation.carriedOverHours,
+            usedHours: vacation.usedHours,
+            remainingHours:
+              vacation.totalHours + vacation.carriedOverHours - vacation.usedHours,
           }
         : null,
       sickDaysThisYear: sickDays,
@@ -164,6 +172,7 @@ export async function getEmployeeDetail(userId: string) {
       phone: true,
       isActive: true,
       hireDate: true,
+      workFundType: true,
       pointsBalance: true,
       department: {
         select: { id: true, name: true, code: true, color: true },
@@ -218,6 +227,9 @@ export async function getEmployeeDetail(userId: string) {
           totalDays: true,
           usedDays: true,
           carriedOver: true,
+          totalHours: true,
+          usedHours: true,
+          carriedOverHours: true,
         },
       },
       hrRequests: {
@@ -232,6 +244,7 @@ export async function getEmployeeDetail(userId: string) {
           startDate: true,
           endDate: true,
           totalDays: true,
+          totalHours: true,
           reason: true,
         },
       },
@@ -254,8 +267,15 @@ export async function getEmployeeDetail(userId: string) {
     .filter((r) => r.type === "HOME_OFFICE" && r.status === "APPROVED")
     .reduce((sum, r) => sum + r.totalDays, 0);
 
+  // Decrypt sensitive medical exam results
+  const decryptedMedicalExams = user.medicalExams.map((exam) => ({
+    ...exam,
+    result: exam.result ? safeDecrypt(exam.result) : null,
+  }));
+
   return {
     ...user,
+    medicalExams: decryptedMedicalExams,
     stats: {
       sickDays,
       doctorDays,
@@ -263,6 +283,16 @@ export async function getEmployeeDetail(userId: string) {
       homeOfficeDays,
     },
   };
+}
+
+/** Safely decrypt — returns original value if not encrypted (legacy data) */
+function safeDecrypt(value: string): string {
+  try {
+    return decrypt(value);
+  } catch {
+    // Not encrypted (legacy data) — return as-is
+    return value;
+  }
 }
 
 // ── Update employee contact details (MANAGER/ADMIN) ────────────────────────
@@ -447,12 +477,15 @@ export async function completeMedicalExam(
 ) {
   await requireManagement();
 
+  // Encrypt sensitive medical result (GDPR Art. 9 — special category data)
+  const encryptedResult = encrypt(result);
+
   await prisma.medicalExamination.update({
     where: { id: examId },
     data: {
       status: "COMPLETED",
       completedAt: new Date(),
-      result,
+      result: encryptedResult,
       nextDueAt: nextDueAt ? new Date(nextDueAt) : null,
     },
   });
@@ -464,7 +497,9 @@ const vacationEntitlementSchema = z.object({
   userId: z.string().cuid(),
   year: z.number().int().min(2020).max(2040),
   totalDays: z.number().min(0).max(60).default(20),
+  totalHours: z.number().min(0).max(480).default(160),
   carriedOver: z.number().min(0).max(30).default(0),
+  carriedOverHours: z.number().min(0).max(240).default(0),
 });
 
 export async function upsertVacationEntitlement(
@@ -484,11 +519,15 @@ export async function upsertVacationEntitlement(
       userId: parsed.userId,
       year: parsed.year,
       totalDays: parsed.totalDays,
+      totalHours: parsed.totalHours,
       carriedOver: parsed.carriedOver,
+      carriedOverHours: parsed.carriedOverHours,
     },
     update: {
       totalDays: parsed.totalDays,
+      totalHours: parsed.totalHours,
       carriedOver: parsed.carriedOver,
+      carriedOverHours: parsed.carriedOverHours,
     },
   });
 
@@ -529,6 +568,22 @@ export async function deleteDocument(documentId: string) {
 
   await prisma.employeeDocument.delete({
     where: { id: documentId },
+  });
+
+  return { success: true };
+}
+
+// ── Update employee work fund type ──────────────────────────────────────────
+
+export async function updateWorkFundType(
+  userId: string,
+  workFundType: "FULL_8H" | "STANDARD_7_5H" | "PART_TIME_6H",
+) {
+  await requireManagement();
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { workFundType },
   });
 
   return { success: true };

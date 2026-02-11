@@ -2,11 +2,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getMyApprovedVacations, getPendingForManager } from "@/actions/hr-queries";
 import { getUnreadMessageCount } from "@/actions/messages";
-import { getDashboardActivity, getDashboardStats } from "@/actions/dashboard-queries";
+import { getDashboardActivity, getDashboardStats, getUpcomingItems } from "@/actions/dashboard-queries";
 import VacationCalendar from "@/components/hr/vacation-calendar";
 import TeamStatus from "@/components/hr/team-status";
 import DashboardHero from "@/components/dashboard/dashboard-hero";
 import { OnboardingTutorial } from "@/components/dashboard/onboarding-tutorial";
+import { UpcomingItems } from "@/components/dashboard/upcoming-items";
 import Link from "next/link";
 import {
   CalendarDots,
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
     user?.role === "ADMIN" || user?.role === "MANAGER";
 
   const currentYear = new Date().getFullYear();
-  const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats, freshUser] = await Promise.all([
+  const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats, freshUser, upcomingItems] = await Promise.all([
     getMyApprovedVacations(currentYear),
     isManagement ? getPendingForManager() : Promise.resolve([]),
     getUnreadMessageCount().catch(() => 0),
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
       where: { id: user!.id },
       select: { pointsBalance: true },
     }),
+    getUpcomingItems(),
   ]);
 
   return (
@@ -116,6 +118,9 @@ export default async function DashboardPage() {
           glowColor="amber"
         />
       </div>
+
+      {/* ── Upcoming items — what awaits the user ─────────── */}
+      <UpcomingItems items={upcomingItems} />
 
       {/* ── Vacation calendar ──────────────────────────────── */}
       <div>

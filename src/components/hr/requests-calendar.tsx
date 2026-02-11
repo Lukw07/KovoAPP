@@ -23,6 +23,8 @@ export type CalendarRequest = {
   startDate: Date | string;
   endDate: Date | string;
   totalDays: number;
+  totalHours: number;
+  isOverLimit: boolean;
   reason: string | null;
   isHalfDayStart: boolean;
   isHalfDayEnd: boolean;
@@ -204,12 +206,7 @@ function DayDetail({
               {!isSingleDay &&
                 ` — ${format(new Date(req.endDate), "d. MMM", { locale: cs })}`}
               <span className="ml-1.5 text-foreground-muted">
-                ({req.totalDays}{" "}
-                {req.totalDays === 1
-                  ? "den"
-                  : req.totalDays < 5
-                    ? "dny"
-                    : "dní"})
+                ({req.totalHours}h)
               </span>
             </p>
             {req.reason && (

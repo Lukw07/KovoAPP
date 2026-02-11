@@ -426,7 +426,7 @@ function InlineTimeline({
                       ? "border-red-200 dark:border-red-800/60 bg-red-50 dark:bg-red-900/30"
                       : isPast
                         ? "border-border/50 bg-background-secondary/50"
-                        : "border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/60 dark:bg-emerald-900/20",
+                        : "border-border bg-background-secondary/60 dark:bg-background-secondary/40",
                     isCurrent &&
                       "ring-2 ring-accent ring-offset-1 dark:ring-offset-card"
                   )}
@@ -443,7 +443,7 @@ function InlineTimeline({
                         ? "bg-red-500"
                         : isPast
                           ? "bg-border"
-                          : "bg-emerald-500"
+                          : "bg-foreground-muted/40"
                     )}
                   />
 

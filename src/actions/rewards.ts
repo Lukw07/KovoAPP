@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod Schema
@@ -96,6 +97,13 @@ export async function claimReward(rewardId: string) {
 
     revalidatePath("/rewards");
     revalidatePath("/dashboard");
+
+    emitRealtimeEvent("reward:update", "all", {
+      action: "claimed",
+    }).catch(() => {});
+    emitRealtimeEvent("points:updated", userId, {
+      action: "reward_claimed",
+    }).catch(() => {});
 
     await logAudit({
       action: "REWARD_CLAIMED",

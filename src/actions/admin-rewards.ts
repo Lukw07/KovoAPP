@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendNotification } from "@/lib/notifications";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Get all reward claims (admin view)
@@ -62,7 +63,9 @@ export async function fulfillRewardClaim(claimId: string) {
     body: `Vaše odměna „${claim.reward.name}" byla schválena a je připravena k vyzvednutí.`,
     link: "/rewards",
   });
-
+  emitRealtimeEvent("reward:update", claim.userId, {
+    action: "fulfilled",
+  }).catch(() => {});
   revalidatePath("/admin");
   revalidatePath("/rewards");
   return { success: true };
@@ -124,7 +127,12 @@ export async function cancelRewardClaim(claimId: string) {
     body: `Vaše žádost o odměnu „${claim.reward.name}" byla zamítnuta. Body (${claim.reward.pointsCost}) byly vráceny.`,
     link: "/rewards",
   });
-
+  emitRealtimeEvent("reward:update", claim.userId, {
+    action: "cancelled",
+  }).catch(() => {});
+  emitRealtimeEvent("points:updated", claim.userId, {
+    action: "refunded",
+  }).catch(() => {});
   revalidatePath("/admin");
   revalidatePath("/rewards");
   return { success: true };

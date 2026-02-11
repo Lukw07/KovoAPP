@@ -46,6 +46,12 @@ enum ResourceType {
   PARKING_SPOT
 }
 
+enum WorkFundType {
+  FULL_8H       // 8 hours per day
+  STANDARD_7_5H // 7.5 hours per day
+  PART_TIME_6H  // 6 hours per day (shortened)
+}
+
 enum ReservationStatus {
   PENDING
   CONFIRMED
@@ -103,6 +109,7 @@ model User {
   pointsBalance  Int      @default(0)
   isActive       Boolean  @default(true)
   hireDate       DateTime @default(now())
+  workFundType   WorkFundType @default(FULL_8H)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -255,6 +262,12 @@ model HrRequest {
 
   // Total working days calculated
   totalDays Float @default(1)
+
+  // Total hours calculated (based on employee's work fund type)
+  totalHours Float @default(8)
+
+  // Warning: request exceeds available vacation balance
+  isOverLimit Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -862,9 +875,12 @@ model CalendarEvent {
 model VacationEntitlement {
   id           String @id @default(cuid())
   year         Int
-  totalDays    Float  @default(20) // Standard Czech = 20 working days (4 weeks)
-  usedDays     Float  @default(0)
-  carriedOver  Float  @default(0)  // From previous year
+  totalDays    Float  @default(20)   // Total days entitlement (for reference)
+  totalHours   Float  @default(160)  // Total hours entitlement (totalDays × hoursPerDay)
+  usedDays     Float  @default(0)    // Used days (for reference)
+  usedHours    Float  @default(0)    // Used hours (main tracking unit)
+  carriedOver  Float  @default(0)    // Carried over days from previous year
+  carriedOverHours Float @default(0) // Carried over hours from previous year
   note         String?
 
   userId String
@@ -874,4 +890,38 @@ model VacationEntitlement {
   @@index([userId])
   @@index([year])
   @@map("vacation_entitlements")
+}
+
+// ============================================================================
+// ADMIN-MANAGED CATEGORIES
+// ============================================================================
+
+model HrRequestCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?  // hex color for UI badges
+  icon        String?  // emoji or icon name
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("hr_request_categories")
+}
+
+model ResourceCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?  // hex color for UI badges
+  icon        String?  // emoji or icon name
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("resource_categories")
 }

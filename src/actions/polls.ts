@@ -196,6 +196,11 @@ export async function removeVoteFromPoll(pollId: string, optionIndex?: number) {
       });
     }
 
+    emitRealtimeEvent("poll:voted", "all", {
+      action: "vote_removed",
+      pollId,
+    }).catch(() => {});
+
     revalidatePath("/polls");
     return { success: true };
   } catch (err) {
@@ -228,7 +233,10 @@ export async function closePoll(pollId: string) {
       `Výsledky ankety „${poll.question}" jsou k dispozici.`,
       "/polls",
     );
-
+    emitRealtimeEvent("poll:voted", "all", {
+      action: "closed",
+      pollId,
+    }).catch(() => {});
     revalidatePath("/polls");
     revalidatePath("/admin");
     return { success: true };

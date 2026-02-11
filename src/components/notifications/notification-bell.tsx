@@ -96,20 +96,18 @@ export function NotificationBell() {
 
   const handleMarkRead = async (id: string) => {
     await markNotificationRead(id);
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
     setUnreadCount((c) => Math.max(0, c - 1));
   };
 
   const handleMarkAllRead = async () => {
     await markAllNotificationsRead();
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications([]);
     setUnreadCount(0);
   };
 
   const handleNotificationClick = (n: Notification) => {
-    if (!n.isRead) handleMarkRead(n.id);
+    handleMarkRead(n.id);
     if (n.link) window.location.href = n.link;
     setOpen(false);
   };
@@ -157,12 +155,12 @@ export function NotificationBell() {
               <h3 className="text-sm font-semibold text-foreground">
                 Notifikace
               </h3>
-              {unreadCount > 0 && (
+              {notifications.length > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   className="text-xs font-medium text-accent hover:text-accent-hover transition-colors"
                 >
-                  Označit vše
+                  Smazat vše
                 </button>
               )}
             </div>

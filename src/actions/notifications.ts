@@ -30,27 +30,25 @@ export async function getUnreadNotificationCount(): Promise<number> {
 }
 
 /**
- * Mark a single notification as read.
+ * Mark a single notification as read — deletes it from DB.
  */
 export async function markNotificationRead(notificationId: string) {
   const session = await auth();
   if (!session?.user?.id) return;
 
-  await prisma.notification.updateMany({
+  await prisma.notification.deleteMany({
     where: { id: notificationId, userId: session.user.id },
-    data: { isRead: true },
   });
 }
 
 /**
- * Mark all notifications as read for the current user.
+ * Mark all notifications as read — deletes all for the current user.
  */
 export async function markAllNotificationsRead() {
   const session = await auth();
   if (!session?.user?.id) return;
 
-  await prisma.notification.updateMany({
-    where: { userId: session.user.id, isRead: false },
-    data: { isRead: true },
+  await prisma.notification.deleteMany({
+    where: { userId: session.user.id },
   });
 }

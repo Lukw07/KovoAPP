@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import type { MarketplaceCategory } from "@/generated/prisma/enums";
+import { emitRealtimeEvent } from "@/lib/socket-server";
 
 // ---------------------------------------------------------------------------
 // Zod schemas
@@ -94,6 +95,10 @@ export async function createListing(formData: FormData) {
       },
     });
 
+    emitRealtimeEvent("marketplace:update", "all", {
+      action: "created",
+    }).catch(() => {});
+
     revalidatePath("/marketplace");
     return { success: true };
   } catch (err) {
@@ -124,6 +129,10 @@ export async function deactivateListing(listingId: string) {
       data: { isActive: false },
     });
 
+    emitRealtimeEvent("marketplace:update", "all", {
+      action: "deactivated",
+    }).catch(() => {});
+
     revalidatePath("/marketplace");
     return { success: true };
   } catch (err) {
@@ -150,6 +159,10 @@ export async function deleteListing(listingId: string) {
     }
 
     await prisma.marketplaceListing.delete({ where: { id: listingId } });
+
+    emitRealtimeEvent("marketplace:update", "all", {
+      action: "deleted",
+    }).catch(() => {});
 
     revalidatePath("/marketplace");
     return { success: true };

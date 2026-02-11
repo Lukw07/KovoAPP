@@ -22,6 +22,7 @@ type VacationRange = {
   startDate: Date | string;
   endDate: Date | string;
   totalDays: number;
+  totalHours?: number;
 };
 
 interface VacationCalendarProps {
