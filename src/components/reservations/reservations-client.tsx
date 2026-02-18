@@ -22,6 +22,9 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  ListChecks,
+  CalendarClock,
+  Send,
   MapPin,
   Car,
   DoorOpen,
@@ -134,7 +137,41 @@ export default function ReservationsClient({
 
   // ---- List view ----
   if (!selected) {
-    return <ResourceList resources={resources} onSelect={setSelected} />;
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm font-semibold text-foreground">Začněte výběrem zdroje</p>
+          <p className="mt-1 text-xs text-foreground-muted">
+            Klikněte na položku níže. Potom uvidíte obsazenost po hodinách a formulář rezervace.
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="rounded-xl bg-background-secondary px-3 py-2 text-xs text-foreground-secondary">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <ListChecks className="h-3.5 w-3.5 text-accent" />
+                Krok 1
+              </span>
+              Vyberte zdroj
+            </div>
+            <div className="rounded-xl bg-background-secondary px-3 py-2 text-xs text-foreground-secondary">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <CalendarClock className="h-3.5 w-3.5 text-accent" />
+                Krok 2
+              </span>
+              Zkontrolujte obsazenost
+            </div>
+            <div className="rounded-xl bg-background-secondary px-3 py-2 text-xs text-foreground-secondary">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Send className="h-3.5 w-3.5 text-accent" />
+                Krok 3
+              </span>
+              Odešlete rezervaci
+            </div>
+          </div>
+        </div>
+
+        <ResourceList resources={resources} onSelect={setSelected} />
+      </div>
+    );
   }
 
   const meta = TYPE_META[selected.type] ?? TYPE_META.TOOL;
@@ -171,6 +208,7 @@ export default function ReservationsClient({
             <p className="truncate text-sm font-bold text-foreground">
               {selected.name}
             </p>
+            <p className="text-[11px] font-medium text-accent">Krok 2/3: Kontrola obsazenosti</p>
             <div className="flex flex-wrap items-center gap-x-3 text-xs text-foreground-muted">
               <span className={cn("font-medium", meta.color)}>
                 {meta.label}
@@ -190,6 +228,9 @@ export default function ReservationsClient({
       <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {/* Date navigation + day tabs */}
         <div className="border-b border-border px-4 pt-3 pb-0">
+          <p className="mb-2 text-xs font-medium text-foreground-secondary">
+            Vyberte den a zkontrolujte obsazené hodiny
+          </p>
           {/* Date nav row */}
           <div className="mb-3 flex items-center justify-between">
             <button
@@ -263,12 +304,14 @@ export default function ReservationsClient({
 
       {/* ─── Booking form ──────────────────────────────────────────── */}
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="mb-3 text-sm font-semibold text-foreground">
-          Nová rezervace
+        <h3 className="mb-1 text-sm font-semibold text-foreground">
+          Krok 3/3: Nová rezervace
         </h3>
+        <p className="mb-3 text-xs text-foreground-muted">
+          Vyplňte čas od-do. Pokud je slot volný, žádost se odešle ke schválení.
+        </p>
         <BookingForm
           resourceId={selected.id}
-          resourceName={selected.name}
           onSuccess={() => fetchTimeline()}
         />
       </div>
@@ -321,7 +364,7 @@ function DayTab({
               : "bg-background-secondary text-foreground-muted"
           )}
         >
-          {count} rez.
+          {count} rezervací
         </span>
       )}
     </button>
@@ -393,6 +436,10 @@ function InlineTimeline({
           </span>
         )}
       </div>
+
+      <p className="text-[11px] text-foreground-muted">
+        Červené sloty jsou obsazené, neutrální jsou volné.
+      </p>
 
       {/* Hourly grid */}
       <div className="overflow-x-auto pb-1 scrollbar-hide">

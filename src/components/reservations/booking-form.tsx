@@ -12,13 +12,11 @@ import { cn } from "@/lib/utils";
 
 interface BookingFormProps {
   resourceId: string;
-  resourceName: string;
   onSuccess?: () => void;
 }
 
 export default function BookingForm({
   resourceId,
-  resourceName,
   onSuccess,
 }: BookingFormProps) {
   const [state, formAction, isPending] = useActionState<
@@ -69,6 +67,9 @@ export default function BookingForm({
           >
             Od
           </label>
+          <p className="mb-1 text-[11px] text-foreground-muted">
+            Začátek rezervace
+          </p>
           <input
             type="datetime-local"
             id="startTime"
@@ -91,6 +92,9 @@ export default function BookingForm({
           >
             Do
           </label>
+          <p className="mb-1 text-[11px] text-foreground-muted">
+            Konec rezervace
+          </p>
           <input
             type="datetime-local"
             id="endTime"
@@ -124,6 +128,9 @@ export default function BookingForm({
           placeholder="Např. služební cesta do Brna"
           className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder-foreground-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
+        <p className="mt-1 text-[11px] text-foreground-muted">
+          Pomáhá schvalovateli rychle pochopit důvod rezervace.
+        </p>
       </div>
 
       {/* Submit */}
