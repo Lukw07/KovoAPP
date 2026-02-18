@@ -47,7 +47,7 @@ const FUND_HOURS: Record<WorkFundType, number> = {
   PART_TIME_6H: 6,
 };
 
-export const FUND_TYPE_LABELS: Record<WorkFundType, string> = {
+const FUND_TYPE_LABELS: Record<WorkFundType, string> = {
   FULL_8H: "Plný úvazek (8h/den)",
   STANDARD_7_5H: "Standardní (7,5h/den)",
   PART_TIME_6H: "Zkrácený (6h/den)",
