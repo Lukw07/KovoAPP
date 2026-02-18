@@ -5,7 +5,7 @@
 // notification instructions. Saves completion to localStorage.
 // ============================================================================
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   HandWaving,
@@ -293,20 +293,17 @@ function getNotificationSteps(platform: Platform): React.ReactNode {
 const LS_KEY = "kovo-tutorial-completed";
 
 export function OnboardingTutorial() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem(LS_KEY);
+  });
   const [step, setStep] = useState(0);
-  const [platform, setPlatform] = useState<Platform>("unknown");
+  const [platform] = useState<Platform>(() => {
+    if (typeof window === "undefined") return "unknown";
+    return detectPlatform();
+  });
 
-  useEffect(() => {
-    const completed = localStorage.getItem(LS_KEY);
-    if (!completed) {
-      setShow(true);
-    }
-    setPlatform(detectPlatform());
-  }, []);
-
-  const steps: TutorialStep[] = useMemo(
-    () => [
+  const steps: TutorialStep[] = [
       {
         id: "welcome",
         title: "Vítejte v KOVO Apce!",
@@ -422,9 +419,7 @@ export function OnboardingTutorial() {
           </div>
         ),
       },
-    ],
-    [platform],
-  );
+    ];
 
   const isLast = step === steps.length - 1;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -38,6 +38,15 @@ interface DashboardHeroProps {
   } | null;
 }
 
+type SparkleData = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+  repeatDelay: number;
+};
+
 /* ── greeting based on time of day ─────────────────────────── */
 function getGreeting(): { text: string; icon: typeof Sun; period: string } {
   const hour = new Date().getHours();
@@ -66,7 +75,7 @@ function getFormattedDate(): string {
 }
 
 /* ── sparkle particle ──────────────────────────────────────── */
-function Sparkle({ delay, x, y, size }: { delay: number; x: number; y: number; size: number }) {
+function Sparkle({ delay, repeatDelay, x, y, size }: { delay: number; repeatDelay: number; x: number; y: number; size: number }) {
   return (
     <motion.div
       className="absolute rounded-full bg-white pointer-events-none"
@@ -75,11 +84,23 @@ function Sparkle({ delay, x, y, size }: { delay: number; x: number; y: number; s
       animate={{ opacity: [0, 0.8, 0], scale: [0, 1, 0] }}
       transition={{
         duration: 2.5, delay,
-        repeat: Infinity, repeatDelay: Math.random() * 3 + 2,
+        repeat: Infinity,
+        repeatDelay,
         ease: "easeInOut",
       }}
     />
   );
+}
+
+function createSparkles(): SparkleData[] {
+  return Array.from({ length: 6 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 90 + 5,
+    y: Math.random() * 80 + 10,
+    size: Math.random() * 3 + 1.5,
+    delay: Math.random() * 3,
+    repeatDelay: Math.random() * 3 + 2,
+  }));
 }
 
 /* ── animated counter ──────────────────────────────────────── */
@@ -199,20 +220,8 @@ export default function DashboardHero({
   const [activity, setActivity] = useState<ActivityItem[]>(initialActivity);
   const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
   const [livePoints, setLivePoints] = useState(pointsBalance);
+  const [sparkles] = useState<SparkleData[]>(() => createSparkles());
   const { on, isConnected } = useSocket();
-
-  // Sparkles data (stable across renders)
-  const sparkles = useMemo(
-    () =>
-      Array.from({ length: 6 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 90 + 5,
-        y: Math.random() * 80 + 10,
-        size: Math.random() * 3 + 1.5,
-        delay: Math.random() * 3,
-      })),
-    [],
-  );
 
   const firstName = userName?.split(" ")[0] ?? userName;
 
@@ -275,7 +284,7 @@ export default function DashboardHero({
 
       {/* ── Sparkle particles ─────────────────────────────── */}
       {sparkles.map((s) => (
-        <Sparkle key={s.id} delay={s.delay} x={s.x} y={s.y} size={s.size} />
+        <Sparkle key={s.id} delay={s.delay} repeatDelay={s.repeatDelay} x={s.x} y={s.y} size={s.size} />
       ))}
 
       {/* ── Content ───────────────────────────────────────── */}

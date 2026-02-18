@@ -17,6 +17,7 @@ import {
   Newspaper,
   Gift,
 } from "@phosphor-icons/react/dist/ssr";
+import { redirect } from "next/navigation";
 import { DashboardAnimations } from "./dashboard-animations";
 
 export const metadata = { title: "Přehled" };
@@ -24,21 +25,25 @@ export const metadata = { title: "Přehled" };
 export default async function DashboardPage() {
   const session = await auth();
   const user = session?.user;
+  if (!user?.id) {
+    redirect("/login?callbackUrl=/dashboard");
+  }
+
   const isManagement =
     user?.role === "ADMIN" || user?.role === "MANAGER";
 
   const currentYear = new Date().getFullYear();
   const [vacations, pendingRequests, unreadMessages, activityFeed, dashboardStats, freshUser, upcomingItems] = await Promise.all([
-    getMyApprovedVacations(currentYear),
-    isManagement ? getPendingForManager() : Promise.resolve([]),
+    getMyApprovedVacations(currentYear).catch(() => []),
+    isManagement ? getPendingForManager().catch(() => []) : Promise.resolve([]),
     getUnreadMessageCount().catch(() => 0),
-    getDashboardActivity(8),
-    getDashboardStats(),
+    getDashboardActivity(8).catch(() => []),
+    getDashboardStats().catch(() => null),
     prisma.user.findUnique({
-      where: { id: user!.id },
+      where: { id: user.id },
       select: { pointsBalance: true },
-    }),
-    getUpcomingItems(),
+    }).catch(() => null),
+    getUpcomingItems().catch(() => []),
   ]);
 
   return (
