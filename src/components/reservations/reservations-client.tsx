@@ -15,7 +15,6 @@ import {
   startOfDay,
   format,
   isToday,
-  isTomorrow,
 } from "date-fns";
 import { cs } from "date-fns/locale";
 import {
@@ -101,35 +100,25 @@ export default function ReservationsClient({
 }: ReservationsClientProps) {
   const [selected, setSelected] = useState<Resource | null>(null);
   const [dateOffset, setDateOffset] = useState(0);
-  const [activeDay, setActiveDay] = useState<0 | 1>(0); // 0=day1 1=day2
-  const [day1Reservations, setDay1Reservations] = useState<
-    TimelineReservation[]
-  >([]);
-  const [day2Reservations, setDay2Reservations] = useState<
-    TimelineReservation[]
-  >([]);
+  const [reservations, setReservations] = useState<TimelineReservation[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const day1 = startOfDay(addDays(new Date(), dateOffset));
-  const day2 = addDays(day1, 1);
-
-  const reservations = activeDay === 0 ? day1Reservations : day2Reservations;
-  const activeDate = activeDay === 0 ? day1 : day2;
+  const selectedDate = startOfDay(addDays(new Date(), dateOffset));
 
   const fetchTimeline = useCallback(async () => {
     if (!selected) return;
     setLoading(true);
     try {
-      const [d1, d2] = await Promise.all([
-        getResourceReservations(selected.id, day1, 1),
-        getResourceReservations(selected.id, day2, 1),
-      ]);
-      setDay1Reservations(d1);
-      setDay2Reservations(d2);
+      const dayReservations = await getResourceReservations(
+        selected.id,
+        selectedDate,
+        1,
+      );
+      setReservations(dayReservations);
     } finally {
       setLoading(false);
     }
-  }, [selected, dateOffset]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected, selectedDate]);
 
   useEffect(() => {
     fetchTimeline();
@@ -188,7 +177,6 @@ export default function ReservationsClient({
             onClick={() => {
               setSelected(null);
               setDateOffset(0);
-              setActiveDay(0);
             }}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-background-secondary text-foreground-secondary active:scale-95 transition-transform"
           >
@@ -226,13 +214,13 @@ export default function ReservationsClient({
 
       {/* ─── Unified timeline card ─────────────────────────────────── */}
       <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-        {/* Date navigation + day tabs */}
-        <div className="border-b border-border px-4 pt-3 pb-0">
+        {/* Date navigation */}
+        <div className="border-b border-border px-4 py-3">
           <p className="mb-2 text-xs font-medium text-foreground-secondary">
-            Vyberte den a zkontrolujte obsazené hodiny
+            Vyberte jeden den a zkontrolujte obsazené hodiny
           </p>
           {/* Date nav row */}
-          <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => setDateOffset((o) => o - 1)}
@@ -244,9 +232,11 @@ export default function ReservationsClient({
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-foreground-muted" />
               <span className="text-sm font-medium text-foreground">
-                {format(day1, "d. MMMM", { locale: cs })}
-                {" – "}
-                {format(day2, "d. MMMM", { locale: cs })}
+                {isToday(selectedDate)
+                  ? "Dnes"
+                  : format(selectedDate, "EEEE", { locale: cs })}
+                {" · "}
+                {format(selectedDate, "d. MMMM yyyy", { locale: cs })}
               </span>
             </div>
 
@@ -256,7 +246,6 @@ export default function ReservationsClient({
                   type="button"
                   onClick={() => {
                     setDateOffset(0);
-                    setActiveDay(0);
                   }}
                   className="rounded-lg bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent active:scale-95 transition-transform"
                 >
@@ -272,22 +261,6 @@ export default function ReservationsClient({
               </button>
             </div>
           </div>
-
-          {/* Day tabs */}
-          <div className="flex">
-            <DayTab
-              date={day1}
-              active={activeDay === 0}
-              count={day1Reservations.length}
-              onClick={() => setActiveDay(0)}
-            />
-            <DayTab
-              date={day2}
-              active={activeDay === 1}
-              count={day2Reservations.length}
-              onClick={() => setActiveDay(1)}
-            />
-          </div>
         </div>
 
         {/* Timeline content */}
@@ -297,7 +270,7 @@ export default function ReservationsClient({
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent" />
             </div>
           ) : (
-            <InlineTimeline reservations={reservations} date={activeDate} />
+            <InlineTimeline reservations={reservations} date={selectedDate} />
           )}
         </div>
       </div>
@@ -316,58 +289,6 @@ export default function ReservationsClient({
         />
       </div>
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// DayTab — tab for switching between two days
-// ---------------------------------------------------------------------------
-
-function DayTab({
-  date,
-  active,
-  count,
-  onClick,
-}: {
-  date: Date;
-  active: boolean;
-  count: number;
-  onClick: () => void;
-}) {
-  const label = isToday(date)
-    ? "Dnes"
-    : isTomorrow(date)
-      ? "Zítra"
-      : format(date, "EEEE", { locale: cs });
-
-  const dateStr = format(date, "d. M.", { locale: cs });
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex flex-1 flex-col items-center gap-0.5 border-b-2 px-3 pb-2.5 pt-1 text-center transition-colors",
-        active
-          ? "border-accent text-foreground"
-          : "border-transparent text-foreground-muted hover:text-foreground-secondary"
-      )}
-    >
-      <span className="text-xs font-semibold capitalize">{label}</span>
-      <span className="text-[11px]">{dateStr}</span>
-      {count > 0 && (
-        <span
-          className={cn(
-            "mt-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-none",
-            active
-              ? "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"
-              : "bg-background-secondary text-foreground-muted"
-          )}
-        >
-          {count} rezervací
-        </span>
-      )}
-    </button>
   );
 }
 
