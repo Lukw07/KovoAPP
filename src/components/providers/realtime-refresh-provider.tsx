@@ -10,8 +10,8 @@
  * reload. This gives every page instant live data without per-page wiring.
  */
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/useSocket";
 
 /** All event types that should trigger a page refresh */
@@ -35,11 +35,24 @@ const DEBOUNCE_MS = 300;
 
 export function RealtimeRefreshProvider() {
   const router = useRouter();
+  const pathname = usePathname();
   const { on } = useSocket();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const shouldRefreshForEvent = useCallback(
+    (event: (typeof REFRESH_EVENTS)[number]) => {
+      if (pathname?.startsWith("/reservations")) {
+        return event === "reservation:update";
+      }
+      return true;
+    },
+    [pathname],
+  );
+
   useEffect(() => {
-    const debouncedRefresh = () => {
+    const debouncedRefresh = (event: (typeof REFRESH_EVENTS)[number]) => {
+      if (!shouldRefreshForEvent(event)) return;
+
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         router.refresh();
@@ -47,14 +60,14 @@ export function RealtimeRefreshProvider() {
     };
 
     const unsubscribers = REFRESH_EVENTS.map((event) =>
-      on(event, debouncedRefresh),
+      on(event, () => debouncedRefresh(event)),
     );
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [on, router]);
+  }, [on, router, shouldRefreshForEvent]);
 
   return null;
 }

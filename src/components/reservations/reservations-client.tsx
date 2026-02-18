@@ -127,6 +127,10 @@ export default function ReservationsClient({
     fetchTimeline();
   }, [fetchTimeline]);
 
+  const handleBookingSuccess = useCallback(() => {
+    void fetchTimeline();
+  }, [fetchTimeline]);
+
   // ---- List view ----
   if (!selected) {
     return (
@@ -288,7 +292,7 @@ export default function ReservationsClient({
         </p>
         <BookingForm
           resourceId={selected.id}
-          onSuccess={() => fetchTimeline()}
+          onSuccess={handleBookingSuccess}
         />
       </div>
     </div>
@@ -317,6 +321,7 @@ function InlineTimeline({
   }, [startHour, endHour]);
 
   const currentHour = new Date().getHours();
+  const currentMinute = new Date().getMinutes();
 
   const getSlotStatus = (hour: number) => {
     const slotStart = addHours(startOfDay(date), hour);
@@ -407,6 +412,13 @@ function InlineTimeline({
                       : "Volné"
                   }
                 >
+                  {isCurrent && (
+                    <span
+                      className="absolute inset-y-1 z-10 w-0.5 rounded-full bg-accent"
+                      style={{ left: `${(currentMinute / 60) * 100}%` }}
+                    />
+                  )}
+
                   <span
                     className={cn(
                       "h-2 w-2 rounded-full",
