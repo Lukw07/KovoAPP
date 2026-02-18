@@ -91,13 +91,24 @@ export async function getMyApprovedVacations(year: number) {
   const session = await auth();
   if (!session?.user?.id) return [];
 
+  const yearStart = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
+  const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
   return prisma.hrRequest.findMany({
     where: {
       userId: session.user.id,
       status: "APPROVED",
-      type: { in: ["VACATION", "PERSONAL_DAY", "HOME_OFFICE"] },
-      startDate: { lte: new Date(`${year}-12-31T23:59:59`) },
-      endDate: { gte: new Date(`${year}-01-01T00:00:00`) },
+      type: {
+        in: [
+          "VACATION",
+          "PERSONAL_DAY",
+          "HOME_OFFICE",
+          "SICK_DAY",
+          "DOCTOR",
+        ],
+      },
+      startDate: { lte: yearEnd },
+      endDate: { gte: yearStart },
     },
     orderBy: { startDate: "asc" },
     select: {

@@ -1160,6 +1160,54 @@ select {
   color: #93c5fd;
 }
 
+/* Personal day (violet) */
+.rdp-personal-day .rdp-day_button {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-personal-day .rdp-day_button {
+  background-color: rgba(109, 40, 217, 0.3);
+  color: #c4b5fd;
+}
+
+/* Home office (emerald) */
+.rdp-home-office .rdp-day_button {
+  background-color: #dcfce7;
+  color: #047857;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-home-office .rdp-day_button {
+  background-color: rgba(5, 150, 105, 0.28);
+  color: #6ee7b7;
+}
+
+/* Sick day (amber) */
+.rdp-sick-day .rdp-day_button {
+  background-color: #fef3c7;
+  color: #b45309;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-sick-day .rdp-day_button {
+  background-color: rgba(180, 83, 9, 0.3);
+  color: #fcd34d;
+}
+
+/* Doctor (rose) */
+.rdp-doctor .rdp-day_button {
+  background-color: #ffe4e6;
+  color: #be123c;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+.dark .rdp-doctor .rdp-day_button {
+  background-color: rgba(190, 24, 93, 0.28);
+  color: #fda4af;
+}
+
 /* Holidays (red) */
 .rdp-holiday .rdp-day_button {
   background-color: #fef2f2;

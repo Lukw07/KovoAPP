@@ -30,6 +30,21 @@ interface VacationCalendarProps {
   className?: string;
 }
 
+type DateRange = { from: Date; to: Date };
+
+function toLocalDateOnly(value: Date | string): Date {
+  const parsed = value instanceof Date ? value : new Date(value);
+  return new Date(
+    parsed.getFullYear(),
+    parsed.getMonth(),
+    parsed.getDate(),
+    12,
+    0,
+    0,
+    0,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -77,11 +92,24 @@ export default function VacationCalendar({
   const holidays = useMemo(() => getCzechHolidays(year), [year]);
 
   // Build modifier arrays for DayPicker
-  const vacationDays = useMemo(() => {
-    return vacations.map((v) => ({
-      from: new Date(v.startDate),
-      to: new Date(v.endDate),
-    }));
+  const rangesByType = useMemo(() => {
+    const ranges: Record<string, DateRange[]> = {
+      VACATION: [],
+      PERSONAL_DAY: [],
+      HOME_OFFICE: [],
+      SICK_DAY: [],
+      DOCTOR: [],
+    };
+
+    for (const vacation of vacations) {
+      if (!ranges[vacation.type]) continue;
+      ranges[vacation.type].push({
+        from: toLocalDateOnly(vacation.startDate),
+        to: toLocalDateOnly(vacation.endDate),
+      });
+    }
+
+    return ranges;
   }, [vacations]);
 
   // Unique types used in legend
@@ -100,11 +128,19 @@ export default function VacationCalendar({
         month={month}
         onMonthChange={setMonth}
         modifiers={{
-          vacation: vacationDays,
+          vacation: rangesByType.VACATION,
+          personal_day: rangesByType.PERSONAL_DAY,
+          home_office: rangesByType.HOME_OFFICE,
+          sick_day: rangesByType.SICK_DAY,
+          doctor: rangesByType.DOCTOR,
           holiday: holidays,
         }}
         modifiersClassNames={{
           vacation: "rdp-vacation",
+          personal_day: "rdp-personal-day",
+          home_office: "rdp-home-office",
+          sick_day: "rdp-sick-day",
+          doctor: "rdp-doctor",
           holiday: "rdp-holiday",
           today: "rdp-today-custom",
         }}

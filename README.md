@@ -91,6 +91,20 @@ NEXT_PUBLIC_FIREBASE_VAPID_KEY="..."
 FIREBASE_ADMIN_SDK_KEY='{"type":"service_account",...}'
 ```
 
+Optional — realtime Socket.IO configuration:
+
+```env
+# Local dev (default fallback already works):
+# NEXT_PUBLIC_SOCKET_URL="http://localhost:3001"
+
+# Production behind reverse proxy (recommended):
+NEXT_PUBLIC_SOCKET_URL="https://your-domain.tld"
+NEXT_PUBLIC_SOCKET_PATH="/socket.io"
+```
+
+> For HTTPS production, do not connect browser clients directly to `:3001` unless that port has TLS termination.
+> Recommended setup is TLS on your reverse proxy and forwarding `/socket.io` to the internal socket server.
+
 ### 3. Set up the database
 
 ```bash

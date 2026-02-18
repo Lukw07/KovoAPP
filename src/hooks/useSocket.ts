@@ -21,17 +21,33 @@ import { useSession } from "next-auth/react";
 /**
  * Auto-detect socket URL:
  * - If NEXT_PUBLIC_SOCKET_URL is set, use it
- * - Otherwise derive from current page hostname + port 3001
- *   (works in Docker, VPS, localhost — no manual config needed)
+ * - On localhost/dev use hostname + port 3001
+ * - On HTTPS production use same-origin (expects reverse proxy to /socket.io)
  */
 function getSocketUrl(): string {
   if (process.env.NEXT_PUBLIC_SOCKET_URL) {
     return process.env.NEXT_PUBLIC_SOCKET_URL;
   }
+
   if (typeof window !== "undefined") {
-    const proto = window.location.protocol === "https:" ? "https" : "http";
-    return `${proto}://${window.location.hostname}:3001`;
+    const { protocol, hostname, origin } = window.location;
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+
+    // Local development: direct socket port is fine (no TLS)
+    if (isLocalHost) {
+      return `http://${hostname}:3001`;
+    }
+
+    // Production HTTPS: avoid direct :3001 because it is usually plain WS without TLS.
+    // Use same-origin and let reverse proxy terminate TLS + forward websocket.
+    if (protocol === "https:") {
+      return origin;
+    }
+
+    // Non-HTTPS deployments can still use direct socket port.
+    return `http://${hostname}:3001`;
   }
+
   return "http://localhost:3001";
 }
 
@@ -41,11 +57,14 @@ let connectionCount = 0;
 function getSocket(): Socket {
   if (!globalSocket) {
     const url = getSocketUrl();
+    const path = process.env.NEXT_PUBLIC_SOCKET_PATH || "/socket.io";
+
     globalSocket = io(url, {
+      path,
       transports: ["websocket", "polling"],
       autoConnect: false,
       reconnection: true,
-      reconnectionAttempts: Infinity,
+      reconnectionAttempts: 20,
       reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
       timeout: 20000,
