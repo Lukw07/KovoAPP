@@ -4,7 +4,7 @@
 // VacationCalendar — visual calendar showing approved vacations & holidays
 // ============================================================================
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { cs } from "date-fns/locale";
 import { getCzechHolidays } from "@/lib/holidays";
@@ -89,10 +89,10 @@ export default function VacationCalendar({
   const year = month.getFullYear();
 
   // Holidays for the displayed year
-  const holidays = useMemo(() => getCzechHolidays(year), [year]);
+  const holidays = getCzechHolidays(year);
 
   // Build modifier arrays for DayPicker
-  const rangesByType = useMemo(() => {
+  const rangesByType = (() => {
     const ranges: Record<string, DateRange[]> = {
       VACATION: [],
       PERSONAL_DAY: [],
@@ -110,13 +110,10 @@ export default function VacationCalendar({
     }
 
     return ranges;
-  }, [vacations]);
+  })();
 
   // Unique types used in legend
-  const usedTypes = useMemo(() => {
-    const set = new Set(vacations.map((v) => v.type));
-    return Array.from(set);
-  }, [vacations]);
+  const usedTypes = Array.from(new Set(vacations.map((v) => v.type)));
 
   // Merge default rdp class names with Tailwind overrides (v9 requirement)
   const defaults = getDefaultClassNames();

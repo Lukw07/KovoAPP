@@ -39,48 +39,53 @@ export async function registerFcmToken(
   const parsed = registerTokenSchema.safeParse({ token, deviceType, deviceName });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  // Deactivate all OTHER active tokens for the same user + deviceType.
-  // This prevents duplicate pushes caused by token rotation on iOS/web
-  // where the old token still belongs to the same physical device.
-  const deactivated = await prisma.fcmToken.updateMany({
-    where: {
-      userId: session.user.id,
-      deviceType: parsed.data.deviceType,
-      isActive: true,
-      token: { not: parsed.data.token },
-    },
-    data: { isActive: false },
-  });
+  try {
+    // Deactivate all OTHER active tokens for the same user + deviceType.
+    // This prevents duplicate pushes caused by token rotation on iOS/web
+    // where the old token still belongs to the same physical device.
+    const deactivated = await prisma.fcmToken.updateMany({
+      where: {
+        userId: session.user.id,
+        deviceType: parsed.data.deviceType,
+        isActive: true,
+        token: { not: parsed.data.token },
+      },
+      data: { isActive: false },
+    });
 
-  if (deactivated.count > 0) {
+    if (deactivated.count > 0) {
+      console.log(
+        `[FCM:STATUS] 🗑 Deaktivováno ${deactivated.count} starých tokenů pro ${parsed.data.deviceType} | user=${session.user.id}`,
+      );
+    }
+
+    // Upsert — if the token already exists, just update ownership/active flag
+    const result = await prisma.fcmToken.upsert({
+      where: { token: parsed.data.token },
+      update: {
+        userId: session.user.id,
+        deviceType: parsed.data.deviceType,
+        deviceName: parsed.data.deviceName ?? null,
+        isActive: true,
+        updatedAt: new Date(),
+      },
+      create: {
+        token: parsed.data.token,
+        userId: session.user.id,
+        deviceType: parsed.data.deviceType,
+        deviceName: parsed.data.deviceName ?? null,
+      },
+    });
+
     console.log(
-      `[FCM:STATUS] 🗑 Deaktivováno ${deactivated.count} starých tokenů pro ${parsed.data.deviceType} | user=${session.user.id}`,
+      `[FCM:STATUS] ✔ Token registrován | user=${session.user.id} | device=${parsed.data.deviceType} | name="${parsed.data.deviceName ?? "??"}" | tokenId=${result.id} | token=...${parsed.data.token.slice(-8)}`,
     );
+
+    return { success: true };
+  } catch (error) {
+    console.error("[FCM:STATUS] ✖ Registrace tokenu selhala:", error);
+    return { error: "Registrace notifikací dočasně selhala" };
   }
-
-  // Upsert — if the token already exists, just update ownership/active flag
-  const result = await prisma.fcmToken.upsert({
-    where: { token: parsed.data.token },
-    update: {
-      userId: session.user.id,
-      deviceType: parsed.data.deviceType,
-      deviceName: parsed.data.deviceName ?? null,
-      isActive: true,
-      updatedAt: new Date(),
-    },
-    create: {
-      token: parsed.data.token,
-      userId: session.user.id,
-      deviceType: parsed.data.deviceType,
-      deviceName: parsed.data.deviceName ?? null,
-    },
-  });
-
-  console.log(
-    `[FCM:STATUS] ✔ Token registrován | user=${session.user.id} | device=${parsed.data.deviceType} | name="${parsed.data.deviceName ?? "??"}" | tokenId=${result.id} | token=...${parsed.data.token.slice(-8)}`,
-  );
-
-  return { success: true };
 }
 
 /**

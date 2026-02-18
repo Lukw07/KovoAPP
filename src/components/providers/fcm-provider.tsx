@@ -66,7 +66,12 @@ export function FcmProvider({ children }: { children: React.ReactNode }) {
         const deviceName = navigator.userAgent.slice(0, 50);
 
         console.log(`[FCM:KLIENT] ▶ Registruji token | device=${deviceType} | token=...${fcmToken.slice(-8)}`);
-        await registerFcmToken(fcmToken, deviceType, deviceName);
+        const result = await registerFcmToken(fcmToken, deviceType, deviceName);
+        if (result?.error) {
+          console.warn(`[FCM:KLIENT] ⚠ Registrace tokenu selhala: ${result.error}`);
+          return;
+        }
+
         tokenRegistered.current = true;
         console.log(`[FCM:KLIENT] ✔ Token registrován na serveru | device=${deviceType}`);
       } else {

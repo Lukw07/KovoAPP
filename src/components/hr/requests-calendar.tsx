@@ -4,7 +4,7 @@
 // RequestsCalendar — calendar view of HR requests with month navigation
 // ============================================================================
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { getRequestsForCalendar } from "@/actions/hr-queries";
 import { getCzechHolidays } from "@/lib/holidays";
@@ -247,13 +247,10 @@ export function RequestsCalendar({
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
 
-  const holidays = useMemo(() => getCzechHolidays(year), [year]);
+  const holidays = getCzechHolidays(year);
 
   // Unique types used in current view (for legend)
-  const usedTypes = useMemo(() => {
-    const set = new Set(requests.map((r) => r.type));
-    return Array.from(set);
-  }, [requests]);
+  const usedTypes = Array.from(new Set(requests.map((r) => r.type)));
 
   const navigateMonth = (dir: number) => {
     let newMonth = month + dir;

@@ -4,6 +4,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { PendingApprovals } from "@/components/hr/pending-approvals";
 import { RequestsClient } from "@/components/hr/requests-client";
 
@@ -15,6 +16,10 @@ export const metadata = { title: "Moje žádosti" };
 
 export default async function RequestsPage() {
   const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/requests");
+  }
+
   const role = session?.user?.role;
   const isManagement = role === "ADMIN" || role === "MANAGER";
 
@@ -24,9 +29,9 @@ export default async function RequestsPage() {
 
   const [{ items, total }, pendingRequests, calendarRequests] =
     await Promise.all([
-      getMyRequests(),
-      isManagement ? getPendingForManager() : Promise.resolve([]),
-      getRequestsForCalendar(calendarYear, calendarMonth),
+      getMyRequests().catch(() => ({ items: [], total: 0 })),
+      isManagement ? getPendingForManager().catch(() => []) : Promise.resolve([]),
+      getRequestsForCalendar(calendarYear, calendarMonth).catch(() => []),
     ]);
 
   return (
