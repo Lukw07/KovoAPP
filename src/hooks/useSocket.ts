@@ -53,6 +53,29 @@ function getSocketUrl(): string {
 
 let globalSocket: Socket | null = null;
 let connectionCount = 0;
+let connectErrorCount = 0;
+let socketDisabledForSession = false;
+
+const SOCKET_DISABLE_SESSION_KEY = "kovo:socket-disabled";
+const MAX_CONNECT_ERRORS = 4;
+
+function isSocketDisabled(): boolean {
+  if (socketDisabledForSession) return true;
+  if (typeof window === "undefined") return false;
+
+  const disabled = window.sessionStorage.getItem(SOCKET_DISABLE_SESSION_KEY) === "1";
+  if (disabled) {
+    socketDisabledForSession = true;
+  }
+  return disabled;
+}
+
+function disableSocketForSession(): void {
+  socketDisabledForSession = true;
+  if (typeof window !== "undefined") {
+    window.sessionStorage.setItem(SOCKET_DISABLE_SESSION_KEY, "1");
+  }
+}
 
 function getSocket(): Socket {
   if (!globalSocket) {
@@ -81,11 +104,13 @@ export function useSocket() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isSocketDisabled()) return;
 
     const socket = getSocket();
     connectionCount++;
 
     function onConnect() {
+      connectErrorCount = 0;
       setIsConnected(true);
       // Authenticate with user ID
       if (userId && !authenticatedRef.current) {
@@ -99,11 +124,23 @@ export function useSocket() {
       authenticatedRef.current = false;
     }
 
+    function onConnectError() {
+      connectErrorCount += 1;
+
+      if (connectErrorCount >= MAX_CONNECT_ERRORS) {
+        disableSocketForSession();
+        socket.io.opts.reconnection = false;
+        socket.disconnect();
+        setIsConnected(false);
+      }
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", onConnectError);
 
     // Connect if not already
-    if (!socket.connected) {
+    if (!socket.connected && !isSocketDisabled()) {
       socket.connect();
     } else {
       setIsConnected(true);
@@ -117,6 +154,7 @@ export function useSocket() {
       connectionCount--;
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("connect_error", onConnectError);
 
       // Only disconnect if no more consumers
       if (connectionCount <= 0) {
@@ -129,7 +167,7 @@ export function useSocket() {
 
   // Re-authenticate when user changes
   useEffect(() => {
-    if (!userId || !isConnected) return;
+    if (!userId || !isConnected || isSocketDisabled()) return;
     const socket = getSocket();
     socket.emit("auth", userId);
     authenticatedRef.current = true;
@@ -141,6 +179,10 @@ export function useSocket() {
   const on = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: string, handler: (data: any) => void): (() => void) => {
+      if (isSocketDisabled()) {
+        return () => {};
+      }
+
       const socket = getSocket();
       socket.on(event, handler);
       return () => {
@@ -156,6 +198,8 @@ export function useSocket() {
   const emit = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: string, data?: any) => {
+      if (isSocketDisabled()) return;
+
       const socket = getSocket();
       if (socket.connected) {
         socket.emit(event, data);
