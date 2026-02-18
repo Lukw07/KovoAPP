@@ -103,7 +103,10 @@ export default function ReservationsClient({
   const [reservations, setReservations] = useState<TimelineReservation[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const selectedDate = startOfDay(addDays(new Date(), dateOffset));
+  const selectedDate = useMemo(
+    () => startOfDay(addDays(new Date(), dateOffset)),
+    [dateOffset],
+  );
 
   const fetchTimeline = useCallback(async () => {
     if (!selected) return;
