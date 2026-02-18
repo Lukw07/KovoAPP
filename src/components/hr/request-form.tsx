@@ -467,12 +467,11 @@ export default function RequestForm({
               onSelect={handleSelect}
               disabled={{ before: new Date() }}
               classNames={{
-                root: "w-full",
-                months: "w-full",
-                month: "w-full",
-                month_grid: "w-full border-collapse",
-                month_caption:
-                  "text-sm font-semibold text-foreground capitalize",
+                root: "mx-auto w-fit",
+                months: "flex justify-center",
+                month: "space-y-2",
+                month_grid: "border-collapse mx-auto",
+                month_caption: "flex items-center justify-between text-sm font-semibold text-foreground capitalize px-1",
                 nav: "flex gap-1",
                 button_previous:
                   "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
@@ -480,11 +479,11 @@ export default function RequestForm({
                   "h-8 w-8 rounded-lg flex items-center justify-center hover:bg-background-secondary active:scale-95 text-foreground-secondary",
                 weekdays:
                   "text-xs font-medium text-foreground-muted uppercase",
-                weekday: "text-center py-1",
-                week: "w-full",
-                day: "h-9 w-full text-sm rounded-lg transition-colors text-foreground text-center p-1",
+                weekday: "text-center py-1 w-9",
+                week: "",
+                day: "h-9 w-9 text-sm rounded-lg transition-colors text-foreground text-center p-0",
                 day_button:
-                  "w-full h-full rounded-lg flex items-center justify-center",
+                  "h-9 w-9 rounded-lg flex items-center justify-center",
                 today: "!bg-blue-600 !text-white !rounded-lg !font-bold",
                 selected: "!bg-blue-600 !text-white",
                 range_start: "!bg-blue-600 !text-white !rounded-l-lg",
